@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/static/css/main.36bd905a.css",
+    "main.js": "/static/js/main.77e28bba.js",
+    "static/js/453.ed075b1c.chunk.js": "/static/js/453.ed075b1c.chunk.js",
+    "static/media/banner.png": "/static/media/banner.bfdf6571f22005279c15.png",
+    "static/media/shop.png": "/static/media/shop.49f24ea83d7e8e5b953e.png",
+    "static/media/passbook.png": "/static/media/passbook.6d86de6dac8feda8dbf9.png",
+    "static/media/pan card.png": "/static/media/pan card.677996f0fa6dfb400e38.png",
+    "static/media/ashirwadaata.png": "/static/media/ashirwadaata.8e55339ed5dfe21c8fef.png",
+    "static/media/gst.png": "/static/media/gst.710fa01e87e0cf9d1b73.png",
+    "static/media/ashirwadaata.jpeg": "/static/media/ashirwadaata.efe0646444d3a5722a2b.jpeg",
+    "static/media/download.jpeg": "/static/media/download.5a8f3884be80eb93f4db.jpeg",
+    "index.html": "/index.html",
+    "main.36bd905a.css.map": "/static/css/main.36bd905a.css.map",
+    "main.77e28bba.js.map": "/static/js/main.77e28bba.js.map",
+    "453.ed075b1c.chunk.js.map": "/static/js/453.ed075b1c.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.36bd905a.css",
+    "static/js/main.77e28bba.js"
+  ]
+}

@@ -1,0 +1,40 @@
+/* Toolbar styling remains unchanged */
+.custom-quill-wrapper .ql-toolbar {
+  border: 0.5px solid rgb(233, 236, 240) !important;
+  padding: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Vertical divider between tool groups */
+.custom-quill-wrapper .ql-toolbar > *:not(:last-child)::after {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 20px;
+  background-color: #d1d5db;
+  margin: 0 8px;
+}
+
+/* Container: add 3-side border and shadows */
+.custom-quill-wrapper .ql-container {
+  border-left: 1px solid #e5e7eb !important;   /* Light border */
+  border-right: 1px solid #e5e7eb !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  border-top: none !important;
+
+  box-shadow: 
+    4px 0 6px -4px rgba(0, 0, 0, 0.08),   /* Right light shadow */
+    -4px 0 6px -4px rgba(0, 0, 0, 0.08),  /* Left light shadow */
+    0 6px 12px -2px rgba(0, 0, 0, 0.15);  /* Bottom darker shadow */
+
+  border-radius: 0 0 0.5rem 0.5rem; /* Optional: slight round corners at bottom */
+}
+
+/* Editor inner area */
+.custom-quill-wrapper .ql-editor {
+  min-height: 200px;
+  padding: 16px;
+  font-size: 1rem;
+}
