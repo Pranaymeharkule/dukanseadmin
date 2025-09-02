@@ -49,25 +49,38 @@ const Customer = () => {
 
       // Handle the API response structure
       if (res.data && res.data.success) {
-        // Map the data to match your component's expected structure
-        const mappedCustomers = res.data.data.map((customer) => ({
+        const customerArray = res.data.data || res.data.customers || [];
+        console.log("Mapped Customer Array:", customerArray);
+
+        const mappedCustomers = customerArray.map((customer) => ({
           _id: customer._id,
-          customerName: customer.customerName || `Customer ${customer.phoneNumber}`, // Fallback for missing names
-          phoneNumber: customer.phoneNumber,
-          location: customer.location || "Not specified",
-          totalorders: customer.totalOrders || 0,
-          coinsCredited: customer.coinsCredited || 0,
-          coinsRedeemed: customer.coinsRedeemed || 0,
-          coinsExpired: customer.coinsExpired || 0,
+          customerName:
+            customer.customerName ||
+            customer.name ||
+            `Customer ${customer.phone || customer.phoneNumber}`,
+          phoneNumber: customer.phone || customer.phoneNumber,
+          location: customer.location || customer.address || "Not specified",
+          totalorders: customer.totalOrders || customer.totalorders || 0,
+          coinsCredited:
+            customer.coinsCredited || customer.coins?.credited || 0,
+          coinsRedeemed:
+            customer.coinsRedeemed || customer.coins?.redeemed || 0,
+          coinsExpired: customer.coinsExpired || customer.coins?.expired || 0,
           status: customer.status || "active",
-          Date: customer.Date || "N/A"
+          Date:
+            customer.Date || customer.createdAt
+              ? new Date(customer.createdAt).toLocaleDateString("en-GB")
+              : "N/A",
         }));
 
         setCustomers(mappedCustomers);
 
         // Since the API doesn't provide pagination info, calculate it
         const totalCustomers = mappedCustomers.length;
-        const calculatedTotalPages = Math.max(1, Math.ceil(totalCustomers / limit));
+        const calculatedTotalPages = Math.max(
+          1,
+          Math.ceil(totalCustomers / limit)
+        );
         const hasNext = totalCustomers === limit; // Assume there's more data if we got a full page
 
         setPaginationData({
@@ -104,7 +117,7 @@ const Customer = () => {
         if (!cust.Date || cust.Date === "N/A") return false;
         try {
           // Parse the date format "DD/MM/YYYY"
-          const [day, month, year] = cust.Date.split('/');
+          const [day, month, year] = cust.Date.split("/");
           const custDate = new Date(year, month - 1, day);
           const diffDays = (now - custDate) / (1000 * 60 * 60 * 24);
           return diffDays <= 7; // last 7 days as "new"
@@ -292,13 +305,15 @@ const Customer = () => {
                       <td className="p-3 text-center">{cust.coinsRedeemed}</td>
                       <td className="p-3 text-center">{cust.coinsExpired}</td>
                       <td className="p-3 capitalize">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          cust.status === 'active' 
-                            ? 'bg-green-100 text-green-800' 
-                            : cust.status === 'fraud'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            cust.status === "active"
+                              ? "bg-green-100 text-green-800"
+                              : cust.status === "fraud"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
                           {cust.status}
                         </span>
                       </td>

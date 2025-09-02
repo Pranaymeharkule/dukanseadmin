@@ -32,10 +32,15 @@ function ViewRegisterShop() {
     if (window.confirm("Approve this shop?")) {
       try {
         setIsApproving(true);
-        await axios.post(
+  
+        // Call GET API instead of POST
+        const response = await axios.get(
           `https://dukanse-be-f5w4.onrender.com/api/shopApproval/getApprovedShopById/${shopId}`
         );
-        await refetchApprovedShops();
+  
+        console.log(response.data); // optional: check API response
+  
+        await refetchApprovedShops(); // refresh approved shops if needed
         alert("Shop approved successfully!");
         navigate("/shop");
       } catch (err) {
@@ -45,6 +50,7 @@ function ViewRegisterShop() {
       }
     }
   };
+  
 
   // Reject Shop API call
   const handleReject = async () => {

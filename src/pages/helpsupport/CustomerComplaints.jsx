@@ -164,7 +164,7 @@ export default function CustomerComplaints() {
 
   const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
   const TOKEN =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM3N2Q5OTk2NGQ2ZmQ1OTJiNDVlMiIsImlhdCI6MTc1NjcyNzE3OSwiZXhwIjoxNzU2ODEzNTc5fQ.JdskcFh5IFMieVz1FNCa1IfYqI_QpN_PgnqRdDL4ags";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM3N2Q5OTk2NGQ2ZmQ1OTJiNDVlMiIsImlhdCI6MTc1NjgxNTU5MywiZXhwIjoxNzU2OTAxOTkzfQ.DxCrPaPkCnMl2E9TMxLwjqqze7oLo5SdSc-l33ODz5c";
 
   useEffect(() => {
     const fetchComplaints = async () => {
@@ -199,26 +199,31 @@ export default function CustomerComplaints() {
   };
 
   // ✅ Delete API call when clicking "Yes"
-  const confirmDelete = async () => {
-    if (!currentItem?._id && !currentItem?.id) return;
-    const docId = currentItem._id || currentItem.id;
+  // ✅ Delete API call when clicking "Yes"
+const confirmDelete = async () => {
+  if (!currentItem?._id && !currentItem?.id) return;
+  const complaintId = currentItem._id || currentItem.id;
 
-    try {
-      await axios.delete(`${API_BASE_URL}/adminSupport/reSolve/${docId}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${TOKEN}`,
-        },
-      });
+  try {
+    await axios.delete(`${API_BASE_URL}/adminSupport/delete/${complaintId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}`,
+      },
+    });
 
-      setComplaints((prev) => prev.filter((c) => c._id !== docId && c.id !== docId));
-    } catch (error) {
-      console.error("Error deleting complaint:", error.response?.data || error);
-    }
+    // remove from state
+    setComplaints((prev) =>
+      prev.filter((c) => c._id !== complaintId && c.id !== complaintId)
+    );
+  } catch (error) {
+    console.error("Error deleting complaint:", error.response?.data || error);
+  }
 
-    setIsDeleteModalOpen(false);
-    setCurrentItem(null);
-  };
+  setIsDeleteModalOpen(false);
+  setCurrentItem(null);
+};
+
 
   const closeModal = () => {
     setIsDeleteModalOpen(false);

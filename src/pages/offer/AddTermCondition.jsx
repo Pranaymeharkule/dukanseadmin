@@ -1,22 +1,6 @@
 import React, { useState, useEffect } from "react";
-
-// Back Arrow Icon
-const BackArrowIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M10 19l-7-7m0 0l7-7m-7 7h18"
-    />
-  </svg>
-);
+import { ArrowLeft } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 // Edit Icon
 const EditIcon = () => (
@@ -72,14 +56,21 @@ const CancelIcon = () => (
   </svg>
 );
 
+
 const AddTermCondition = () => {
   const [termsData, setTermsData] = useState(null);
   const [editableContent, setEditableContent] = useState("");
   const [loading, setLoading] = useState(true);
-  const [rawContent, setRawContent] = useState("")
+  const [rawContent, setRawContent] = useState("");
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigate();
+   const handleBackNavigation = () => {
+    navigate(-1);
+  };
+
+
 
   const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
@@ -113,6 +104,7 @@ const AddTermCondition = () => {
     fetchTermsAndConditions();
   }, []);
 
+ 
   // Update terms
   const updateTerms = async () => {
     try {
@@ -150,20 +142,22 @@ const AddTermCondition = () => {
   const handleSave = () => updateTerms();
 
   return (
-    <div className="bg-gray-100 flex items-center justify-center p-4 font-sans min-h-screen">
-      <div className="w-full max-w-5xl space-y-4">
+    <div className="bg-gray-100 min-h-screen flex flex-col font-sans p-4">
+      <div className="flex-1 flex flex-col w-full space-y-4">
         {/* Header Section */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden border-t-4">
           <header className="flex items-center justify-between p-6 bg-gradient-to-r from-gray-50 to-gray-100">
             <div className="flex items-center">
               <button
-                onClick={() => window.history.back()}
-                className="flex items-center justify-center w-10 h-10 bg-white rounded-full mr-4 hover:bg-gray-200 transition-colors duration-300 shadow-sm"
+                onClick={handleBackNavigation}
+                type="button"
+                title="Go Back"
+                className="w-8 h-8 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
               >
-                <BackArrowIcon />
+                <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
               </button>
-              <h1 className="text-xl font-semibold text-gray-800">
-                Offer Terms & Conditions
+              <h1 className="text-xl font-semibold text-gray-800 px-4">
+                Add Offer Terms & Conditions
               </h1>
             </div>
 
@@ -204,8 +198,8 @@ const AddTermCondition = () => {
         </div>
 
         {/* Content Section */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <main className="p-6 overflow-y-auto text-gray-700 leading-relaxed max-h-[500px]">
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden flex-1 flex flex-col">
+          <main className="p-6 overflow-y-auto text-gray-700 leading-relaxed flex-1">
             {loading && (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400"></div>
@@ -250,15 +244,14 @@ const AddTermCondition = () => {
                         const newRaw = e.target.value;
                         setRawContent(newRaw);
 
-                        // Convert text to HTML
                         const formattedContent = newRaw
-                          .split("\n\n") // paragraphs
+                          .split("\n\n")
                           .map((paragraph) =>
                             paragraph.trim()
                               ? `<p style="margin-bottom: 16px;">${paragraph.replace(
                                   /\n/g,
                                   "<br/>"
-                                )}</p>` // keep single line breaks
+                                )}</p>`
                               : ""
                           )
                           .join("");

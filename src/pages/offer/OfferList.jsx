@@ -223,7 +223,7 @@ export default function OffersTable() {
   return (
     <div className="bg-gray-100 p-3 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between bg-white px-4 py-3 rounded-md shadow">
+      <div className="flex items-center justify-between bg-white px-4 m-2 py-3 rounded-md shadow">
         <h2 className="text-lg font-semibold text-gray-800">Offers List</h2>
         <button
           className="flex items-center gap-2 bg-brandYellow text-red-500 font-semibold px-4 py-2 rounded-md shadow hover:bg-brandYellow transition"
@@ -236,7 +236,7 @@ export default function OffersTable() {
 
       {/* Error message */}
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded m-2">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded m-2 ">
           <div className="flex items-start gap-2">
             <svg
               className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0"
@@ -265,7 +265,7 @@ export default function OffersTable() {
       )}
 
       {/* Offer Table */}
-      <div className="bg-white rounded-md m-2 p-4 shadow overflow-x-auto relative">
+      <div className="bg-white rounded-md m-2 p-4 shadow overflow-x-auto relative mt-8">
         {loading && (
           <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
             <div className="flex flex-col items-center">
@@ -306,9 +306,9 @@ export default function OffersTable() {
                     <td className="py-3 px-4">{formatOfferName(item.offer)}</td>
                     <td className="py-3 px-4">
                       {item.discountRate
-                        ? `${item.discountRate}%`
+                        ? `${item.discountRate}% off`
                         : item.discountAmount
-                        ? `₹${item.discountAmount}`
+                        ? `₹${item.discountAmount} off`
                         : "N/A"}
                     </td>
                     <td className="py-3 px-4">{item.offerText || "N/A"}</td>

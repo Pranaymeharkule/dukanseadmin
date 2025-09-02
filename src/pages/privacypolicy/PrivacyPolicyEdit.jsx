@@ -60,17 +60,23 @@ function PrivacyPolicyEdit() {
   return (
     <div className="w-full  bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       {/* Header */}
-      <div className=" mx-auto mb-6 flex items-center gap-3">
-        <button
-          onClick={() => navigate(-1)}
-          className="text-gray-600 hover:text-black text-xl"
-        >
-          <FiArrowLeft />
-        </button>
-        <h1 className="text-xl sm:text-2xl font-semibold text-gray-800 border-b-2  ">
-          Edit Privacy Policy
-        </h1>
-      </div>
+     <div className="mb-6">
+  
+  {/* Full width border box */}
+  <div className="w-full border-2  rounded-md p-4  flex items-center gap-4">
+  <button
+    onClick={() => navigate(-1)}
+    className="text-gray-600 hover:text-black text-xl"
+  >
+    <FiArrowLeft />
+  </button>
+  <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
+    Edit Privacy Policy
+  </h1>
+</div>
+
+</div>
+
 
       {/* Card */}
       <div className="bg-white shadow-lg rounded-xl mx-auto p-6 sm:p-8 space-y-6 ">
@@ -101,11 +107,11 @@ function PrivacyPolicyEdit() {
         </div>
 
         {/* Save Button */}
-        <div className="flex justify-center">
+        <div className="flex justify-center w-full mt">
           <button
             onClick={HandleUpdate}
             disabled={loading}
-            className={`bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-10 py-2.5 rounded-md shadow-md transition duration-200 ease-in-out ${
+            className={`bg-yellow-500 mt-10 hover:bg-yellow-600 text-white font-semibold px-10 py-2.5 rounded-md shadow-md transition duration-200 ease-in-out ${
               loading ? "opacity-60 cursor-not-allowed" : ""
             }`}
           >

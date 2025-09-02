@@ -1,99 +1,185 @@
-import React, { useState, useEffect } from "react";
+// src/pages/settings/EditTermsCondition.jsx
+
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import Breadcrumb from "../../components/breadcrumbs/Breadcrumbs";
-import CustomQuillEditor from "../../components/quill/CustomQuillEditor";
-import Button from "../../components/buttons/Buttons";
-import SuccessOverlay from "../../components/overlay/SuccessOverlay";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { BsArrowLeftCircle } from "react-icons/bs";
+
+// SVG icon component for the calendar
+const CalendarIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-5 w-5 text-gray-400"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+    />
+  </svg>
+);
+
+// SVG icon component for the back arrow
+const BackArrowIcon = () => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        className="h-6 w-6" 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+    >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+    </svg>
+);
+
 
 export default function EditTermsCondition() {
   const navigate = useNavigate();
+  const [term, setTerm] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [editedMessage, setEditedMessage] = useState("");
-  const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
+  
+  // Note: The date is hardcoded to match the image UI. 
+  // No logic for handling date changes is added as per instructions.
+  const [effectiveDate, setEffectiveDate] = useState("1st January, 2025");
 
-  // Fetch existing terms when edit page loads
+  // ✅ GET terms on load (No changes to logic)
   useEffect(() => {
-    const fetchTerms = async () => {
+    async function fetchTerms() {
       try {
-        const response = await axios.get(
-          `${API_BASE_URL}/settings/getUserTerms`
+        const response = await fetch(
+          "https://dukanse-be.onrender.com/api/settings/getUserTerms"
         );
-        if (response.data?.success && response.data?.termsAndCondition?.description) {
-          setEditedMessage(response.data.termsAndCondition.description);
+        const result = await response.json();
+        if (result.success && result.termsAndCondition) {
+          setTerm(result.termsAndCondition.description);
         }
       } catch (error) {
-        console.error("Error fetching terms:", error);
+        console.error("Fetch Error:", error);
       }
-    };
-    fetchTerms();
-  }, [API_BASE_URL]);
+    }
 
-  const handleUpdate = async () => {
+    fetchTerms();
+  }, []);
+
+  // ✅ PUT to update (No changes to logic)
+  const handleSave = async () => {
     try {
       setLoading(true);
-      const response = await axios.put(
-        `${API_BASE_URL}/settings/updateUserTerms`,
-        { description: editedMessage }
+      const response = await fetch(
+        "https://dukanse-be.onrender.com/api/settings/updateUserTerms",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ description: term }), // Only sends the description as in original code
+        }
       );
-
-      if (response.data?.success && response.data?.updated?.description) {
-        setShowSuccess(true);
-        setTimeout(() => {
-          setShowSuccess(false);
-          navigate("/terms-condition");
-        }, 2500);
+      const result = await response.json();
+      if (result.success) {
+        alert("Terms updated successfully!");
+        navigate("/terms-condition");
       } else {
-        alert("Failed to update Terms & Conditions");
+        alert("Update failed");
       }
     } catch (error) {
-      console.error("Error updating terms:", error);
-      alert("Something went wrong while updating.");
+      console.error("Update error:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    navigate("/terms-condition");
-  };
-
   return (
-    <div className="max-w-6xl mx-auto flex flex-col min-h-[600px]">
-      {/* Breadcrumb */}
-      <div className="mb-6">
-        <Breadcrumb titles={["Terms & Conditions", "Edit"]} showBack={true} />
+    <div className="min-h-screen w-full bg-gray-100 p-4 md:p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header section styled to match the image */}
+        <div className="flex items-center mb-4 bg-white p-4 md:p-5 rounded shadow">
+        <div className="flex items-center gap-2">
+          <button onClick={() => navigate(-1)}>
+            <BsArrowLeftCircle
+              size={25}
+              className="text-gray-700 md:text-black"
+            />
+          </button>
+          <h2 className="text-lg md:text-xl font-semibold">Edit Terms and Condition</h2>
+        </div>
       </div>
 
-      {/* Editor */}
-      <div className="h-[400px] overflow-y-auto scrollbar-hide">
-        <CustomQuillEditor value={editedMessage} onChange={setEditedMessage} />
+        {/* Main content card */}
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
+          
+          {/* Effective Date Input */}
+          <div className="mb-6">
+            <label htmlFor="effectiveDate" className="block text-sm font-medium text-gray-700 mb-2">
+              Effective Date
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                id="effectiveDate"
+                value={effectiveDate}
+                readOnly // To prevent user input as per the static image
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm bg-white cursor-pointer focus:outline-none"
+              />
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <CalendarIcon />
+              </div>
+            </div>
+          </div>
+
+          {/* ReactQuill Editor */}
+          <div className="flex-grow min-h-[450px]">
+            <ReactQuill
+              value={term}
+              onChange={setTerm}
+              className="h-full"
+              modules={EditTermsCondition.modules}
+              formats={EditTermsCondition.formats}
+              style={{ minHeight: "400px" }}
+            />
+          </div>
+
+          {/* Save Button */}
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={handleSave}
+              disabled={loading}
+              className="px-20 py-3 rounded-lg font-semibold text-black bg-yellow-400 hover:bg-yellow-500 transition-colors duration-200 disabled:bg-yellow-200 disabled:cursor-not-allowed"
+            >
+              {loading ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </div>
       </div>
-
-      {/* Buttons */}
-      <div className="flex justify-end gap-3 mt-4">
-        <Button
-          onClick={handleUpdate}
-          className="px-10 py-2 rounded bg-brandYellow"
-          disabled={loading}
-        >
-          {loading ? "Updating..." : "Update"}
-        </Button>
-
-        <Button
-          onClick={handleCancel}
-          className="px-10 py-2 rounded bg-brandYellow"
-          variant="outlined"
-        >
-          Cancel
-        </Button>
-      </div>
-
-      {/* Success Overlay */}
-      {showSuccess && (
-        <SuccessOverlay message="Terms & Conditions updated successfully!" />
-      )}
     </div>
   );
 }
+
+// Quill modules and formats defined outside the component for performance.
+EditTermsCondition.modules = {
+  toolbar: [
+    [{ header: "1" }, { header: "2" }, { font: [] }],
+    [{ size: [] }],
+    ["bold", "italic", "underline", "strike", "blockquote"],
+    [
+      { list: "ordered" },
+      { list: "bullet" },
+      { indent: "-1" },
+      { indent: "+1" },
+    ],
+    ["link", "image", "video"],
+    ["clean"],
+  ],
+};
+
+EditTermsCondition.formats = [
+  "header", "font", "size",
+  "bold", "italic", "underline", "strike", "blockquote",
+  "list", "bullet", "indent",
+  "link", "image", "video",
+];

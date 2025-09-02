@@ -208,18 +208,6 @@ export default function ViewOffer() {
             {/* Terms & Conditions */}
             <div className="text-right mb-6">
               {terms?.description ? (
-                <>
-                  <p
-                    className="text-left mb-2"
-                    style={{
-                      fontFamily: "Poppins",
-                      fontSize: "16px",
-                      lineHeight: "24px",
-                      color: "#555",
-                    }}
-                  >
-                    {terms.description}
-                  </p>
                   <Link
                     className="font-medium hover:underline"
                     style={{
@@ -233,7 +221,6 @@ export default function ViewOffer() {
                   >
                     See Terms & Conditions
                   </Link>
-                </>
               ) : (
                 <span
                   style={{
@@ -252,7 +239,7 @@ export default function ViewOffer() {
           {/* Edit Button */}
           <div className="flex justify-center p-6 bg-white border-t sticky bottom-0">
             <button
-              onClick={() => navigate(`/offer/edit-offer/${offerId}`)}
+              onClick={() => navigate(`/offer/edit/${offerId}`)}
               className="rounded-xl font-semibold"
               style={{
                 background: "#FEBC1D",

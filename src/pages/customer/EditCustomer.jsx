@@ -16,7 +16,7 @@ const EditCustomer = () => {
     dob: "",
     phone: "",
     email: "",
-    address: "",
+    addresses: [""], // multiple addresses
     image: "", // will hold uploaded image URL
   });
 
@@ -48,7 +48,9 @@ const EditCustomer = () => {
             dob: profile.dob ? profile.dob.split("/").reverse().join("-") : "",
             phone: profile.phoneNumber || "",
             email: profile.email || "",
-            address: profile.address || "",
+            addresses: Array.isArray(profile.address)
+              ? profile.address
+              : [profile.address || ""],
             image: profile.image || "",
           });
         }
@@ -62,56 +64,64 @@ const EditCustomer = () => {
   }, [customerId]);
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  // Handle address change
+  const handleAddressChange = (index, value) => {
+    const updatedAddresses = [...formData.addresses];
+    updatedAddresses[index] = value;
+    setFormData((prev) => ({ ...prev, addresses: updatedAddresses }));
+  };
+
+  // Add new address
+  const addMoreAddress = () => {
+    setFormData((prev) => ({
+      ...prev,
+      addresses: [...prev.addresses, ""],
+    }));
   };
 
   // Upload image to Imgur
-  const handleImageChange = async (e) => {
+  // Replace your handleImageChange function with this improved version:
+
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    setUploading(true);
-
-    try {
-      const formDataImg = new FormData();
-      formDataImg.append("image", file);
-
-      const { data } = await axios.post(
-        "https://api.imgur.com/3/image",
-        formDataImg,
-        {
-          headers: {
-            Authorization: `Client-ID ${IMGUR_CLIENT_ID}`,
-          },
-        }
-      );
-
-      if (data.success && data.data.link) {
-        setFormData((prev) => ({ ...prev, image: data.data.link }));
-      }
-    } catch (err) {
-      console.error("Image upload failed:", err);
-      alert("Image upload failed. Try again.");
-    } finally {
-      setUploading(false);
+    // Validate file type
+    const supportedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!supportedTypes.includes(file.type.toLowerCase())) {
+      alert('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+      return;
     }
+
+    // Validate file size (5MB limit for preview)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+
+    // Create local preview URL
+    const imageUrl = URL.createObjectURL(file);
+    setFormData((prev) => ({ ...prev, image: imageUrl }));
   };
 
+
   const handleSave = async () => {
-    // Validation
     if (
       !formData.name ||
       !formData.gender ||
       !formData.dob ||
       !formData.phone ||
       !formData.email ||
-      !formData.address
+      formData.addresses.some((addr) => !addr.trim())
     ) {
       return alert("Please fill all fields");
     }
 
-    if (!/^\d{10,13}$/.test(formData.phone)) {
-      return alert("Phone number must be 10-13 digits");
+    if (!/^\d{10}$/.test(formData.phone)) {
+      return alert("Phone number must be exactly 10 digits");
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
@@ -123,28 +133,20 @@ const EditCustomer = () => {
     const payload = {
       customerName: formData.name,
       gender: formData.gender,
-      dateOfBirth: dobFormatted,
+      dateOfBirth: dobFormatted, // DD/MM/YYYY
       phoneNumber: Number(formData.phone),
       email: formData.email,
-      address: formData.address,
+      addresses: formData.addresses.join(", "), // convert array to string
       profileImage: formData.image || "https://example.com/default-profile.png",
     };
 
     try {
       const { data } = await axios.put(
-        `${API_BASE_URL}/adminCustomer/updateCustomerInfo/${customerId}?_=${Date.now()}`,
-        payload,
-        {
-          headers: {
-            "Cache-Control":
-              "no-store, no-cache, must-revalidate, proxy-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
-          },
-        }
+        `${API_BASE_URL}/adminCustomer/updateCustomerInfo/${customerId}`,
+        payload
       );
 
-      if (data.success && data.updatedCustomer) {
+      if (data.success) {
         setShowSuccess(true);
         setTimeout(() => {
           setShowSuccess(false);
@@ -154,7 +156,7 @@ const EditCustomer = () => {
         alert("Failed to update customer info");
       }
     } catch (err) {
-      console.error(err);
+      console.error(err.response?.data || err.message);
       alert("Failed to update customer info");
     }
   };
@@ -172,26 +174,33 @@ const EditCustomer = () => {
 
       <div className="bg-white rounded-md m-2 p-4 shadow space-y-4 text-sm text-gray-800">
         {/* Image Upload */}
-        <div className="flex flex-col items-center mb-4">
+        <div className="mb-4">
+          <label className="block font-medium mb-1">Image (Optional)</label>
+          <div className="flex items-center space-x-6">
+            {/* File Input */}
+            <div className="w-full">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="block w-full text-sm border rounded p-1"
+              />
+              {uploading && (
+                <p className="text-sm text-gray-500 mt-1">Uploading...</p>
+              )}
+            </div>
+          </div>
+          {/* Image Preview */}
           {formData.image ? (
             <img
               src={formData.image}
               alt="Profile"
-              className="w-32 h-32 object-cover rounded-full mb-2 border"
+              className="w-24 h-24 object-cover rounded-full border"
             />
           ) : (
-            <div className="w-32 h-32 flex items-center justify-center bg-gray-200 rounded-full mb-2 border">
+            <div className="w-24 h-24 flex items-center justify-center bg-gray-100 rounded-full border text-xs text-gray-500">
               No Image
             </div>
-          )}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="text-sm"
-          />
-          {uploading && (
-            <p className="text-sm text-gray-500 mt-1">Uploading...</p>
           )}
         </div>
 
@@ -255,19 +264,29 @@ const EditCustomer = () => {
           />
         </div>
 
+        {/* Multiple Addresses */}
         <div>
           <label>Address</label>
-          <textarea
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            rows={3}
-            className="w-full border px-4 py-2 rounded"
-          />
+          {formData.addresses.map((addr, index) => (
+            <textarea
+              key={index}
+              value={addr}
+              onChange={(e) => handleAddressChange(index, e.target.value)}
+              rows={3}
+              className="w-full border px-4 py-2 rounded mb-2"
+            />
+          ))}
+          <button
+            type="button"
+            onClick={addMoreAddress}
+            className="text-red-500 text-sm font-bold hover:underline"
+          >
+            + Add More Address
+          </button>
         </div>
       </div>
 
-      <div className="bg-white shadow border-t p-2 sticky bottom-0 flex justify-center gap-5">
+      <div className="bg-white shadow border-t p-2 sticky sticky fixed bottom-0 flex justify-center gap-5">
         <button
           onClick={handleSave}
           className="bg-yellow-400 hover:bg-yellow-500 text-white px-6 py-2 rounded"

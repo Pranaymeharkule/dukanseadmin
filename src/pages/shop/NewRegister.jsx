@@ -11,6 +11,7 @@ const NewRegister = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [approvingId, setApprovingId] = useState(null);
 
   const baseURL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
@@ -38,6 +39,27 @@ const NewRegister = () => {
     fetchShops();
   }, [baseURL]);
 
+  // ✅ Approve Shop
+  const handleApprove = async (shopId) => {
+    if (!window.confirm("Do you want to approve this shop?")) return;
+    try {
+      setApprovingId(shopId);
+      await axios.put(`${baseURL}/shopApproval/approve-shop/${shopId}`, {});
+      setShops((prev) =>
+        prev.map((shop) =>
+          shop._id === shopId ? { ...shop, shopStatus: "Approved" } : shop
+        )
+      );
+      alert("Shop approved successfully!");
+    } catch (err) {
+      console.error("Failed to approve shop:", err);
+      alert(err.response?.data?.message || "Error approving shop");
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
+  // ✅ Delete Shop
   const handleDelete = async (shopId) => {
     if (window.confirm("Are you sure you want to delete this registration?")) {
       try {
@@ -65,7 +87,7 @@ const NewRegister = () => {
 
   return (
     <div className="bg-gray-100 min-h-screen p-4 md:p-6">
-      {/* Header (same style as FaqAdd.jsx) */}
+      {/* Header */}
       <div className="flex items-center mb-4 bg-white p-4 md:p-5 rounded shadow">
         <div className="flex items-center gap-2">
           <button onClick={() => navigate(-1)}>
@@ -112,9 +134,24 @@ const NewRegister = () => {
                   <td className="px-4 py-3 border-b">{shop.shopName}</td>
                   <td className="px-4 py-3 border-b">{shop.ownerName}</td>
                   <td className="px-4 py-3 border-b">{shop.phoneNumber}</td>
-                  <td className="px-4 py-3 border-b text-gray-600">
-                    {shop.status || ""}
-                  </td>
+
+                  {/* ✅ Status column with Approve button */}
+                  {/* Status column with green UI */}
+<td className="px-4 py-3 border-b text-green-600 font-medium">
+  {shop.shopStatus === "Approved" ? (
+    "Approved"
+  ) : (
+    <button
+      disabled={approvingId === shop._id}
+      onClick={() => handleApprove(shop._id)}
+      className="hover:underline"
+    >
+      {approvingId === shop._id ? "Approving..." : "Approve"}
+    </button>
+  )}
+</td>
+
+
                   <td className="px-4 py-3 border-b">
                     {new Date(shop.createdAt || shop.date).toLocaleDateString(
                       "en-IN"

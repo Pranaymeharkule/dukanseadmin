@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { FaSortAmountDown, FaFilter, FaEye, FaWhatsapp } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 export default function Shop() {
   const [shops, setShops] = useState([]);
@@ -26,7 +28,6 @@ export default function Shop() {
 
   useEffect(() => {
     let list = [...shops];
-    const now = new Date();
 
     // ✅ Status filter
     if (statusFilter === "Active") {
@@ -36,17 +37,33 @@ export default function Shop() {
     }
 
     // ✅ Date filter
-    if (dateFilter === "This Week") {
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay());
-      list = list.filter((s) => new Date(s.createdAt) >= startOfWeek);
-    } else if (dateFilter === "This Month") {
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      list = list.filter((s) => new Date(s.createdAt) >= startOfMonth);
-    } else if (dateFilter === "This Year") {
-      const startOfYear = new Date(now.getFullYear(), 0, 1);
-      list = list.filter((s) => new Date(s.createdAt) >= startOfYear);
-    }
+    list = list.filter((s) => {
+      const shopDate = new Date(s.OnBoardingdate || s.createdAt);
+      if (isNaN(shopDate)) return false; // safeguard
+
+      shopDate.setHours(0, 0, 0, 0); // normalize
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (dateFilter === "This Week") {
+        // Last 7 days
+        const sevenDaysAgo = new Date(today);
+        sevenDaysAgo.setDate(today.getDate() - 7);
+        return shopDate >= sevenDaysAgo && shopDate <= today;
+      }
+
+      if (dateFilter === "This Month") {
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        return shopDate >= startOfMonth && shopDate <= today;
+      }
+
+      if (dateFilter === "This Year") {
+        const startOfYear = new Date(today.getFullYear(), 0, 1);
+        return shopDate >= startOfYear && shopDate <= today;
+      }
+
+      return true; // "All"
+    });
 
     applySort(sortOption, list);
   }, [shops, statusFilter, dateFilter, sortOption]);
@@ -68,6 +85,42 @@ export default function Shop() {
     } finally {
       setLoading(false);
     }
+  };
+  const exportToExcel = () => {
+    if (!shops || shops.length === 0) {
+      alert("No shop data to export.");
+      return;
+    }
+
+    // Format data for Excel
+    const worksheetData = shops.map((s, index) => ({
+      "S.No": index + 1,
+      "Store Name": s.shopName,
+      Owner: s.ownerName,
+      "Phone Number": s.phoneNumber || "—",
+      Email: s.email || "—",
+      Status: s.status,
+      "Referral Conversion %": s.referralConversion ?? "—",
+      "Commission Earned": s.commissionEarned ?? "—",
+      Date: s.createdAt
+        ? new Date(s.createdAt).toLocaleDateString("en-IN")
+        : "—",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Approved Shops");
+
+    // Export to file
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const data = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    saveAs(data, "Approved_Shops.xlsx");
   };
 
   const applySort = (option, list = filteredShops) => {
@@ -209,7 +262,10 @@ export default function Shop() {
             >
               New Shop Registered
             </button>
-            <button className="px-4 py-1.5 rounded-md border border-red-500 text-red-500 text-sm font-medium flex items-center gap-2 hover:bg-red-50">
+            <button
+              onClick={exportToExcel}
+              className="px-4 py-1.5 rounded-md border border-red-500 text-red-500 text-sm font-medium flex items-center gap-2 hover:bg-red-50"
+            >
               <span>⬇</span> Export to Excel
             </button>
           </div>
@@ -220,23 +276,25 @@ export default function Shop() {
       <div className="overflow-x-auto">
         <div className="bg-white rounded-md shadow">
           <div className="p-6 overflow-x-auto">
-            <table className="min-w-[1400px] w-full table-auto">
-              <thead className="bg-[#FEBC1D] text-black">
-                <tr className="text-left">
-                  <th className="p-3">Store Name</th>
-                  <th className="p-3">Owner</th>
-                  <th className="p-3">Number</th>
-                  <th className="p-3">Email</th>
-                  <th className="p-3">Total Orders Fulfilled</th>
-                  <th className="p-3">Avg. Order Time</th>
-                  <th className="p-3">% Referral Conversion</th>
-                  <th className="p-3">Commission Earned</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Date</th>
-                  <th className="p-3">Action</th>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-[#FEBC1D] text-black text-sm uppercase">
+                  <th className="px-6 py-3 text-left">Store Name</th>
+                  <th className="px-6 py-3 text-left">Owner</th>
+                  <th className="px-6 py-3 text-left">Number</th>
+                  <th className="px-6 py-3 text-left">Email</th>
+                  <th className="px-6 py-3 text-left ">Orders Fulfilled</th>
+                  <th className="px-6 py-3 text-left ">Avg. Order Time</th>
+                  <th className="px-6 py-3 text-left ">
+                    % Referral Conversion
+                  </th>
+                  <th className="px-6 py-3 text-left">Commission Earned</th>
+                  <th className="px-6 py-3 text-left">Status</th>
+                  <th className="px-6 py-3 text-left">Date</th>
+                  <th className="px-6 py-3 text-left">Action</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-gray-700">
                 {currentShops.length === 0 ? (
                   <tr>
                     <td colSpan="11" className="p-6 text-center text-gray-500">
@@ -253,22 +311,22 @@ export default function Shop() {
                     return (
                       <tr
                         key={shop._id}
-                        className="border-b last:border-b-0 hover:bg-gray-50"
+                        className="border-b hover:bg-gray-50 transition"
                       >
-                        <td className="p-3">{shop.shopName}</td>
-                        <td className="p-3">{shop.ownerName}</td>
-                        <td className="p-3">{shop.phoneNumber || "—"}</td>
-                        <td className="p-3">{shop.email || "—"}</td>
-                        <td className="p-3">—</td>
-                        <td className="p-3">—</td>
-                        <td className="p-3">
+                        <td className="px-6 py-4">{shop.shopName}</td>
+                        <td className="px-6 py-4">{shop.ownerName}</td>
+                        <td className="px-6 py-4">{shop.phoneNumber || "—"}</td>
+                        <td className="px-6 py-4">{shop.email || "—"}</td>
+                        <td className="px-6 py-4 text-center">—</td>
+                        <td className="px-6 py-4 text-center">—</td>
+                        <td className="px-6 py-4 text-center">
                           {asPercent(shop.referralConversion)}
                         </td>
-                        <td className="p-3">
+                        <td className="px-6 py-4 text-center">
                           {asRupees(shop.commissionEarned)}
                         </td>
                         <td
-                          className={`p-3 font-semibold cursor-pointer ${statusClass}`}
+                          className={`px-6 py-4 text-center font-semibold cursor-pointer ${statusClass}`}
                           onClick={() =>
                             shop.status !== "active" && approveShop(shop._id)
                           }
@@ -280,11 +338,11 @@ export default function Shop() {
                         >
                           {shop.status}
                         </td>
-                        <td className="p-3">
+                        <td className="px-6 py-4 text-center">
                           {shop.OnBoardingdate || asDate(shop.createdAt)}
                         </td>
-                        <td className="p-3">
-                          <div className="flex items-center gap-3">
+                        <td className="px-6 py-4 text-center">
+                          <div className="flex items-center justify-center gap-3">
                             <button
                               title="View"
                               onClick={() => navigate(`/shop/view/${shop._id}`)}
@@ -314,41 +372,6 @@ export default function Shop() {
               </tbody>
             </table>
           </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="border-t px-4 py-4 flex justify-center items-center gap-3 text-sm">
-              <button
-                aria-label="Previous page"
-                disabled={page === 1}
-                onClick={() => setPage((p) => Math.max(p - 1, 1))}
-                className="h-8 w-8 flex items-center justify-center rounded-full text-[rgb(236,45,1)] hover:bg-red-50 disabled:opacity-30"
-              >
-                ‹
-              </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={
-                    page === p
-                      ? "min-w-8 h-8 px-3 rounded-full bg-[#FEBC1D] text-black font-semibold shadow-sm"
-                      : "min-w-8 h-8 px-3 rounded-full text-[rgb(236,45,1)] hover:bg-red-50"
-                  }
-                >
-                  {p}
-                </button>
-              ))}
-              <button
-                aria-label="Next page"
-                disabled={page === totalPages}
-                onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-                className="h-8 w-8 flex items-center justify-center rounded-full text-[rgb(236,45,1)] hover:bg-red-50 disabled:opacity-30"
-              >
-                ›
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>
