@@ -48,6 +48,7 @@ const AddProduct = () => {
       setBackImgPreview(URL.createObjectURL(file));
     }
   };
+
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSave = async () => {
@@ -61,7 +62,7 @@ const AddProduct = () => {
     data.append("shelfLife", formData.shelfLife);
     data.append("nutrientContent", formData.nutrient);
     data.append("productDescription", formData.description);
-    data.append("unitsAvailable", "100"); // default value
+    data.append("unitsAvailable", "100");
     data.append("productPhotoFront", attaFile);
     data.append("productPhotoBack", backImgFile);
 
@@ -78,32 +79,36 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="bg-gray-100">
+    <div className="bg-gray-100 min-h-screen flex flex-col">
       {/* Header */}
-      <div className="bg-white px-4 py-3 shadow-md sticky top-0 z-10 flex items-center space-x-2">
+      <div className="bg-white px-4 py-3 shadow-md sticky top-0 z-10 flex items-center space-x-3">
         <BsArrowLeftCircle
-          className="text-2xl cursor-pointer"
+          className="text-2xl cursor-pointer text-gray-700 hover:text-gray-900"
           onClick={() => navigate(-1)}
         />
-        <h2 className="text-xl font-semibold">Add Product</h2>
+        <h2 className="text-xl font-bold text-gray-800">Add Product</h2>
       </div>
 
-      {/* Product Card */}
-      <div className="overflow-x-auto scrollbar-thin bg-white mt-2 p-4 rounded shadow">
-        <div className="max-h-[430px] min-w-[800px]">
-          <div className="flex gap-6 mb-6">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-4 pb-32">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          {/* Upload Section */}
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">
+            Upload Product Images
+          </h3>
+          <div className="flex flex-wrap gap-6 mb-6">
             {/* Front Image */}
-            <div className="w-52 h-[290px] bg-white rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 shadow">
+            <div className="w-52 h-[300px] bg-gray-50 rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 hover:shadow-md transition">
               <img
                 src={attaPreview}
                 alt="Front View"
-                className="w-full h-48 object-contain"
+                className="w-full h-48 object-contain rounded"
               />
               <label className="w-full">
-                <div className="bg-brandYellow text-brandRed font-semibold rounded-md py-2 text-center cursor-pointer hover:bg-yellow-500">
-                  <span className="flex items-center justify-center gap-1">
+                <div className="bg-brandYellow text-brandRed font-semibold rounded-md py-2 text-center cursor-pointer hover:bg-yellow-500 transition">
+                  <span className="flex items-center justify-center gap-2">
                     <GrUpload className="text-lg" />
-                    Upload
+                    Upload Front
                   </span>
                   <input
                     type="file"
@@ -116,17 +121,17 @@ const AddProduct = () => {
             </div>
 
             {/* Back Image */}
-            <div className="w-52 h-[290px] bg-white rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 shadow">
+            <div className="w-52 h-[300px] bg-gray-50 rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 hover:shadow-md transition">
               <img
                 src={backImgPreview}
                 alt="Back View"
-                className="w-full h-48 object-contain"
+                className="w-full h-48 object-contain rounded"
               />
               <label className="w-full">
-                <div className="bg-brandYellow text-brandRed font-semibold rounded-md py-2 text-center cursor-pointer hover:bg-yellow-500">
-                  <span className="flex items-center justify-center gap-1">
+                <div className="bg-brandYellow text-brandRed font-semibold rounded-md py-2 text-center cursor-pointer hover:bg-yellow-500 transition">
+                  <span className="flex items-center justify-center gap-2">
                     <GrUpload className="text-lg" />
-                    Upload
+                    Upload Back
                   </span>
                   <input
                     type="file"
@@ -138,109 +143,63 @@ const AddProduct = () => {
               </label>
             </div>
           </div>
+
           {/* Form Inputs */}
-          <div className="space-y-2 text-sm text-gray-800">
-            <div>
-              <label className="font-bold">Name of Product</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Price (₹)</label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Pack Of</label>
-              <input
-                type="text"
-                name="packOf"
-                value={formData.packOf}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Brand</label>
-              <input
-                type="text"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Type</label>
-              <input
-                type="text"
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Net Weight</label>
-              <input
-                type="text"
-                name="weight"
-                value={formData.weight}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Maximum Shelf Life</label>
-              <input
-                type="text"
-                name="shelfLife"
-                value={formData.shelfLife}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Nutrient Content</label>
-              <input
-                type="text"
-                name="nutrient"
-                value={formData.nutrient}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Product Description</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={4}
-                className="w-full mt-1 p-2 border rounded"
-              ></textarea>
-            </div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-3">
+            Product Details
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
+            {[
+              { label: "Name of Product", name: "name", type: "text" },
+              { label: "Price (₹)", name: "price", type: "number" },
+              { label: "Pack Of", name: "packOf", type: "text" },
+              { label: "Brand", name: "brand", type: "text" },
+              { label: "Type", name: "type", type: "text" },
+              { label: "Net Weight", name: "weight", type: "text" },
+              { label: "Maximum Shelf Life", name: "shelfLife", type: "text" },
+              { label: "Nutrient Content", name: "nutrient", type: "text" },
+            ].map((field) => (
+              <div key={field.name}>
+                <label className="font-semibold text-gray-700">
+                  {field.label}
+                </label>
+                <input
+                  type={field.type}
+                  name={field.name}
+                  value={formData[field.name]}
+                  onChange={handleChange}
+                  className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-brandYellow focus:outline-none"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4">
+            <label className="font-semibold text-gray-700">
+              Product Description
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={4}
+              className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-brandYellow focus:outline-none"
+              placeholder="Enter detailed description..."
+            ></textarea>
           </div>
         </div>
       </div>
 
-      {/* Save Button */}
-      <div className="bg-white px-1 py-2 sticky bottom-0 z-10 flex justify-center border-t">
+      {/* Sticky Bottom Bar */}
+      <div className="bg-white px-4 py-3 fixed bottom-0 left-0 w-full z-20 border-t flex justify-center shadow-lg">
         <button
-          className="bg-brandYellow text-brandRed px-5 py-1.5 rounded hover:bg-yellow-600 font-bold"
+          disabled={isLoading}
+          className={`${
+            isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-yellow-600"
+          } bg-brandYellow text-brandRed px-6 py-2 rounded-lg font-bold shadow-md transition`}
           onClick={handleSave}
         >
-          Add
+          {isLoading ? "Saving..." : "Add Product"}
         </button>
         {showSuccess && (
           <SuccessOverlay message="Product is successfully added in the master catalog" />
