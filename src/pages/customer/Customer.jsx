@@ -27,7 +27,8 @@ const Customer = () => {
     next: false,
   });
 
-  const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
+  // Updated API base URL
+  const API_BASE_URL = "https://dukanse-be-f5w4.onrender.com/api";
 
   // Fetch customer list from API
   const fetchCustomers = async () => {
@@ -46,16 +47,48 @@ const Customer = () => {
 
       console.log("Customer List API:", res.data);
 
-      setCustomers(res.data.customers || []);
+      // Handle the API response structure
+      if (res.data && res.data.success) {
+        // Map the data to match your component's expected structure
+        const mappedCustomers = res.data.data.map((customer) => ({
+          _id: customer._id,
+          customerName: customer.customerName || `Customer ${customer.phoneNumber}`, // Fallback for missing names
+          phoneNumber: customer.phoneNumber,
+          location: customer.location || "Not specified",
+          totalorders: customer.totalOrders || 0,
+          coinsCredited: customer.coinsCredited || 0,
+          coinsRedeemed: customer.coinsRedeemed || 0,
+          coinsExpired: customer.coinsExpired || 0,
+          status: customer.status || "active",
+          Date: customer.Date || "N/A"
+        }));
 
-      if (res.data) {
+        setCustomers(mappedCustomers);
+
+        // Since the API doesn't provide pagination info, calculate it
+        const totalCustomers = mappedCustomers.length;
+        const calculatedTotalPages = Math.max(1, Math.ceil(totalCustomers / limit));
+        const hasNext = totalCustomers === limit; // Assume there's more data if we got a full page
+
         setPaginationData({
-          totalPages: res.data.totalPages || 1,
-          next: res.data.next || false,
+          totalPages: calculatedTotalPages,
+          next: hasNext,
+        });
+      } else {
+        setCustomers([]);
+        setPaginationData({
+          totalPages: 1,
+          next: false,
         });
       }
     } catch (err) {
       console.error("Error fetching customers:", err);
+      // Handle error gracefully
+      setCustomers([]);
+      setPaginationData({
+        totalPages: 1,
+        next: false,
+      });
     }
   };
 
@@ -68,10 +101,17 @@ const Customer = () => {
     if (viewType === "new") {
       const now = new Date();
       return customers.filter((cust) => {
-        if (!cust.Date) return false;
-        const custDate = new Date(cust.Date);
-        const diffDays = (now - custDate) / (1000 * 60 * 60 * 24);
-        return diffDays <= 7; // last 7 days as "new"
+        if (!cust.Date || cust.Date === "N/A") return false;
+        try {
+          // Parse the date format "DD/MM/YYYY"
+          const [day, month, year] = cust.Date.split('/');
+          const custDate = new Date(year, month - 1, day);
+          const diffDays = (now - custDate) / (1000 * 60 * 60 * 24);
+          return diffDays <= 7; // last 7 days as "new"
+        } catch (error) {
+          console.error("Error parsing date:", cust.Date);
+          return false;
+        }
       });
     }
     return customers;
@@ -139,10 +179,16 @@ const Customer = () => {
 
         {/* Right actions */}
         <div className="relative flex items-center gap-2">
-          <button className="p-2 border rounded-md" onClick={() => setFilterVisible(!filterVisible)}>
+          <button
+            className="p-2 border rounded-md"
+            onClick={() => setFilterVisible(!filterVisible)}
+          >
             <FaFilter />
           </button>
-          <button className="p-2 border rounded-md" onClick={() => setSortVisible(!sortVisible)}>
+          <button
+            className="p-2 border rounded-md"
+            onClick={() => setSortVisible(!sortVisible)}
+          >
             <FaSortAmountDown />
           </button>
           <button
@@ -219,78 +265,96 @@ const Customer = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredCustomers.map((cust) => (
-                  <tr
-                    key={cust._id}
-                    className="border-b hover:bg-gray-100 cursor-pointer h-16"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/customer/profile/${cust._id}`);
-                    }}
-                  >
-                    <td className="flex items-center gap-3 p-3">
-                      <img
-                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          cust.customerName
-                        )}`}
-                        alt="Avatar"
-                        className="w-8 h-8 rounded-full"
-                      />
-                      {cust.customerName}
-                    </td>
-                    <td className="p-3">{cust.phoneNumber}</td>
-                    <td className="p-3">{cust.location}</td>
-                    <td className="p-3 text-center">{cust.totalorders}</td>
-                    <td className="p-3 text-center">{cust.coinsCredited}</td>
-                    <td className="p-3 text-center">{cust.coinsRedeemed}</td>
-                    <td className="p-3 text-center">{cust.coinsExpired}</td>
-                    <td className="p-3 capitalize">{cust.status}</td>
-                    <td className="p-3">{cust.Date}</td>
-                    <td className="p-3">
-                      <div className="flex items-center gap-3">
-                        <button
-                          title="View"
-                          className="text-gray-700 hover:text-black"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/customer/profile/${cust._id}`);
-                          }}
-                        >
-                          <FaEye />
-                        </button>
-                        <button
-                          title="WhatsApp"
-                          className="text-green-500 hover:text-green-600"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(
-                              `https://wa.me/${cust.phoneNumber}`,
-                              "_blank"
-                            );
-                          }}
-                        >
-                          <FaWhatsapp />
-                        </button>
-                        <button
-                          title="Delete"
-                          className="text-red-500 hover:text-red-600"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            alert("Delete feature not available in API.");
-                          }}
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
+                {filteredCustomers.length > 0 ? (
+                  filteredCustomers.map((cust) => (
+                    <tr
+                      key={cust._id}
+                      className="border-b hover:bg-gray-100 cursor-pointer h-16"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/customer/profile/${cust._id}`);
+                      }}
+                    >
+                      <td className="flex items-center gap-3 p-3">
+                        <img
+                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            cust.customerName
+                          )}`}
+                          alt="Avatar"
+                          className="w-8 h-8 rounded-full"
+                        />
+                        {cust.customerName}
+                      </td>
+                      <td className="p-3">{cust.phoneNumber}</td>
+                      <td className="p-3">{cust.location}</td>
+                      <td className="p-3 text-center">{cust.totalorders}</td>
+                      <td className="p-3 text-center">{cust.coinsCredited}</td>
+                      <td className="p-3 text-center">{cust.coinsRedeemed}</td>
+                      <td className="p-3 text-center">{cust.coinsExpired}</td>
+                      <td className="p-3 capitalize">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          cust.status === 'active' 
+                            ? 'bg-green-100 text-green-800' 
+                            : cust.status === 'fraud'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {cust.status}
+                        </span>
+                      </td>
+                      <td className="p-3">{cust.Date}</td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-3">
+                          <button
+                            title="View"
+                            className="text-gray-700 hover:text-black"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/customer/profile/${cust._id}`);
+                            }}
+                          >
+                            <FaEye />
+                          </button>
+                          <button
+                            title="WhatsApp"
+                            className="text-green-500 hover:text-green-600"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(
+                                `https://wa.me/${cust.phoneNumber}`,
+                                "_blank"
+                              );
+                            }}
+                          >
+                            <FaWhatsapp />
+                          </button>
+                          <button
+                            title="Delete"
+                            className="text-red-500 hover:text-red-600"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              alert("Delete feature not available in API.");
+                            }}
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="10" className="text-center p-8 text-gray-500">
+                      No customers found
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* --- MODIFIED: Pagination logic updated --- */}
+        {/* Pagination */}
         <div className="flex justify-center items-center mt-4 gap-2 text-sm">
           <button
             onClick={() => setPage(page - 1)}
