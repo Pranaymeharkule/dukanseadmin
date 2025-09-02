@@ -36,7 +36,6 @@
   import HelpSupport from "../pages/helpsupport/HelpSupport";
   import FaqEdit from "../pages/helpsupport/FaqEdit";
   import FaqView from "../pages/helpsupport/FaqView";
-  import HelpSupportChat from "../pages/helpsupport/HelpSupportChat";
   import FaqAdd from "../pages/helpsupport/FaqAdd";
   import CustomerComplaints from "../pages/helpsupport/CustomerComplaints";
   import CustomerSupportNumber from "../pages/helpsupport/CustomerSupportNumber";
@@ -469,14 +468,6 @@
           element={
             <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
               <Faq />
-            </Layout>
-          }
-        />
-        <Route
-          path="/helpSupport/chat/:ticketId"
-          element={
-            <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
-              <HelpSupportChat />
             </Layout>
           }
         />
