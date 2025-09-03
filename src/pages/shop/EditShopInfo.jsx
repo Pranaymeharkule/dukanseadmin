@@ -223,61 +223,6 @@ function EditShopInfo() {
           ))}
         </div>
 
-        {/* Bank Details */}
-        <div className="space-y-4 mb-6">
-          <h3 className="font-semibold mb-4">Bank Details</h3>
-          <div>
-            <label className="block mb-1">Bank Name</label>
-            <input
-              type="text"
-              name="bankName"
-              value={shopData.bankName || ""}
-              onChange={handleChange}
-              className="w-full border rounded-md p-2"
-            />
-          </div>
-          <div>
-            <label className="block mb-1">IFSC Code</label>
-            <input
-              type="text"
-              name="IFSCCode"
-              value={shopData.IFSCCode || ""}
-              onChange={handleChange}
-              className="w-full border rounded-md p-2"
-            />
-          </div>
-          <div>
-            <label className="block mb-1">Account Number</label>
-            <input
-              type="text"
-              name="accountNumber"
-              value={shopData.accountNumber || ""}
-              onChange={handleChange}
-              className="w-full border rounded-md p-2"
-            />
-          </div>
-          <div>
-            <label className="block mb-1">Account Holder Name</label>
-            <input
-              type="text"
-              name="accountHolderName"
-              value={shopData.accountHolderName || ""}
-              onChange={handleChange}
-              className="w-full border rounded-md p-2"
-            />
-          </div>
-          <div>
-            <label className="block mb-1">Account Type</label>
-            <input
-              type="text"
-              name="accountType"
-              value={shopData.accountType || ""}
-              onChange={handleChange}
-              className="w-full border rounded-md p-2"
-            />
-          </div>
-        </div>
-
         {/* Save Button */}
         <div className="flex justify-center">
           <button

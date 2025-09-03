@@ -7,17 +7,15 @@ import axios from "axios";
 const CustomerProfile = () => {
   const navigate = useNavigate();
   const { customerId } = useParams();
-
+  const [isFlagged, setIsFlagged] = useState(false);
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState([]);
   const [referrals, setReferrals] = useState([]);
   const [gullakLedger, setGullakLedger] = useState([]);
-  const [isFlagged, setIsFlagged] = useState(false);
   const [showAllOrders, setShowAllOrders] = useState(false);
   const [showAllReferrals, setShowAllReferrals] = useState(false);
   const [showAllGullak, setShowAllGullak] = useState(false);
-
   const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
   useEffect(() => {
@@ -38,27 +36,32 @@ const CustomerProfile = () => {
         if (res.data.success) {
           const details = res.data.customerDetails;
 
-          // Profile
+          // ✅ Use profile if available, else fallback
+          const profileData = details.profile || details;
+
           setCustomer({
             profile: {
-              fullName: details.profile?.fullName || "-",
-              dob: details.profile?.dob || "-",
-              gender: details.profile?.gender || "-",
-              phoneNumber: details.profile?.phoneNumber || "-",
-              email: details.profile?.email || "-",
-              address: details.profile?.address || "-",
-              image: details.profile?.profileImage || null,
+              fullName: profileData.fullName || profileData.customerName || "-",
+              dob: profileData.dob || profileData.dateOfBirth || "-",
+              gender: profileData.gender || "-",
+              phoneNumber: profileData.phoneNumber || "-",
+              email: profileData.email || "-",
+              address: profileData.address || profileData.addresses || "-",
+              image: profileData.profileImage || null,
             },
+            previousOrders: details.previousOrders || [],
+            referrals: details.referrals || [],
+            coinHistory: details.coinHistory || [],
             isFraud: details.isFraud || false,
           });
 
           setIsFlagged(details.isFraud || false);
 
-          // Orders
+          // ✅ Map orders
           setOrders(
             (details.previousOrders || []).map((order, index) => ({
-              id: order.orderId || index,
-              date: order.date || "-",
+              id: order.orderId,
+              date: order.date,
               product: order.productName || "-",
               quantity: order.quantity || "-",
               price: order.totalPrice || "₹0",
@@ -66,18 +69,18 @@ const CustomerProfile = () => {
             }))
           );
 
-          // Referrals
+          // ✅ Map referrals
           setReferrals(details.referrals || []);
 
-          // Gullak ledger
+          // ✅ Map gullak ledger
           setGullakLedger(
-            (details.coinHistory || []).map((entry, index) => ({
-              id: index,
-              date: entry.date || "-",
-              available: entry.availableCoins || "-",
-              earned: entry.coinsEarned || "-",
-              redeemed: entry.coinsRedeemed || "-",
-              expired: entry.coinsExpired || "-",
+            (details.coinHistory || []).map((entry, idx) => ({
+              id: idx,
+              date: entry.date,
+              available: entry.availableCoins,
+              earned: entry.coinsEarned,
+              redeemed: entry.coinsRedeemed,
+              expired: entry.coinsExpired,
             }))
           );
         }
@@ -89,7 +92,6 @@ const CustomerProfile = () => {
     fetchCustomerDetails();
   }, [customerId]);
 
-  // Flag as fraud
   const handleToggle = async () => {
     try {
       setLoading(true);
@@ -127,14 +129,6 @@ const CustomerProfile = () => {
     navigate(`/order/details/${orderId}`);
   };
 
-  if (!customer) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-gray-500">
-        Loading...
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -159,10 +153,11 @@ const CustomerProfile = () => {
           {/* Customer Profile Section */}
           <div className="p-6">
             <div className="flex justify-between items-start">
-              {/* Profile + Details */}
+              {/* Profile + Details (stacked left) */}
               <div className="flex flex-col items-start flex-1">
+                {/* Profile Image */}
                 <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4 overflow-hidden">
-                  {customer.profile.image ? (
+                  {customer?.profile?.image ? (
                     <img
                       src={customer.profile.image}
                       alt="Profile"
@@ -173,20 +168,61 @@ const CustomerProfile = () => {
                   )}
                 </div>
 
-                <div className="w-full max-w-md space-y-4 text-left">
-                  {Object.entries(customer.profile).map(([key, value]) => {
-                    const label = key
-                      .replace(/([A-Z])/g, " $1")
-                      .replace(/^./, (str) => str.toUpperCase());
-                    return (
-                      <div key={key} className="flex gap-x-8 items-center">
-                        <span className="w-40 font-semibold text-gray-800">
-                          {label}:
-                        </span>
-                        <span className="flex-1 text-gray-700">{value || "-"}</span>
-                      </div>
-                    );
-                  })}
+                {/* Customer Details */}
+                <div className="w-full max-w-md space-y-9 text-left">
+                  <div className="flex gap-x-8 items-center">
+                    <span className="w-40 font-semibold text-gray-800">
+                      Full Name:
+                    </span>
+                    <span className="flex-1 text-gray-700">
+                      {customer?.profile?.fullName || "-"}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-x-8 items-center">
+                    <span className="w-40 font-semibold text-gray-800">
+                      Gender:
+                    </span>
+                    <span className="flex-1 text-gray-700">
+                      {customer?.profile?.gender || "-"}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-x-8 items-center">
+                    <span className="w-40 font-semibold text-gray-800">
+                      Date Of Birth:
+                    </span>
+                    <span className="flex-1 text-gray-700">
+                      {customer?.profile?.dob || "-"}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-x-8 items-center">
+                    <span className="w-40 font-semibold text-gray-800">
+                      Phone Number:
+                    </span>
+                    <span className="flex-1 text-gray-700">
+                      {customer?.profile?.phoneNumber || "-"}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-x-8 items-center">
+                    <span className="w-40 font-semibold text-gray-800">
+                      Email:
+                    </span>
+                    <span className="flex-1 text-gray-700">
+                      {customer?.profile?.email || "-"}
+                    </span>
+                  </div>
+
+                  <div className="flex gap-x-8 items-start">
+                    <span className="w-40 font-semibold text-gray-800">
+                      Address:
+                    </span>
+                    <span className="flex-1 text-gray-700 break-words">
+                      {customer?.profile?.address || "-"}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -212,69 +248,261 @@ const CustomerProfile = () => {
           </div>
 
           {/* Orders Section */}
-          <DataTable
-            title="Previous Order Details"
-            data={orders}
-            columns={["Sl.No", "Date", "Product Name", "Quantity", "Total Price", "Payment Status", "View Order"]}
-            showAll={showAllOrders}
-            setShowAll={setShowAllOrders}
-            renderRow={(order, index) => (
-              <>
-                <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{order.date}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{order.product}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{order.quantity}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{order.price}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{order.status}</td>
-                <td className="px-4 py-3">
-                  <button
-                    onClick={() => handleViewOrder(order.id)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <VscEye size={18} />
-                  </button>
-                </td>
-              </>
-            )}
-          />
+          <div className="bg-white p-6">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="font-semibold text-gray-900">
+                Previous Order Details:
+              </h2>
+              <button
+                onClick={() => setShowAllOrders(!showAllOrders)}
+                className="text-blue-600 hover:underline text-sm font-medium"
+              >
+                See all
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white rounded-lg overflow-hidden">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Sl.No
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Product Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Quantity
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Total Price
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Payment Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      View Order
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {(showAllOrders ? orders : orders.slice(0, 3)).length > 0 ? (
+                    (showAllOrders ? orders : orders.slice(0, 3)).map(
+                      (order, index) => (
+                        <tr
+                          key={order.id}
+                          className={
+                            index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                          }
+                        >
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {index + 1}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {order.date}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {order.product}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {order.quantity}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {order.price}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {order.status}
+                          </td>
+                          <td className="px-4 py-3">
+                            <button
+                              onClick={() => handleViewOrder(order.id)}
+                              className="text-gray-400 hover:text-gray-600"
+                            >
+                              <VscEye size={18} />
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    )
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="7"
+                        className="px-4 py-3 text-center text-gray-500"
+                      >
+                        No orders found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-          {/* Referrals Section */}
-          <DataTable
-            title="Referral History"
-            data={referrals}
-            columns={["Sl.No", "Date", "Person Name", "Referral code", "Referred via", "Status"]}
-            showAll={showAllReferrals}
-            setShowAll={setShowAllReferrals}
-            renderRow={(ref, index) => (
-              <>
-                <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{ref.date}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{ref.name}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{ref.code}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{ref.via}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{ref.status}</td>
-              </>
-            )}
-          />
+          {/* Referral History Section */}
+          <div className="bg-white p-6">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="font-semibold text-gray-900">Referral History:</h2>
+              <button
+                onClick={() => setShowAllReferrals(!showAllReferrals)}
+                className="text-blue-600 hover:underline text-sm font-medium"
+              >
+                See all
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white rounded-lg overflow-hidden">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Sl.No
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Person Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Referral code
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Referred via
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {(showAllReferrals ? referrals : referrals.slice(0, 3))
+                    .length > 0 ? (
+                    (showAllReferrals ? referrals : referrals.slice(0, 3)).map(
+                      (ref, index) => (
+                        <tr
+                          key={ref.id}
+                          className={
+                            index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                          }
+                        >
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {index + 1}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {ref.date}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {ref.name}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {ref.code}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {ref.via}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {ref.status}
+                          </td>
+                        </tr>
+                      )
+                    )
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="6"
+                        className="px-4 py-3 text-center text-gray-500"
+                      >
+                        No referrals found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
           {/* Gullak Ledger Section */}
-          <DataTable
-            title="Gullak Ledger"
-            data={gullakLedger}
-            columns={["Sl.No", "Date", "Available Coins", "Coins Earned", "Coins Redeemed", "Coins Expired"]}
-            showAll={showAllGullak}
-            setShowAll={setShowAllGullak}
-            renderRow={(entry, index) => (
-              <>
-                <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{entry.date}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{entry.available}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{entry.earned}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{entry.redeemed}</td>
-                <td className="px-4 py-3 text-sm text-gray-900">{entry.expired}</td>
-              </>
-            )}
-          />
+          <div className="bg-white p-6">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="font-semibold text-gray-900">Gullak ledger:</h2>
+              <button
+                onClick={() => setShowAllGullak(!showAllGullak)}
+                className="text-blue-600 hover:underline text-sm font-medium"
+              >
+                See all
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white rounded-lg overflow-hidden">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Sl.No
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Available Coins
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Coins Earned
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Coins Redeemed
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                      Coins Expired
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {(showAllGullak ? gullakLedger : gullakLedger.slice(0, 3))
+                    .length > 0 ? (
+                    (showAllGullak
+                      ? gullakLedger
+                      : gullakLedger.slice(0, 3)
+                    ).map((entry, index) => (
+                      <tr
+                        key={entry.id}
+                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                      >
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {index + 1}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {entry.date}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {entry.available}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {entry.earned}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {entry.redeemed}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {entry.expired}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="6"
+                        className="px-4 py-3 text-center text-gray-500"
+                      >
+                        No gullak entries found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
           {/* Action Buttons */}
           <div className="bg-white px-6 py-4">
@@ -297,55 +525,3 @@ const CustomerProfile = () => {
 };
 
 export default CustomerProfile;
-
-// Reusable DataTable component
-const DataTable = ({ title, data, columns, showAll, setShowAll, renderRow }) => (
-  <div className="bg-white p-6 mt-4">
-    <div className="flex justify-between items-center mb-3">
-      <h2 className="font-semibold text-gray-900">{title}:</h2>
-      <button
-        onClick={() => setShowAll(!showAll)}
-        className="text-blue-600 hover:underline text-sm font-medium"
-      >
-        See all
-      </button>
-    </div>
-    <div className="overflow-x-auto">
-      <table className="min-w-full bg-white rounded-lg overflow-hidden">
-        <thead className="bg-gray-50">
-          <tr>
-            {columns.map((col) => (
-              <th
-                key={col}
-                className="px-4 py-3 text-left text-sm font-bold text-gray-700"
-              >
-                {col}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {data.length > 0 ? (
-            (showAll ? data : data.slice(0, 3)).map((row, index) => (
-              <tr
-                key={row.id || index}
-                className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-              >
-                {renderRow(row, index)}
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td
-                colSpan={columns.length}
-                className="px-4 py-3 text-center text-gray-500"
-              >
-                No data found
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  </div>
-);

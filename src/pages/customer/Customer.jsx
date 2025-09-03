@@ -22,13 +22,15 @@ const Customer = () => {
   const navigate = useNavigate();
 
   const [sortOrder, setSortOrder] = useState("asc");
+  const [sortBy, setSortBy] = useState("name");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [paginationData, setPaginationData] = useState({
     totalPages: 1,
     next: false,
   });
 
   // Updated API base URL
-  const API_BASE_URL = "https://dukanse-be-f5w4.onrender.com/api";
+  const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
   // Fetch customer list from API
   const fetchCustomers = async () => {
@@ -49,7 +51,7 @@ const Customer = () => {
 
       // Handle the API response structure
       if (res.data && res.data.success) {
-        const customerArray = res.data.data || res.data.customers || [];
+        const customerArray = res.data.customers || res.data.data || [];
         console.log("Mapped Customer Array:", customerArray);
 
         const mappedCustomers = customerArray.map((customer) => ({
@@ -57,8 +59,8 @@ const Customer = () => {
           customerName:
             customer.customerName ||
             customer.name ||
-            `Customer ${customer.phone || customer.phoneNumber}`,
-          phoneNumber: customer.phone || customer.phoneNumber,
+            `Customer ${customer.phoneNumber || customer.phone}`,
+          phoneNumber: customer.phoneNumber || customer.phone,
           location: customer.location || customer.address || "Not specified",
           totalorders: customer.totalOrders || customer.totalorders || 0,
           coinsCredited:
@@ -68,23 +70,22 @@ const Customer = () => {
           coinsExpired: customer.coinsExpired || customer.coins?.expired || 0,
           status: customer.status || "active",
           Date:
-            customer.Date || customer.createdAt
+            customer.Date ||
+            (customer.createdAt
               ? new Date(customer.createdAt).toLocaleDateString("en-GB")
-              : "N/A",
+              : "N/A"),
         }));
 
         setCustomers(mappedCustomers);
 
-        // Since the API doesn't provide pagination info, calculate it
-        const totalCustomers = mappedCustomers.length;
-        const calculatedTotalPages = Math.max(
-          1,
-          Math.ceil(totalCustomers / limit)
-        );
-        const hasNext = totalCustomers === limit; // Assume there's more data if we got a full page
+        // Use API pagination data if available, otherwise calculate
+        const totalPages =
+          res.data.totalPages ||
+          Math.max(1, Math.ceil(customerArray.length / limit));
+        const hasNext = res.data.next || customerArray.length === limit;
 
         setPaginationData({
-          totalPages: calculatedTotalPages,
+          totalPages,
           next: hasNext,
         });
       } else {
@@ -109,36 +110,105 @@ const Customer = () => {
     fetchCustomers();
   }, [page, search, sortOrder]);
 
-  // --- New Customer Filter (frontend only) ---
-  const filteredCustomers = useMemo(() => {
+  // Helper function to parse DD/MM/YYYY date format
+  const parseDate = (dateStr) => {
+    if (!dateStr || dateStr === "N/A") return null;
+    try {
+      const [day, month, year] = dateStr.split("/");
+      if (!day || !month || !year) return null;
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    } catch (error) {
+      console.error("Error parsing date:", dateStr, error);
+      return null;
+    }
+  };
+
+  // Enhanced filtering and sorting
+  const filteredAndSortedCustomers = useMemo(() => {
+    let filtered = customers;
+
+    // Apply view type filter (new customers)
     if (viewType === "new") {
       const now = new Date();
-      return customers.filter((cust) => {
-        if (!cust.Date || cust.Date === "N/A") return false;
-        try {
-          // Parse the date format "DD/MM/YYYY"
-          const [day, month, year] = cust.Date.split("/");
-          const custDate = new Date(year, month - 1, day);
-          const diffDays = (now - custDate) / (1000 * 60 * 60 * 24);
-          return diffDays <= 7; // last 7 days as "new"
-        } catch (error) {
-          console.error("Error parsing date:", cust.Date);
-          return false;
-        }
+      filtered = customers.filter((cust) => {
+        const custDate = parseDate(cust.Date);
+        if (!custDate) return false;
+        const diffDays = (now - custDate) / (1000 * 60 * 60 * 24);
+        return diffDays <= 7; // last 7 days as "new"
       });
     }
-    return customers;
-  }, [customers, viewType]);
+
+    // Apply status filter
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((cust) => cust.status === statusFilter);
+    }
+
+    // Apply sorting
+    const sorted = [...filtered].sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sortBy) {
+        case "name":
+          aValue = a.customerName.toLowerCase();
+          bValue = b.customerName.toLowerCase();
+          break;
+        case "date":
+          aValue = parseDate(a.Date);
+          bValue = parseDate(b.Date);
+          // Handle null dates
+          if (!aValue && !bValue) return 0;
+          if (!aValue) return 1;
+          if (!bValue) return -1;
+          break;
+        case "orders":
+          aValue = a.totalorders;
+          bValue = b.totalorders;
+          break;
+        case "coins":
+          aValue = a.coinsCredited;
+          bValue = b.coinsCredited;
+          break;
+        default:
+          aValue = a.customerName.toLowerCase();
+          bValue = b.customerName.toLowerCase();
+      }
+
+      if (sortBy === "date") {
+        return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+      } else if (sortBy === "orders" || sortBy === "coins") {
+        return sortOrder === "asc" ? aValue - bValue : bValue - aValue;
+      } else {
+        if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+        return 0;
+      }
+    });
+
+    return sorted;
+  }, [customers, viewType, statusFilter, sortBy, sortOrder]);
+
+  // Handle sort selection
+  const handleSort = (type, order) => {
+    setSortBy(type);
+    setSortOrder(order);
+    setSortVisible(false);
+  };
+
+  // Handle filter selection
+  const handleFilter = (status) => {
+    setStatusFilter(status);
+    setFilterVisible(false);
+  };
 
   // --- Export to Excel ---
   const handleExport = () => {
-    if (!filteredCustomers.length) {
+    if (!filteredAndSortedCustomers.length) {
       alert("No data to export!");
       return;
     }
 
     const worksheet = XLSX.utils.json_to_sheet(
-      filteredCustomers.map((cust) => ({
+      filteredAndSortedCustomers.map((cust) => ({
         "Customer Name": cust.customerName,
         "Mobile No.": cust.phoneNumber,
         Location: cust.location,
@@ -214,31 +284,57 @@ const Customer = () => {
           {sortVisible && (
             <div className="absolute top-12 right-24 bg-white border rounded-md shadow-md p-2 w-36 text-sm z-10">
               <div
-                className="py-1 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setSortOrder("asc");
-                  setSortVisible(false);
-                }}
+                className="py-1 hover:bg-gray-100 cursor-pointer border-b mb-1"
+                onClick={() => handleSort("name", "asc")}
               >
                 Name A - Z
               </div>
               <div
-                className="py-1 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  setSortOrder("desc");
-                  setSortVisible(false);
-                }}
+                className="py-1 hover:bg-gray-100 cursor-pointer border-b mb-1"
+                onClick={() => handleSort("name", "desc")}
               >
                 Name Z - A
               </div>
-              <div className="py-1 text-gray-400">Date</div>
+              <div
+                className="py-1 hover:bg-gray-100 cursor-pointer border-b mb-1"
+                onClick={() => handleSort("date", "desc")}
+              >
+                Date (Newest)
+              </div>
+              <div
+                className="py-1 hover:bg-gray-100 cursor-pointer border-b mb-1"
+                onClick={() => handleSort("date", "asc")}
+              >
+                Date (Oldest)
+              </div>
             </div>
           )}
 
           {filterVisible && (
-            <div className="absolute top-12 right-44 bg-white border rounded-md shadow-md p-1 w-44 text-sm z-10">
-              <div className="p-2 text-gray-500">
-                API does not support filtering
+            <div className="absolute top-12 right-44 bg-white border rounded-md shadow-md p-2 w-44 text-sm z-10">
+              <div
+                className="py-1 hover:bg-gray-100 cursor-pointer border-b mb-1"
+                onClick={() => handleFilter("all")}
+              >
+                All Status
+              </div>
+              <div
+                className="py-1 hover:bg-gray-100 cursor-pointer border-b mb-1"
+                onClick={() => handleFilter("active")}
+              >
+                Active
+              </div>
+              <div
+                className="py-1 hover:bg-gray-100 cursor-pointer border-b mb-1"
+                onClick={() => handleFilter("fraud")}
+              >
+                Fraud
+              </div>
+              <div
+                className="py-1 hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleFilter("inactive")}
+              >
+                Inactive
               </div>
             </div>
           )}
@@ -278,8 +374,8 @@ const Customer = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredCustomers.length > 0 ? (
-                  filteredCustomers.map((cust) => (
+                {filteredAndSortedCustomers.length > 0 ? (
+                  filteredAndSortedCustomers.map((cust) => (
                     <tr
                       key={cust._id}
                       className="border-b hover:bg-gray-100 cursor-pointer h-16"
@@ -370,25 +466,39 @@ const Customer = () => {
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-center items-center mt-4 gap-2 text-sm">
-          <button
-            onClick={() => setPage(page - 1)}
-            disabled={page === 1}
-            className="text-orange-300 disabled:opacity-50"
-          >
-            &#8592;
-          </button>
-          <button className="bg-orange-500 text-white px-3 py-1 rounded-full">
-            {page}
-          </button>
-          <button
-            onClick={() => setPage(page + 1)}
-            disabled={!paginationData.next}
-            className="text-orange-500 disabled:opacity-50"
-          >
-            &#8594;
-          </button>
-        </div>
+        {paginationData?.totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 mt-4">
+            {/* Previous Button */}
+            <button
+              onClick={() => setPage(page - 1)}
+              disabled={page === 1}
+              className={`text-red-500 hover:text-red-700 transition-all ${
+                page === 1 ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              &#8592;
+            </button>
+
+            {/* Current Page */}
+            <button
+              disabled
+              className="px-3 py-1 rounded-md font-bold bg-[#FEBC1D] text-red-500"
+            >
+              {page}
+            </button>
+
+            {/* Next Button */}
+            <button
+              onClick={() => setPage(page + 1)}
+              disabled={!paginationData.next}
+              className={`text-red-500 hover:text-red-700 transition-all ${
+                !paginationData.next ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              &#8594;
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

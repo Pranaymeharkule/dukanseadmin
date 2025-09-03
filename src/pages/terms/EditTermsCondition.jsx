@@ -1,5 +1,4 @@
 // src/pages/settings/EditTermsCondition.jsx
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
@@ -24,30 +23,13 @@ const CalendarIcon = () => (
   </svg>
 );
 
-// SVG icon component for the back arrow
-const BackArrowIcon = () => (
-    <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        className="h-6 w-6" 
-        fill="none" 
-        viewBox="0 0 24 24" 
-        stroke="currentColor"
-    >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-    </svg>
-);
-
-
 export default function EditTermsCondition() {
   const navigate = useNavigate();
   const [term, setTerm] = useState("");
   const [loading, setLoading] = useState(false);
-  
-  // Note: The date is hardcoded to match the image UI. 
-  // No logic for handling date changes is added as per instructions.
   const [effectiveDate, setEffectiveDate] = useState("1st January, 2025");
 
-  // ✅ GET terms on load (No changes to logic)
+  // ✅ GET terms on load
   useEffect(() => {
     async function fetchTerms() {
       try {
@@ -66,7 +48,7 @@ export default function EditTermsCondition() {
     fetchTerms();
   }, []);
 
-  // ✅ PUT to update (No changes to logic)
+  // ✅ PUT to update
   const handleSave = async () => {
     try {
       setLoading(true);
@@ -77,7 +59,7 @@ export default function EditTermsCondition() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ description: term }), // Only sends the description as in original code
+          body: JSON.stringify({ description: term }),
         }
       );
       const result = await response.json();
@@ -97,70 +79,75 @@ export default function EditTermsCondition() {
   return (
     <div className="min-h-screen w-full bg-gray-100 p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header section styled to match the image */}
+        {/* Header */}
         <div className="flex items-center mb-4 bg-white p-4 md:p-5 rounded shadow">
-        <div className="flex items-center gap-2">
-          <button onClick={() => navigate(-1)}>
-            <BsArrowLeftCircle
-              size={25}
-              className="text-gray-700 md:text-black"
-            />
-          </button>
-          <h2 className="text-lg md:text-xl font-semibold">Edit Terms and Condition</h2>
-        </div>
-      </div>
-
-        {/* Main content card */}
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
-          
-          {/* Effective Date Input */}
-          <div className="mb-6">
-            <label htmlFor="effectiveDate" className="block text-sm font-medium text-gray-700 mb-2">
-              Effective Date
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                id="effectiveDate"
-                value={effectiveDate}
-                readOnly // To prevent user input as per the static image
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm bg-white cursor-pointer focus:outline-none"
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate(-1)}>
+              <BsArrowLeftCircle
+                size={25}
+                className="text-gray-700 md:text-black"
               />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <CalendarIcon />
-              </div>
-            </div>
-          </div>
-
-          {/* ReactQuill Editor */}
-          <div className="flex-grow min-h-[450px]">
-            <ReactQuill
-              value={term}
-              onChange={setTerm}
-              className="h-full"
-              modules={EditTermsCondition.modules}
-              formats={EditTermsCondition.formats}
-              style={{ minHeight: "400px" }}
-            />
-          </div>
-
-          {/* Save Button */}
-          <div className="flex justify-center mt-8">
-            <button
-              onClick={handleSave}
-              disabled={loading}
-              className="px-20 py-3 rounded-lg font-semibold text-black bg-yellow-400 hover:bg-yellow-500 transition-colors duration-200 disabled:bg-yellow-200 disabled:cursor-not-allowed"
-            >
-              {loading ? "Saving..." : "Save"}
             </button>
+            <h2 className="text-lg md:text-xl font-semibold">
+              Edit Terms and Condition
+            </h2>
           </div>
         </div>
+
+        {/* Main card */}
+        <div className=" bg-white p-6 rounded-lg shadow-md flex flex-col border border-gray-300">
+  {/* Effective Date */}
+  <div className="mb-6">
+    <label
+      htmlFor="effectiveDate"
+      className="block text-sm font-medium text-gray-700 mb-2"
+    >
+      Effective Date
+    </label>
+    <div className="relative">
+      <input
+        type="text"
+        id="effectiveDate"
+        value={effectiveDate}
+        readOnly
+        className="w-full px-4 py-2.5 border border-gray-300 rounded-md shadow-sm bg-white cursor-pointer focus:outline-none"
+      />
+      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+        <CalendarIcon />
+      </div>
+    </div>
+  </div>
+
+  {/* ReactQuill Editor */}
+  <div className="flex-grow">
+    <ReactQuill
+      value={term}
+      onChange={setTerm}
+      modules={EditTermsCondition.modules}
+      formats={EditTermsCondition.formats}
+      className="rounded-md h-full"
+      style={{ minHeight: "350px" }}
+    />
+  </div>
+
+  {/* Save Button */}
+  <div className="flex justify-center mt-8">
+    <button
+      onClick={handleSave}
+      disabled={loading}
+      className="px-20 py-3 rounded-lg font-semibold text-black bg-yellow-400 hover:bg-yellow-500 transition-colors duration-200 disabled:bg-yellow-200 disabled:cursor-not-allowed"
+    >
+      {loading ? "Saving..." : "Save"}
+    </button>
+  </div>
+</div>
+
       </div>
     </div>
   );
 }
 
-// Quill modules and formats defined outside the component for performance.
+// Quill modules + formats
 EditTermsCondition.modules = {
   toolbar: [
     [{ header: "1" }, { header: "2" }, { font: [] }],
@@ -178,8 +165,18 @@ EditTermsCondition.modules = {
 };
 
 EditTermsCondition.formats = [
-  "header", "font", "size",
-  "bold", "italic", "underline", "strike", "blockquote",
-  "list", "bullet", "indent",
-  "link", "image", "video",
+  "header",
+  "font",
+  "size",
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "blockquote",
+  "list",
+  "bullet",
+  "indent",
+  "link",
+  "image",
+  "video",
 ];

@@ -158,7 +158,7 @@ function ViewShop() {
               <div className="flex justify-center gap-4 mt-8 w-full">
                 <button
                   className="bg-white border border-red-500 text-red-500 font-semibold px-6 py-2 rounded-md hover:bg-red-50"
-                  onClick={() => alert("Suspend API not yet integrated")}
+                  onClick={() => navigate(-1)} // ✅ Navigate back instead of API
                 >
                   Suspend
                 </button>

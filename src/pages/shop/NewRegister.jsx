@@ -5,84 +5,86 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BsArrowLeftCircle } from "react-icons/bs";
 
-const NewRegister = () => {
+/* ---------- Helpers ---------- */
+const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
+
+const formatDate = (val) => {
+  if (!val) return "";
+  const d = new Date(val);
+  if (Number.isNaN(d.getTime())) return String(val);
+  return d.toLocaleDateString("en-IN");
+};
+
+/* ---------- Status Badge ---------- */
+const StatusBadge = ({ status }) => {
+  const baseClasses = "px-2 py-1 rounded text-sm font-medium";
+  const statusClasses = {
+    pending: "text-yellow-500",
+    active: "text-green-500",
+    approved: "text-green-500",
+    rejected: "text-red-500",
+  };
+  return (
+    <span
+      className={`${baseClasses} ${
+        statusClasses[String(status).toLowerCase()] || "text-gray-500"
+      }`}
+    >
+      {status}
+    </span>
+  );
+};
+
+/* ---------- Main Component ---------- */
+export default function NewRegister() {
   const navigate = useNavigate();
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [deletingId, setDeletingId] = useState(null);
-  const [approvingId, setApprovingId] = useState(null);
+  const [error, setError] = useState(null);
 
-  const baseURL = process.env.REACT_APP_BACKEND_API_BASEURL;
-
-  useEffect(() => {
-    const fetchShops = async () => {
-      try {
-        const response = await axios.get(
-          `${baseURL}/shopApproval/getNewRegisterShops?timestamp=${Date.now()}`,
-          { headers: { "Cache-Control": "no-cache" } }
-        );
-
-        setShops(
-          Array.isArray(response.data.newRegisterdShops)
-            ? response.data.newRegisterdShops
-            : []
-        );
-      } catch (err) {
-        console.error("Error fetching shops:", err);
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchShops();
-  }, [baseURL]);
-
-  // ✅ Approve Shop
-  const handleApprove = async (shopId) => {
-    if (!window.confirm("Do you want to approve this shop?")) return;
+  const fetchShops = async () => {
     try {
-      setApprovingId(shopId);
-      await axios.put(`${baseURL}/shopApproval/approve-shop/${shopId}`, {});
-      setShops((prev) =>
-        prev.map((shop) =>
-          shop._id === shopId ? { ...shop, shopStatus: "Approved" } : shop
-        )
+      setLoading(true);
+      const res = await axios.get(
+        `${API_BASE_URL}/shopApproval/getNewRegisterShops`,
+        { params: { t: Date.now() } }
       );
-      alert("Shop approved successfully!");
+      setShops(
+        Array.isArray(res.data?.newRegisterdShops)
+          ? res.data.newRegisterdShops
+          : []
+      );
+      setError(null);
     } catch (err) {
-      console.error("Failed to approve shop:", err);
-      alert(err.response?.data?.message || "Error approving shop");
+      setError(err);
+      console.error("Error fetching shops:", err.response?.data || err);
     } finally {
-      setApprovingId(null);
+      setLoading(false);
     }
   };
 
-  // ✅ Delete Shop
-  const handleDelete = async (shopId) => {
-    if (window.confirm("Are you sure you want to delete this registration?")) {
-      try {
-        setDeletingId(shopId);
-        await axios.delete(
-          `${baseURL}/shopApproval/deleteApprovedShop/${shopId}`
-        );
+  useEffect(() => {
+    fetchShops();
+  }, []);
 
-        setShops((prev) => prev.filter((shop) => shop._id !== shopId));
-        alert("Shop registration deleted successfully!");
-      } catch (err) {
-        console.error("Failed to delete shop:", err);
-        alert(err.response?.data?.message || "Error deleting shop");
-      } finally {
-        setDeletingId(null);
-      }
+  const handleDelete = async (shop) => {
+    if (!window.confirm("Delete this registration?")) return;
+    try {
+      await axios.delete(
+        `${API_BASE_URL}/shopApproval/deleteApprovedShop/${shop._id}`
+      );
+      setShops((prev) => prev.filter((s) => s._id !== shop._id));
+    } catch (err) {
+      console.error("Error deleting shop:", err.response?.data || err);
     }
   };
 
   if (loading) return <div className="p-4 text-center">Loading...</div>;
   if (error)
     return (
-      <div className="p-4 text-center text-red-500">Something went wrong</div>
+      <div className="p-4 text-center text-red-500">
+        Something went wrong. Check console.
+      </div>
     );
 
   return (
@@ -100,7 +102,7 @@ const NewRegister = () => {
         </div>
       </div>
 
-      {/* Table Section */}
+      {/* Table */}
       <div className="bg-white p-4 md:p-6 rounded-md shadow">
         <table className="w-full table-auto text-sm md:text-base">
           <thead className="bg-[#FEBC1D] text-black">
@@ -135,47 +137,24 @@ const NewRegister = () => {
                   <td className="px-4 py-3 border-b">{shop.ownerName}</td>
                   <td className="px-4 py-3 border-b">{shop.phoneNumber}</td>
 
-                  {/* ✅ Status column with Approve button */}
-                  {/* Status column with green UI */}
-<td className="px-4 py-3 border-b text-green-600 font-medium">
-  {shop.shopStatus === "Approved" ? (
-    "Approved"
-  ) : (
-    <button
-      disabled={approvingId === shop._id}
-      onClick={() => handleApprove(shop._id)}
-      className="hover:underline"
-    >
-      {approvingId === shop._id ? "Approving..." : "Approve"}
-    </button>
-  )}
-</td>
-
+                  {/* ✅ Status only displays, no API call */}
+                  <td className="px-4 py-3 border-b">
+                    <StatusBadge status={shop.shopStatus} />
+                  </td>
 
                   <td className="px-4 py-3 border-b">
-                    {new Date(shop.createdAt || shop.date).toLocaleDateString(
-                      "en-IN"
-                    )}
+                    {formatDate(shop.createdAt || shop.date)}
                   </td>
                   <td className="px-4 py-3 border-b">
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-3 items-center">
                       <FiEye
                         className="cursor-pointer text-lg text-gray-700 hover:text-black"
                         onClick={() =>
                           navigate(`/shop/registere/info/${shop._id}`)
                         }
                       />
-                      <button
-                        disabled={deletingId === shop._id}
-                        onClick={() => handleDelete(shop._id)}
-                      >
-                        <MdDelete
-                          className={`cursor-pointer text-lg ${
-                            deletingId === shop._id
-                              ? "text-gray-400"
-                              : "text-red-500 hover:text-red-700"
-                          }`}
-                        />
+                      <button onClick={() => handleDelete(shop)}>
+                        <MdDelete className="cursor-pointer text-lg text-red-500 hover:text-red-700" />
                       </button>
                     </div>
                   </td>
@@ -187,6 +166,4 @@ const NewRegister = () => {
       </div>
     </div>
   );
-};
-
-export default NewRegister;
+}

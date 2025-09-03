@@ -1,52 +1,86 @@
 import React, { useState, useEffect } from "react";
-import { FaSortAmountDown, FaFilter, FaEye, FaWhatsapp } from "react-icons/fa";
+import { FaEye, FaWhatsapp } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { FaSortAmountDown, FaFilter } from "react-icons/fa";
 
 export default function Shop() {
   const [shops, setShops] = useState([]);
   const [filteredShops, setFilteredShops] = useState([]);
   const [dateFilter, setDateFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-
   const [showFilter, setShowFilter] = useState(false);
-  const [showSort, setShowSort] = useState(false);
+const [showSort, setShowSort] = useState(false);
+
+
   const [sortOption, setSortOption] = useState("Name A - Z");
 
-  const limit = 8;
+  const limit = 8; // ✅ one page shows 8 shops
   const navigate = useNavigate();
-  const baseURL = process.env.REACT_APP_BACKEND_API_BASEURL;
+  const API_URL =
+    "https://dukanse-be-f5w4.onrender.com/api/shopApproval/getAllApprovedShops?limit=50";
+
+  // ✅ Helper to parse DD/MM/YYYY correctly
+  const parseDate = (dateStr) => {
+    if (!dateStr) return null;
+    if (dateStr.includes("/")) {
+      const [day, month, year] = dateStr.split("/");
+      return new Date(`${year}-${month}-${day}`); // yyyy-MM-dd
+    }
+    return new Date(dateStr);
+  };
 
   useEffect(() => {
     fetchShops();
   }, []);
 
   useEffect(() => {
+    applyFiltersAndSorting();
+  }, [shops, statusFilter, dateFilter, sortOption]);
+
+  const fetchShops = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(API_URL, {
+        headers: { "Cache-Control": "no-cache" },
+      });
+
+      if (response.data?.success) {
+        setShops(response.data.allApprovedShops || []);
+      }
+    } catch (err) {
+      console.error("Error fetching shops:", err);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applyFiltersAndSorting = () => {
     let list = [...shops];
 
     // ✅ Status filter
     if (statusFilter === "Active") {
       list = list.filter((s) => s.status?.toLowerCase() === "active");
-    } else if (statusFilter === "Suspended") {
-      list = list.filter((s) => s.status?.toLowerCase() === "suspended");
+    } else if (statusFilter === "Pending") {
+      list = list.filter((s) => s.status?.toLowerCase() === "pending");
     }
 
     // ✅ Date filter
     list = list.filter((s) => {
-      const shopDate = new Date(s.OnBoardingdate || s.createdAt);
-      if (isNaN(shopDate)) return false; // safeguard
+      const shopDate = parseDate(s.OnBoardingdate) || parseDate(s.createdAt);
+      if (isNaN(shopDate)) return false;
 
-      shopDate.setHours(0, 0, 0, 0); // normalize
+      shopDate.setHours(0, 0, 0, 0);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
       if (dateFilter === "This Week") {
-        // Last 7 days
         const sevenDaysAgo = new Date(today);
         sevenDaysAgo.setDate(today.getDate() - 7);
         return shopDate >= sevenDaysAgo && shopDate <= today;
@@ -62,37 +96,32 @@ export default function Shop() {
         return shopDate >= startOfYear && shopDate <= today;
       }
 
-      return true; // "All"
+      return true;
     });
 
-    applySort(sortOption, list);
-  }, [shops, statusFilter, dateFilter, sortOption]);
-
-  const fetchShops = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(
-        `${baseURL}/shopApproval/getAllApprovedShops?ts=${new Date().getTime()}`,
-        { headers: { "Cache-Control": "no-cache" } }
+    // ✅ Sort
+    if (sortOption === "Name A - Z") {
+      list.sort((a, b) => a.shopName.localeCompare(b.shopName));
+    } else if (sortOption === "Name Z - A") {
+      list.sort((a, b) => b.shopName.localeCompare(a.shopName));
+    } else if (sortOption === "Date") {
+      list.sort(
+        (a, b) =>
+          (parseDate(b.OnBoardingdate) || parseDate(b.createdAt)) -
+          (parseDate(a.OnBoardingdate) || parseDate(a.createdAt))
       );
-
-      if (response.data?.success) {
-        setShops(response.data.allApprovedShops || []);
-      }
-    } catch (err) {
-      console.error("Error fetching shops:", err);
-      setError(true);
-    } finally {
-      setLoading(false);
     }
+
+    setFilteredShops(list);
+    setCurrentPage(1); // reset to page 1 after filter/sort
   };
+
   const exportToExcel = () => {
     if (!shops || shops.length === 0) {
       alert("No shop data to export.");
       return;
     }
 
-    // Format data for Excel
     const worksheetData = shops.map((s, index) => ({
       "S.No": index + 1,
       "Store Name": s.shopName,
@@ -102,16 +131,15 @@ export default function Shop() {
       Status: s.status,
       "Referral Conversion %": s.referralConversion ?? "—",
       "Commission Earned": s.commissionEarned ?? "—",
-      Date: s.createdAt
-        ? new Date(s.createdAt).toLocaleDateString("en-IN")
-        : "—",
+      Date:
+        s.OnBoardingdate ||
+        (s.createdAt ? new Date(s.createdAt).toLocaleDateString("en-IN") : "—"),
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Approved Shops");
 
-    // Export to file
     const excelBuffer = XLSX.write(workbook, {
       bookType: "xlsx",
       type: "array",
@@ -123,23 +151,10 @@ export default function Shop() {
     saveAs(data, "Approved_Shops.xlsx");
   };
 
-  const applySort = (option, list = filteredShops) => {
-    let sorted = [...list];
-    if (option === "Name A - Z") {
-      sorted.sort((a, b) => a.shopName.localeCompare(b.shopName));
-    } else if (option === "Name Z - A") {
-      sorted.sort((a, b) => b.shopName.localeCompare(a.shopName));
-    } else if (option === "Date") {
-      sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    }
-    setFilteredShops(sorted);
-    setPage(1);
-  };
-
   const approveShop = async (shopId) => {
     try {
       const res = await axios.put(
-        `${baseURL}/shopApproval/approve-shop/${shopId}`
+        `https://dukanse-be-f5w4.onrender.com/api/shopApproval/approve-shop/${shopId}`
       );
       if (res.data?.success) {
         setShops((prev) =>
@@ -153,11 +168,6 @@ export default function Shop() {
     }
   };
 
-  const totalPages = Math.ceil(filteredShops.length / limit);
-  const currentShops = filteredShops.slice((page - 1) * limit, page * limit);
-
-  const asDate = (d) =>
-    d ? new Date(d).toLocaleDateString("en-IN") : "--/--/----";
   const asPercent = (v) => (v || v === 0 ? `${v}%` : "—");
   const asRupees = (v) => (v || v === 0 ? `₹ ${v}` : "—");
 
@@ -168,6 +178,14 @@ export default function Shop() {
         Failed to fetch approved shops.
       </div>
     );
+
+  // ✅ Pagination (client-side)
+  const totalPages = Math.ceil(filteredShops.length / limit);
+  const currentShops = filteredShops.slice(
+    (currentPage - 1) * limit,
+    currentPage * limit
+  );
+  
 
   return (
     <div className="p-4 bg-gray-100">
@@ -182,7 +200,7 @@ export default function Shop() {
                 onClick={() => setDateFilter(df)}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium ${
                   dateFilter === df
-                    ? "bg-[#FEBC1D] text-black"
+                    ? "bg-[#FEBC1D] text-"
                     : "border border-red-500 text-red-500 hover:bg-red-50"
                 }`}
               >
@@ -263,15 +281,15 @@ export default function Shop() {
               New Shop Registered
             </button>
             <button
-              onClick={exportToExcel}
-              className="px-4 py-1.5 rounded-md border border-red-500 text-red-500 text-sm font-medium flex items-center gap-2 hover:bg-red-50"
-            >
-              <span>⬇</span> Export to Excel
-            </button>
+  onClick={exportToExcel}
+  className="px-4 py-1.5 rounded-md border border-red-500 text-red-500 text-sm font-medium flex items-center gap-2 hover:bg-red-50"
+>
+  <span>⬇</span> Export to Excel
+</button>
+
           </div>
         </div>
       </div>
-
       {/* Table */}
       <div className="overflow-x-auto">
         <div className="bg-white rounded-md shadow">
@@ -283,11 +301,8 @@ export default function Shop() {
                   <th className="px-6 py-3 text-left">Owner</th>
                   <th className="px-6 py-3 text-left">Number</th>
                   <th className="px-6 py-3 text-left">Email</th>
-                  <th className="px-6 py-3 text-left ">Orders Fulfilled</th>
-                  <th className="px-6 py-3 text-left ">Avg. Order Time</th>
-                  <th className="px-6 py-3 text-left ">
-                    % Referral Conversion
-                  </th>
+                  <th className="px-6 py-3 text-left">Orders Fulfilled</th>
+                  <th className="px-6 py-3 text-left">% Referral Conversion</th>
                   <th className="px-6 py-3 text-left">Commission Earned</th>
                   <th className="px-6 py-3 text-left">Status</th>
                   <th className="px-6 py-3 text-left">Date</th>
@@ -297,7 +312,7 @@ export default function Shop() {
               <tbody className="text-gray-700">
                 {currentShops.length === 0 ? (
                   <tr>
-                    <td colSpan="11" className="p-6 text-center text-gray-500">
+                    <td colSpan="10" className="p-6 text-center text-gray-500">
                       No approved shops found.
                     </td>
                   </tr>
@@ -307,18 +322,15 @@ export default function Shop() {
                       shop.status === "active"
                         ? "text-green-600"
                         : "text-red-500";
-
                     return (
-                      <tr
-                        key={shop._id}
-                        className="border-b hover:bg-gray-50 transition"
-                      >
+                      <tr key={shop._id} className="border-b hover:bg-gray-50">
                         <td className="px-6 py-4">{shop.shopName}</td>
                         <td className="px-6 py-4">{shop.ownerName}</td>
                         <td className="px-6 py-4">{shop.phoneNumber || "—"}</td>
                         <td className="px-6 py-4">{shop.email || "—"}</td>
-                        <td className="px-6 py-4 text-center">—</td>
-                        <td className="px-6 py-4 text-center">—</td>
+                        <td className="px-6 py-4 text-center">
+                          {shop.totalOrdersFulfilled ?? "—"}
+                        </td>
                         <td className="px-6 py-4 text-center">
                           {asPercent(shop.referralConversion)}
                         </td>
@@ -330,16 +342,15 @@ export default function Shop() {
                           onClick={() =>
                             shop.status !== "active" && approveShop(shop._id)
                           }
-                          title={
-                            shop.status !== "active"
-                              ? "Click to Approve"
-                              : "Already Approved"
-                          }
                         >
                           {shop.status}
                         </td>
                         <td className="px-6 py-4 text-center">
-                          {shop.OnBoardingdate || asDate(shop.createdAt)}
+                          {shop.OnBoardingdate
+                            ? shop.OnBoardingdate
+                            : new Date(shop.createdAt).toLocaleDateString(
+                                "en-IN"
+                              )}
                         </td>
                         <td className="px-6 py-4 text-center">
                           <div className="flex items-center justify-center gap-3">
@@ -374,6 +385,41 @@ export default function Shop() {
           </div>
         </div>
       </div>
+
+      {/* ✅ Pagination */}
+      {totalPages > 1 && (
+        <div className="flex flex-wrap justify-center items-center mt-4 gap-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-2 py-1 text-red-500 hover:text-red-700 disabled:opacity-50"
+          >
+            &lt;
+          </button>
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index + 1}
+              onClick={() => setCurrentPage(index + 1)}
+              className={`px-3 py-1 rounded ${
+                currentPage === index + 1
+                  ? "bg-[#FEBC1D] text-black font-semibold"
+                  : "bg-white text-red-500 hover:text-red-700"
+              }`}
+            >
+              {index + 1}
+            </button>
+          ))}
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className="px-2 py-1 text-red-500 hover:text-red-700 disabled:opacity-50"
+          >
+            &gt;
+          </button>
+        </div>
+      )}
     </div>
   );
 }

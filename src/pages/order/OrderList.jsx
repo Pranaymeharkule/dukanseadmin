@@ -32,16 +32,12 @@ const OrderList = () => {
   const [gullakFilter, setGullakFilter] = useState("all");
   const [deliveryTypeFilter, setDeliveryTypeFilter] = useState("all");
   const [orderId, setOrderId] = useState("");
+  const [shops, setShops] = useState([]);
+  const [selectedShop, setSelectedShop] = useState("");
+  const [shopFilter, setShopFilter] = useState("");
+  const [shopSearch, setShopSearch] = useState("");
 
-  const shops = [
-    "Shop 1",
-    "Shop 2",
-    "Super Store",
-    "Mega Mart",
-    "Devendra Kirana Store",
-    "Fresh Mart",
-  ];
-  const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL; 
+  const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
   const exportToExcel = () => {
     if (orders.length === 0) return;
@@ -83,44 +79,46 @@ const OrderList = () => {
 
       if (searchTerm.trim()) params.search = searchTerm.trim();
 
-      // Apply order status filters only when delivery type is "all"
-      if (deliveryTypeFilter === "all") {
-        if (viewType !== "all") {
-          params.orderStatus = viewType.toUpperCase();
-        } else if (statusFilter !== "all") {
-          params.orderStatus = statusFilter.toUpperCase();
-        }
+      if (deliveryTypeFilter === "all" && viewType !== "all") {
+        params.orderStatus = viewType.toUpperCase();
       }
-
-      // Apply delivery type filter - this might be causing the API to return empty results
-      // Let's remove this from API params and handle it client-side only
-      // if (deliveryTypeFilter !== "all") {
-      //   params.deliveryType =
-      //     deliveryTypeFilter === "pickup" ? "SELF_PICKUP" : "DELIVERY";
-      // }
 
       if (paymentFilter !== "all") params.paymentStatus = paymentFilter;
 
       if (gullakFilter === "high") params.minGullak = 10;
       else if (gullakFilter === "low") params.maxGullak = 5;
       else if (gullakFilter === "none") params.gullakUsed = 0;
-
-      if (fromDate) {
-        params.fromDate = new Date(fromDate + "T00:00:00.000Z").toISOString();
-      }
-      if (toDate) {
-        params.toDate = new Date(toDate + "T23:59:59.999Z").toISOString();
-      }
-
-      const res = await axios.get(
-        `${API_BASE_URL}/adminOrder/getAllOrders`,
-        { params, headers: { "Cache-Control": "no-cache" } }
-      );
+      const res = await axios.get(`${API_BASE_URL}/adminOrder/getAllOrders`, {
+        params,
+        headers: { "Cache-Control": "no-cache" },
+      });
 
       if (res.data.success) {
         let filteredOrders = res.data.AllOrders || [];
 
-        // Apply client-side filters
+        // Collect unique shop names for dropdown
+        const uniqueShops = [
+          ...new Set(
+            filteredOrders.map((o) => o.shopId?.shopName).filter(Boolean)
+          ),
+        ];
+        setShops(uniqueShops);
+
+        // 🔹 Shop filter (dropdown)
+        if (selectedShop) {
+          filteredOrders = filteredOrders.filter(
+            (order) => order.shopId?.shopName === selectedShop
+          );
+        }
+
+        // 🔹 Shop filter (extra state)
+        if (shopFilter) {
+          filteredOrders = filteredOrders.filter(
+            (order) => order.shopId?.shopName === shopFilter
+          );
+        }
+
+        // 🔹 Search shop name
         if (searchTerm.trim()) {
           filteredOrders = filteredOrders.filter((order) =>
             order.shopId?.shopName
@@ -129,31 +127,49 @@ const OrderList = () => {
           );
         }
 
-        // Client-side delivery type filter
-        if (deliveryTypeFilter !== "all") {
-          const expected =
-            deliveryTypeFilter === "pickup" ? "SELF_PICKUP" : "DELIVERY";
-          filteredOrders = filteredOrders.filter(
-            (order) => order.deliveryType === expected
+        // 🔹 Order ID filter
+        if (orderId.trim()) {
+          filteredOrders = filteredOrders.filter((order) =>
+            order.orderNumber.toLowerCase().includes(orderId.toLowerCase())
           );
         }
 
-        // Apply status filter only if delivery type filter is not active
-        if (deliveryTypeFilter === "all") {
-          const activeStatus = viewType !== "all" ? viewType : statusFilter;
-          if (activeStatus !== "all") {
-            filteredOrders = filteredOrders.filter(
-              (order) => order.orderStatus === activeStatus.toUpperCase()
-            );
-          }
+        // 🔹 Strict Date range filter (client-side check)
+        if (fromDate) {
+          const from = new Date(fromDate + "T00:00:00");
+          filteredOrders = filteredOrders.filter(
+            (order) => new Date(order.orderDate) >= from
+          );
+        }
+        if (toDate) {
+          const to = new Date(toDate + "T23:59:59");
+          filteredOrders = filteredOrders.filter(
+            (order) => new Date(order.orderDate) <= to
+          );
         }
 
+        // 🔹 Status filter
+        if (viewType !== "all") {
+          filteredOrders = filteredOrders.filter(
+            (order) => order.orderStatus === viewType.toUpperCase()
+          );
+        }
+
+        // 🔹 Delivery type filter
+        if (deliveryTypeFilter !== "all") {
+          filteredOrders = filteredOrders.filter(
+            (order) => order.deliveryType === deliveryTypeFilter
+          );
+        }
+
+        // 🔹 Payment filter
         if (paymentFilter !== "all") {
           filteredOrders = filteredOrders.filter(
             (order) => order.paymentStatus === paymentFilter
           );
         }
 
+        // 🔹 Gullak filter
         if (gullakFilter === "high") {
           filteredOrders = filteredOrders.filter((o) => o.gullakUsed >= 10);
         } else if (gullakFilter === "low") {
@@ -164,6 +180,7 @@ const OrderList = () => {
           filteredOrders = filteredOrders.filter((o) => o.gullakUsed === 0);
         }
 
+        // 🔹 Map to table format
         const mappedOrders = filteredOrders.map((order, index) => ({
           Sr: index + 1 + (page - 1) * 10,
           id: order.orderNumber,
@@ -183,8 +200,6 @@ const OrderList = () => {
         }));
 
         setOrders(mappedOrders);
-        // Note: Since we're filtering client-side, the totalPages from API might not be accurate
-        // For now, we'll use it as is, but ideally pagination should be handled server-side
         setTotalPages(res.data.totalPages || 1);
       } else {
         setOrders([]);
@@ -219,8 +234,8 @@ const OrderList = () => {
     viewType,
     searchTerm,
     page,
-    fromDate,
-    toDate,
+    selectedShop,
+    orderId,
     sortOrder,
     sortBy,
     statusFilter,
@@ -246,6 +261,10 @@ const OrderList = () => {
     setStatusFilter("all");
     setPaymentFilter("all");
     setGullakFilter("all");
+    setShopFilter("");
+    setShopSearch("");
+    setSelectedShop("");
+    setOrderId("");
     setPage(1);
     setError("");
   };
@@ -263,7 +282,7 @@ const OrderList = () => {
   };
 
   const handleDeliveryTypeFilter = (type) => {
-    setDeliveryTypeFilter(type);
+    setDeliveryTypeFilter(type); // SELF_PICKUP or HOME_DELIVERY
     setViewType("all");
     setFilterVisible(false);
     setPage(1);
@@ -272,14 +291,15 @@ const OrderList = () => {
 
   const handleTabClick = (type) => {
     setViewType(type);
-    setDeliveryTypeFilter("all");
     setStatusFilter("all");
     setPage(1);
     setError("");
   };
 
   const handleShopSelect = (shop) => {
-    setSearchTerm(shop);
+    setShopFilter(shop);
+    setSelectedShop(shop);
+    setShopSearch(shop);
     setShowDropdown(false);
     setPage(1);
     setError("");
@@ -289,19 +309,23 @@ const OrderList = () => {
     <div className="p-0.5 bg-gray-100 rounded-md overflow-hidden">
       {/* Filter Buttons & Sort */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4 bg-white p-4">
-        <div className="flex flex-wrap gap-2">
-          {["all", "DELIVERED", "CANCELLED", "PENDING"].map((type) => (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {["all", "DELIVERED", "DECLINED", "PENDING"].map((type) => (
             <button
               key={type}
-              className={`px-4 py-2 rounded-full text-sm capitalize ${
+              className={`px-4 py-2 rounded-full text-sm capitalize transition-colors ${
                 viewType === type
                   ? "bg-yellow-400 text-red-600"
-                  : "border border-red-600 text-red-600"
+                  : "border border-red-600 text-red-600 hover:bg-red-50"
               }`}
               onClick={() => handleTabClick(type)}
             >
               {type === "all"
                 ? "All"
+                : type === "DECLINED"
+                ? "Declined"
+                : type === "PENDING"
+                ? "Pending"
                 : type.charAt(0) + type.slice(1).toLowerCase()}
             </button>
           ))}
@@ -334,13 +358,13 @@ const OrderList = () => {
               <div className="flex flex-col gap-2 text-sm text-gray-800">
                 <button
                   className="text-left hover:underline"
-                  onClick={() => handleDeliveryTypeFilter("pickup")}
+                  onClick={() => handleDeliveryTypeFilter("SELF_PICKUP")}
                 >
                   Pickup
                 </button>
                 <button
                   className="text-left hover:underline"
-                  onClick={() => handleDeliveryTypeFilter("delivery")}
+                  onClick={() => handleDeliveryTypeFilter("HOME_DELIVERY")}
                 >
                   Delivery
                 </button>
@@ -360,8 +384,8 @@ const OrderList = () => {
             <input
               type="text"
               placeholder="Search for shop"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={shopSearch} // ✅ use shopSearch
+              onChange={(e) => setShopSearch(e.target.value)}
               className="w-full rounded-md py-2 pl-10 pr-10 text-sm border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
             <FiSearch className="absolute left-3 top-3 text-gray-400" />
@@ -374,7 +398,7 @@ const OrderList = () => {
               <ul className="absolute z-10 bg-white border border-gray-300 w-full mt-1 rounded-md max-h-40 overflow-y-auto text-sm shadow-lg">
                 {shops
                   .filter((shop) =>
-                    shop.toLowerCase().includes(searchTerm.toLowerCase())
+                    shop.toLowerCase().includes(shopSearch.toLowerCase())
                   )
                   .map((shop, index) => (
                     <li
@@ -386,7 +410,7 @@ const OrderList = () => {
                     </li>
                   ))}
                 {shops.filter((shop) =>
-                  shop.toLowerCase().includes(searchTerm.toLowerCase())
+                  shop.toLowerCase().includes(shopSearch.toLowerCase())
                 ).length === 0 && (
                   <li className="px-4 py-2 text-gray-500">No shops found</li>
                 )}
@@ -470,26 +494,7 @@ const OrderList = () => {
           )}
         </div>
       )}
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4 mx-2">
-          <p className="text-sm">{error}</p>
-          {(searchTerm ||
-            fromDate ||
-            toDate ||
-            viewType !== "all" ||
-            deliveryTypeFilter !== "all" ||
-            paymentFilter !== "all" ||
-            gullakFilter !== "all") && (
-            <button
-              onClick={clearFilters}
-              className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
-            >
-              Clear all filters and show all orders
-            </button>
-          )}
-        </div>
-      )}
+
       {/* Orders Table */}
       <div className="bg-white p-2 mt-4">
         <div className="overflow-x-auto scrollbar-hidden">

@@ -32,14 +32,6 @@ const TermsContent = ({ isLoading, term, onEdit }) => {
         dangerouslySetInnerHTML={{ __html: term.description }}
       />
       {/* Centered Edit Button */}
-      <div className="text-center mt-10">
-        <button
-          onClick={onEdit}
-          className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold text-sm px-12 py-3 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-60"
-        >
-          Edit
-        </button>
-      </div>
     </>
   );
 };
@@ -98,19 +90,31 @@ export default function TermsCondition() {
   return (
     // Main container with a light gray background and padding
     <div className="min-h-screen w-full bg-gray-100 p-4 md:p-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header section styled to match the image */}
-        <div className="flex items-center mb-4 bg-white p-4 md:p-5 rounded shadow">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg md:text-xl font-semibold">
-              Terms and Condition
-            </h2>
-          </div>
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center mb-4 bg-white p-4 rounded shadow">
+          <h2 className="text-lg md:text-xl font-semibold">
+            Terms & Conditions
+          </h2>
         </div>
 
-        {/* Content Section - Renders the presentational component */}
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col">
-          <TermsContent isLoading={isLoading} term={term} onEdit={handleEdit} />
+        {/* Content */}
+        <div className="bg-white rounded-lg shadow-md flex flex-col h-[80vh]">
+          {/* Scrollable text content */}
+          <div className="p-6 overflow-y-auto flex-1 text-justify break-words">
+            <TermsContent isLoading={isLoading} term={term} />
+          </div>
+
+          {/* Single Button fixed at bottom */}
+          <div className="p-4 flex justify-center ">
+          <button
+  onClick={handleEdit}
+  className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold text-sm px-12 py-3 rounded-lg transition duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-60"
+>
+  Edit
+</button>
+
+          </div>
         </div>
       </div>
     </div>

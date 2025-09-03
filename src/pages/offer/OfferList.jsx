@@ -308,7 +308,7 @@ export default function OffersTable() {
                       {item.discountRate
                         ? `${item.discountRate}% off`
                         : item.discountAmount
-                        ? `₹${item.discountAmount} off`
+                        ? `₹ ${item.discountAmount} off`
                         : "N/A"}
                     </td>
                     <td className="py-3 px-4">{item.offerText || "N/A"}</td>

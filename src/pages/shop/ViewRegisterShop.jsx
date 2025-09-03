@@ -1,3 +1,4 @@
+// src/pages/Shop/ViewRegisterShop.jsx
 import React, { useState } from "react";
 import { BsArrowLeftCircle } from "react-icons/bs";
 import { useNavigate, useParams } from "react-router-dom";
@@ -6,11 +7,7 @@ import gstImg from "../../assets/gst.png";
 import shopImg from "../../assets/shop.png";
 import bankImg from "../../assets/passbook.png";
 import axios from "axios";
-import {
-  useGetNewRegisteredShopsQuery,
-  useDeleteNewShopMutation,
-  useGetAllApprovedShopsQuery,
-} from "../../redux/apis/shopApi";
+import { useGetNewRegisteredShopsQuery } from "../../redux/apis/shopApi";
 
 function ViewRegisterShop() {
   const navigate = useNavigate();
@@ -19,49 +16,58 @@ function ViewRegisterShop() {
   const { data: shops, isLoading, isError } = useGetNewRegisteredShopsQuery();
   const shop = shops?.find((s) => s._id === shopId);
 
-  const [rejectShop, { isLoading: isRejecting }] = useDeleteNewShopMutation();
-  const { refetch: refetchApprovedShops } = useGetAllApprovedShopsQuery(
-    { page: 1, limit: 10, search: "" },
-    { skip: true }
-  );
-
   const [isApproving, setIsApproving] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
-  // Approve Shop API call
+  // ✅ Approve Shop API call
   const handleApprove = async () => {
     if (window.confirm("Approve this shop?")) {
       try {
         setIsApproving(true);
-  
-        // Call GET API instead of POST
-        const response = await axios.get(
-          `https://dukanse-be-f5w4.onrender.com/api/shopApproval/getApprovedShopById/${shopId}`
+
+        const response = await axios.put(
+          `https://dukanse-be-f5w4.onrender.com/api/shopApproval/approve-shop/${shopId}`,
+          { shopStatus: "active" },
+          { headers: { "Content-Type": "application/json" } }
         );
-  
-        console.log(response.data); // optional: check API response
-  
-        await refetchApprovedShops(); // refresh approved shops if needed
-        alert("Shop approved successfully!");
-        navigate("/shop");
+
+        console.log("✅ Approval success:", response.data);
+
+        // ✅ Show success popup
+        setSuccessMessage("Your shop has been successfully registered with Dukaanसे");
+        setShowSuccess(true);
+
+        // Auto close modal after 2.5 sec and go back
+        setTimeout(() => {
+          setShowSuccess(false);
+          navigate(-1);
+        }, 2500);
       } catch (err) {
-        alert(err.response?.data?.message || "Approval failed");
+        console.error("❌ Approval API error:", err);
+        alert(err.response?.data?.message || err.message || "Approval failed");
       } finally {
         setIsApproving(false);
       }
     }
   };
-  
 
-  // Reject Shop API call
+  // ❌ Reject Shop (No API – just success popup)
   const handleReject = async () => {
-    if (window.confirm("Reject and delete this shop?")) {
-      try {
-        await rejectShop(shopId).unwrap();
-        alert("Shop rejected successfully!");
-        navigate("/shop/registere");
-      } catch (err) {
-        alert(err.data?.message || "Rejection failed");
-      }
+    if (window.confirm("Reject this shop?")) {
+      setIsRejecting(true);
+
+      // ✅ Show rejection popup (same style as approval)
+      setSuccessMessage("This shop has been successfully rejected.");
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        setShowSuccess(false);
+        navigate(-1);
+      }, 2500);
+
+      setIsRejecting(false);
     }
   };
 
@@ -159,6 +165,34 @@ function ViewRegisterShop() {
           </div>
         </div>
       </div>
+
+      {/* ✅ Success Popup */}
+      {showSuccess && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 flex items-center justify-center rounded-full bg-green-100">
+                <svg
+                  className="w-10 h-10 text-green-500"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800">
+              {successMessage}
+            </h3>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
