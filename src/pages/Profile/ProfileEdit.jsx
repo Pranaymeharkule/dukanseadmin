@@ -9,7 +9,7 @@ const api = axios.create({
   baseURL: "https://dukanse-be-f5w4.onrender.com/api/admin",
   headers: {
     Authorization:
-      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM3N2Q5OTk2NGQ2ZmQ1OTJiNDVlMiIsImlhdCI6MTc1NjgxMTk1NywiZXhwIjoxNzU2ODk4MzU3fQ._bq7zlxZqZFTXTn8hdvER4DHSgtEThAmivnVN-t_1bs",
+      "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM3N2Q5OTk2NGQ2ZmQ1OTJiNDVlMiIsImlhdCI6MTc1Njk5MzY2NCwiZXhwIjoxNzU3MDgwMDY0fQ.UnmuvLJ1YQzwV7BDDfl6_w2C_BawZyCpPovJL2Y5pSQ",
   },
 });
 

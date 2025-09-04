@@ -48,7 +48,7 @@ const StatusBadge = ({ status, onClick }) => {
 /* ---------- Helpers ---------- */
 const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 const TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM3N2Q5OTk2NGQ2ZmQ1OTJiNDVlMiIsImlhdCI6MTc1NjkwMzY2MiwiZXhwIjoxNzU2OTkwMDYyfQ.knfcWbzkCIR1GGVDtRXUBmVf4bgGcmmJ184Lf93B7Zo";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM3N2Q5OTk2NGQ2ZmQ1OTJiNDVlMiIsImlhdCI6MTc1Njk5MzY2NCwiZXhwIjoxNzU3MDgwMDY0fQ.UnmuvLJ1YQzwV7BDDfl6_w2C_BawZyCpPovJL2Y5pSQ";
 
 // Prefer Mongo document _id for API actions
 const getDocumentId = (item) => {
@@ -268,31 +268,30 @@ export default function HelpSupport() {
   };
 
   // ✅ Delete API call
- // ✅ Delete API call when clicking "Yes"
-const confirmDelete = async () => {
-  if (!currentItem?._id && !currentItem?.id) return;
-  const complaintId = currentItem._id || currentItem.id;
+  const confirmDelete = async () => {
+    if (!currentItem) return;
+    const docId = getDocumentId(currentItem);
+    if (!docId) return;
 
-  try {
-    await axios.delete(`${API_BASE_URL}/adminSupport/delete/${complaintId}`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${TOKEN}`,
-      },
-    });
+    try {
+      await axios.delete(
+        `https://dukanse-be-f5w4.onrender.com/api/adminSupport/reSolve/${docId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        }
+      );
 
-    // remove from state
-    setComplaints((prev) =>
-      prev.filter((c) => c._id !== complaintId && c.id !== complaintId)
-    );
-  } catch (error) {
-    console.error("Error deleting complaint:", error.response?.data || error);
-  }
-
-  setIsDeleteModalOpen(false);
-  setCurrentItem(null);
-};
-
+      // remove from state
+      setComplaints((prev) => prev.filter((c) => getDocumentId(c) !== docId));
+    } catch (err) {
+      console.error("Error deleting complaint:", err.response?.data || err);
+    } finally {
+      setIsDeleteModalOpen(false);
+      setCurrentItem(null);
+    }
+  };
 
   const closeModal = () => {
     setIsDeleteModalOpen(false);
