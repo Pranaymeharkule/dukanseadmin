@@ -36,7 +36,9 @@ function ViewRegisterShop() {
         console.log("✅ Approval success:", response.data);
 
         // ✅ Show success popup
-        setSuccessMessage("Your shop has been successfully registered with Dukaanसे");
+        setSuccessMessage(
+          "Your shop has been successfully registered with Dukaanसे"
+        );
         setShowSuccess(true);
 
         // Auto close modal after 2.5 sec and go back
@@ -53,21 +55,34 @@ function ViewRegisterShop() {
     }
   };
 
-  // ❌ Reject Shop (No API – just success popup)
+  // ❌ Reject Shop API call
   const handleReject = async () => {
     if (window.confirm("Reject this shop?")) {
-      setIsRejecting(true);
+      try {
+        setIsRejecting(true);
 
-      // ✅ Show rejection popup (same style as approval)
-      setSuccessMessage("This shop has been successfully rejected.");
-      setShowSuccess(true);
+        const response = await axios.put(
+          `https://dukanse-be-f5w4.onrender.com/api/shopApproval/approve-shop/${shopId}`,
+          { shopStatus: "rejected" },
+          { headers: { "Content-Type": "application/json" } }
+        );
 
-      setTimeout(() => {
-        setShowSuccess(false);
-        navigate(-1);
-      }, 2500);
+        console.log("❌ Rejection success:", response.data);
 
-      setIsRejecting(false);
+        // ✅ Show rejection popup
+        setSuccessMessage("This shop has been successfully rejected.");
+        setShowSuccess(true);
+
+        setTimeout(() => {
+          setShowSuccess(false);
+          navigate(-1);
+        }, 2500);
+      } catch (err) {
+        console.error("❌ Rejection API error:", err);
+        alert(err.response?.data?.message || err.message || "Rejection failed");
+      } finally {
+        setIsRejecting(false);
+      }
     }
   };
 

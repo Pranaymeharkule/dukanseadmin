@@ -15,8 +15,7 @@ export default function Shop() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
-const [showSort, setShowSort] = useState(false);
-
+  const [showSort, setShowSort] = useState(false);
 
   const [sortOption, setSortOption] = useState("Name A - Z");
 
@@ -151,23 +150,6 @@ const [showSort, setShowSort] = useState(false);
     saveAs(data, "Approved_Shops.xlsx");
   };
 
-  const approveShop = async (shopId) => {
-    try {
-      const res = await axios.put(
-        `https://dukanse-be-f5w4.onrender.com/api/shopApproval/approve-shop/${shopId}`
-      );
-      if (res.data?.success) {
-        setShops((prev) =>
-          prev.map((s) => (s._id === shopId ? { ...s, status: "active" } : s))
-        );
-        alert("Shop Approved Successfully ✅");
-      }
-    } catch (err) {
-      console.error("Error approving shop:", err);
-      alert("Failed to approve shop. Please try again.");
-    }
-  };
-
   const asPercent = (v) => (v || v === 0 ? `${v}%` : "—");
   const asRupees = (v) => (v || v === 0 ? `₹ ${v}` : "—");
 
@@ -185,7 +167,6 @@ const [showSort, setShowSort] = useState(false);
     (currentPage - 1) * limit,
     currentPage * limit
   );
-  
 
   return (
     <div className="p-4 bg-gray-100">
@@ -200,7 +181,7 @@ const [showSort, setShowSort] = useState(false);
                 onClick={() => setDateFilter(df)}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium ${
                   dateFilter === df
-                    ? "bg-[#FEBC1D] text-"
+                    ? "bg-[#FEBC1D] "
                     : "border border-red-500 text-red-500 hover:bg-red-50"
                 }`}
               >
@@ -281,12 +262,11 @@ const [showSort, setShowSort] = useState(false);
               New Shop Registered
             </button>
             <button
-  onClick={exportToExcel}
-  className="px-4 py-1.5 rounded-md border border-red-500 text-red-500 text-sm font-medium flex items-center gap-2 hover:bg-red-50"
->
-  <span>⬇</span> Export to Excel
-</button>
-
+              onClick={exportToExcel}
+              className="px-4 py-1.5 rounded-md border border-red-500 text-red-500 text-sm font-medium flex items-center gap-2 hover:bg-red-50"
+            >
+              <span>⬇</span> Export to Excel
+            </button>
           </div>
         </div>
       </div>
@@ -296,7 +276,7 @@ const [showSort, setShowSort] = useState(false);
           <div className="p-6 overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-[#FEBC1D] text-black text-sm uppercase">
+                <tr className="bg-[#FEBC1D] text-black text-sm ">
                   <th className="px-6 py-3 text-left">Store Name</th>
                   <th className="px-6 py-3 text-left">Owner</th>
                   <th className="px-6 py-3 text-left">Number</th>
@@ -338,10 +318,7 @@ const [showSort, setShowSort] = useState(false);
                           {asRupees(shop.commissionEarned)}
                         </td>
                         <td
-                          className={`px-6 py-4 text-center font-semibold cursor-pointer ${statusClass}`}
-                          onClick={() =>
-                            shop.status !== "active" && approveShop(shop._id)
-                          }
+                          className={`px-6 py-4 text-center font-semibold ${statusClass}`}
                         >
                           {shop.status}
                         </td>
@@ -402,7 +379,7 @@ const [showSort, setShowSort] = useState(false);
               onClick={() => setCurrentPage(index + 1)}
               className={`px-3 py-1 rounded ${
                 currentPage === index + 1
-                  ? "bg-[#FEBC1D] text-black font-semibold"
+                  ? "bg-[#FEBC1D] text-red font-semibold"
                   : "bg-white text-red-500 hover:text-red-700"
               }`}
             >

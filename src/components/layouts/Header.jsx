@@ -13,7 +13,44 @@ export default function Header({ onMenuClick }) {
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef();
+  const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
 
+  const routes = [
+    { keyword: "dashboard", path: "/dashboard" },
+    { keyword: "customer", path: "/customer" },
+    { keyword: "shop", path: "/shop" },
+    { keyword: "product", path: "/product" },
+    { keyword: "order", path: "/order" },
+    { keyword: "refer", path: "/refer" },
+    { keyword: "gullak", path: "/gullak" },
+    { keyword: "payment", path: "/payment" },
+    { keyword: "offer", path: "/offer" },
+    { keyword: "send-notification", path: "/send-notification" },
+    { keyword: "helpsupport", path: "/helpSupport" },
+    { keyword: "privacy-policy", path: "/privacy-policy" },
+    { keyword: "terms-condition", path: "/terms-condition" },
+  ];
+
+  const handleSearch = (value) => {
+    const lower = value.toLowerCase();
+    setQuery(value);
+
+    if (lower.trim() === "") {
+      setSuggestions([]); // clear if input is empty
+      return;
+    }
+    // Filter suggestions
+    const filtered = routes.filter((r) => r.keyword.includes(lower));
+    setSuggestions(filtered);
+
+    // If exact match, navigate
+    const match = routes.find((r) => r.keyword === lower);
+    if (match) {
+      navigate(match.path);
+      setSuggestions([]); // clear suggestions on navigate
+    }
+  };
   // Toggle dropdown on profile click
   const handleToggleDropdown = () => {
     setShowDropdown((prev) => !prev);
@@ -63,7 +100,10 @@ export default function Header({ onMenuClick }) {
       </button>
 
       {/* Search Bar */}
-      <form className="flex-1 max-w-80 ml-6">
+      <form
+        className="flex-1 max-w-80 ml-6"
+        onSubmit={(e) => e.preventDefault()}
+      >
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
             <svg
@@ -83,8 +123,29 @@ export default function Header({ onMenuClick }) {
           <input
             type="text"
             placeholder="Search"
+            value={query}
             className="w-full pl-12 pr-4 py-2 rounded-full bg-white text-gray-700 placeholder-gray-400 focus:outline-none"
+            onChange={(e) => handleSearch(e.target.value)}
           />
+
+          {/* Suggestions Dropdown */}
+          {suggestions.length > 0 && (
+            <ul className="absolute mt-2 w-full bg-white rounded-lg shadow-lg z-10">
+              {suggestions.map((s) => (
+                <li
+                  key={s.path}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    navigate(s.path);
+                    setQuery("");
+                    setSuggestions([]);
+                  }}
+                >
+                  {s.keyword}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </form>
 
@@ -96,7 +157,7 @@ export default function Header({ onMenuClick }) {
         {/* Bell Icon */}
         <button
           aria-label="Notifications"
-          onClick={() => navigate("/send-notification")}
+          onClick={() => navigate("/notification-page")}
           className="relative flex items-center justify-center text-2xl"
         >
           <FaRegBell />

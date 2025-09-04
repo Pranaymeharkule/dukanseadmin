@@ -13,6 +13,10 @@ function ViewShop() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [isSuspending, setIsSuspending] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
   // ✅ API Base URL from .env
   const BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
@@ -48,6 +52,36 @@ function ViewShop() {
 
     if (id) fetchShop();
   }, [id, BASE_URL]);
+
+  // ✅ Suspend Shop API
+  const handleSuspend = async () => {
+    if (window.confirm("Are you sure you want to suspend this shop?")) {
+      try {
+        setIsSuspending(true);
+
+        const response = await axios.put(
+          `${BASE_URL}/shopApproval/approve-shop/${id}`,
+          { shopStatus: "suspended" },
+          { headers: { "Content-Type": "application/json" } }
+        );
+
+        console.log("✅ Suspension success:", response.data);
+
+        setSuccessMessage("This shop has been successfully suspended.");
+        setShowSuccess(true);
+
+        setTimeout(() => {
+          setShowSuccess(false);
+          navigate(-1);
+        }, 2500);
+      } catch (err) {
+        console.error("❌ Suspension API error:", err);
+        alert(err.response?.data?.message || err.message || "Suspension failed");
+      } finally {
+        setIsSuspending(false);
+      }
+    }
+  };
 
   if (loading) {
     return <div className="p-6 text-center text-lg">Loading Shop Info...</div>;
@@ -157,10 +191,11 @@ function ViewShop() {
               {/* Buttons INSIDE the content div */}
               <div className="flex justify-center gap-4 mt-8 w-full">
                 <button
-                  className="bg-white border border-red-500 text-red-500 font-semibold px-6 py-2 rounded-md hover:bg-red-50"
-                  onClick={() => navigate(-1)} // ✅ Navigate back instead of API
+                  className="bg-white border border-red-500 text-red-500 font-semibold px-6 py-2 rounded-md hover:bg-red-50 disabled:bg-gray-300"
+                  onClick={handleSuspend}
+                  disabled={isSuspending}
                 >
-                  Suspend
+                  {isSuspending ? "Suspending..." : "Suspend"}
                 </button>
 
                 <button
@@ -174,6 +209,34 @@ function ViewShop() {
           </div>
         </div>
       </div>
+
+      {/* ✅ Success Popup */}
+      {showSuccess && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 flex items-center justify-center rounded-full bg-yellow-100">
+                <svg
+                  className="w-10 h-10 text-yellow-500"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"
+                  />
+                </svg>
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800">
+              {successMessage}
+            </h3>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
