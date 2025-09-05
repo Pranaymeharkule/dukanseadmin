@@ -1,19 +1,63 @@
 // src/pages/helpsupport/CustomerSupportNumber.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
 export default function CustomerSupportNumber() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [supportNumber, setSupportNumber] = useState(
-    localStorage.getItem("supportNumber") || ""
-  );
+  const [supportNumber, setSupportNumber] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [supportId, setSupportId] = useState("");
 
-  const handleSave = (e) => {
+  // API Base URL
+  const BASE_URL = "https://dukanse-be-f5w4.onrender.com/api/supportNumber";
+
+  // Fetch support number (GET API)
+  useEffect(() => {
+    const fetchSupportNumber = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${BASE_URL}/getNumber`);
+        if (res.data.success) {
+          setSupportNumber(res.data.supportNumber.contactNumber);
+          setSupportId(res.data.supportNumber._id);
+        }
+      } catch (err) {
+        console.error("Error fetching support number:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSupportNumber();
+  }, []);
+
+  // Save/Update support number (PUT API)
+  const handleSave = async (e) => {
     e.preventDefault();
-    localStorage.setItem("supportNumber", supportNumber);
-    alert("Customer Support Number saved!");
+    if (!supportId) {
+      alert("Support ID not found. Please refresh the page.");
+      return;
+    }
+    try {
+      setLoading(true);
+      const res = await axios.put(
+        `${BASE_URL}/updateNumber/${supportId}`,
+        { contactNumber: supportNumber }
+      );
+
+      if (res.data.success) {
+        alert("Customer Support Number updated successfully!");
+      } else {
+        alert("Failed to update number.");
+      }
+    } catch (err) {
+      console.error("Error updating support number:", err);
+      alert("Something went wrong while updating!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -93,9 +137,10 @@ export default function CustomerSupportNumber() {
             <div className="flex justify-center mt-auto">
               <button
                 type="submit"
-                className="bg-[#FEBC1D] text-red-600 font-semibold px-8 py-2 rounded hover:opacity-90"
+                disabled={loading}
+                className="bg-[#FEBC1D] text-red-600 font-semibold px-8 py-2 rounded hover:opacity-90 disabled:opacity-50"
               >
-                Save
+                {loading ? "Saving..." : "Save"}
               </button>
             </div>
           </form>

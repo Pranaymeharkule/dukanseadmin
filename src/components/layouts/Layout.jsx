@@ -20,7 +20,7 @@ export default function Layout({ children }) {
 
         {/* Main grows to fill remaining space */}
         {/* <main className="flex-1 px-0 sm:px-4 md:px-6 py-7 bg-white overflow-y-auto scrollbar-hide"> */}
-        <main className="flex-1 px-4 md:px-6 py-7 bg-white overflow-y-auto scrollbar-hide">
+        <main className="flex-1 bg-grey-100 overflow-y-auto scrollbar-hidden">
           {children}
         </main>
       </div>

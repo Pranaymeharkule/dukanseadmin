@@ -12,6 +12,13 @@ import {
   Cell,
   ResponsiveContainer,
 } from "recharts";
+import { FiUser } from "react-icons/fi";
+import { LuUserPlus } from "react-icons/lu";
+import { LuTicketPercent } from "react-icons/lu";
+import { FaMoneyBills } from "react-icons/fa6";
+
+
+
 import axios from "axios";
 
 import { MapContainer, TileLayer, Circle, Popup } from "react-leaflet";
@@ -88,6 +95,15 @@ export default function Dashboard() {
   const [topCustomers, setTopCustomers] = useState([]);
   const [topSellers, setTopSellers] = useState([]);
 
+  const [sellerStats, setSellerStats] = useState(null);
+const [revenueStats, setRevenueStats] = useState(null);
+const [storeStats, setStoreStats] = useState(null);
+const [coinEconomics, setCoinEconomics] = useState([]);
+
+
+
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -104,6 +120,11 @@ export default function Dashboard() {
           recentOrdersRes,
           weeklySalesRes,
           orderTypeRes,
+          sellerRes,   // ✅ NEW
+          revenueRes,   // ✅ add this
+            totalStoreRes,   // ✅ add here
+
+
         ] = await Promise.all([
           axios.get(`${API_BASE_URL}/customers`),
           axios.get(`${API_BASE_URL}/sales`),
@@ -117,12 +138,25 @@ export default function Dashboard() {
           axios.get(`${API_BASE_URL}/recentDeliveredOrders`),
           axios.get(`${API_BASE_URL}/weeklySales`),
           axios.get(`${API_BASE_URL}/orderTypeShare`),
+          axios.get(`${API_BASE_URL}/sellerStats`), // ✅ fetch Seller Stats
+          axios.get(`${API_BASE_URL}/revenueStats`),  // ✅ added API call
+            axios.get(`${API_BASE_URL}/totalStore`), // ✅ fetch Total Stores
+            
+
+
+
+          
         ]);
 
-        setCustomerStats(custRes.data);
+      setCustomerStats(custRes.data);
         setSalesStats(salesRes.data);
         setActiveStores(storesRes.data);
-        setTodaysOrders(ordersRes.data);
+if (ordersRes.data) {
+  setTodaysOrders({
+    count: ordersRes.data["Today's Orders"] || 0,
+    growth: ordersRes.data.growth || "0% growth since yesterday",
+  });
+}
         setMostActiveUsers(activeUsersRes.data?.data || []);
         setTopOrderedItems(topItemsRes.data?.mostOrderedItems || []);
         setNewCustomers(newCustRes.data?.data || []);
@@ -130,12 +164,14 @@ export default function Dashboard() {
         setInactiveUsers(inactiveUsersRes.data?.data || []);
         setRecentOrders(recentOrdersRes.data?.data || []);
         
+         // Weekly Sales
         const formattedWeeklySales = (weeklySalesRes.data?.getWeeklySales || []).map(d => ({
           period: d.day,
           income: d.sales || 0,
         }));
         setWeeklySalesData(formattedWeeklySales);
 
+        // Order Type
         const orderPercentages = orderTypeRes.data?.orderTypePercentage;
         if (orderPercentages) {
           const formattedOrderType = [
@@ -144,6 +180,32 @@ export default function Dashboard() {
           ];
           setOrderTypeData(formattedOrderType);
         }
+
+        // ✅ Seller Stats
+        setSellerStats(sellerRes.data?.seller || null);
+        setRevenueStats(revenueRes.data?.data || null);   // ✅ new line
+        setStoreStats(totalStoreRes.data?.totalStores || null);
+
+        // --- Coin Economics ---
+const coinEcoRes = await axios.get(`${API_BASE_URL}/coinEconomics`);
+if (coinEcoRes.data?.success) {
+  const apiData = coinEcoRes.data.data;
+
+  const formattedCoinEco = [
+    { day: "Mon", issued: apiData.Man?.issued || 0, redeemed: apiData.Man?.redeemed || 0 },
+    { day: "Tue", issued: apiData.Tue?.issued || 0, redeemed: apiData.Tue?.redeemed || 0 },
+    { day: "Wed", issued: apiData.Wed?.issued || 0, redeemed: apiData.Wed?.redeemed || 0 },
+    { day: "Thu", issued: apiData.Thu?.issued || 0, redeemed: apiData.Thu?.redeemed || 0 },
+    { day: "Fri", issued: apiData.Fri?.issued || 0, redeemed: apiData.Fri?.redeemed || 0 },
+    { day: "Sat", issued: apiData.Sat?.issued || 0, redeemed: apiData.Sat?.redeemed || 0 },
+    { day: "Sun", issued: apiData.Sun?.issued || 0, redeemed: apiData.Sun?.redeemed || 0 },
+  ];
+
+  setCoinEconomics(formattedCoinEco);
+}
+
+
+
 
       } catch (err) {
         console.error("Dashboard API error:", err);
@@ -159,6 +221,11 @@ export default function Dashboard() {
             coinsClaimedRes,
             topCustomersRes,
             topSellersRes,
+             // NEW
+  sellerRes,
+  revenueRes,
+  totalStoreRes,
+  coinEcoRes,
           ] = await Promise.all([
             axios.get(`${API_BASE_URL.replace("adminDashboard","referralDashboard")}/getTotalReferrals`),
             axios.get(`${API_BASE_URL.replace("adminDashboard","referralDashboard")}/getActiveReferrals`),
@@ -183,14 +250,7 @@ export default function Dashboard() {
     fetchReferralStats();
   }, []);
 
-  // Static data
-  const coinData = [
-    { day: "Mon", issued: 300, redeemed: 220 }, { day: "Tue", issued: 500, redeemed: 120 },
-    { day: "Wed", issued: 620, redeemed: 500 }, { day: "Thu", issued: 430, redeemed: 580 },
-    { day: "Fri", issued: 230, redeemed: 330 }, { day: "Sat", issued: 420, redeemed: 550 },
-    { day: "Sun", issued: 240, redeemed: 130 },
-  ];
-
+ 
   const stateAOVCards = [
     { label: "Customer AOV", value: "1000", change: "12%" },
     { label: "Seller AOV", value: "1000", change: "02%" },
@@ -200,126 +260,248 @@ export default function Dashboard() {
   const COLORS = ["#fbc02d", "#f44336"];
   const labelColorMap = { Pickup: "#f44336", Delivery: "#fbc02d" };
 
+const [selectedPeriod, setSelectedPeriod] = useState("This Week");
+
+// Example data (replace with your real data)
+const monthlySalesData = [ /* your monthly data */ ];
+const yearlySalesData = [ /* your yearly data */ ];
+
+
   return (
     <div className="p-4 space-y-6 bg-[#F5F5F5]">
       {/* --- TOP STATS --- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#FEBC1D] p-3 rounded-lg shadow-md">
-          <div className="flex items-center mb-1">
-            <FaUser className="text-brandRed h-10 w-5 mr-2" />
-            <span className="text-2xl font-medium text-brandRed">Seller</span>
-          </div>
-          <div className="text-brandRed text-3xl font-bold mb-2">2000</div>
-          <p className="text-xs text-red-600">25% since last month</p>
-        </div>
-        <div className="bg-[#FEBC1D] p-3 rounded-lg shadow-md">
-          <div className="flex items-center mb-1">
-            <FaUsers className="text-brandRed h-10 w-5 mr-2" />
-            <span className="text-2xl font-medium text-brandRed">Customer</span>
-          </div>
-          <div className="text-brandRed text-3xl font-bold mb-2">
-            {customerStats?.Customer ?? "85"}
-          </div>
-          <p className="text-xs text-red-600">{customerStats?.growth ?? "214.8% growth since last month"}</p>
-        </div>
-        <div className="bg-[#FEBC1D] p-3 rounded-lg shadow-md">
-          <div className="flex items-center mb-1">
-            <FaChartBar className="text-brandRed h-10 w-5 mr-2" />
-            <span className="text-2xl font-medium text-brandRed">Sales</span>
-          </div>
-          <div className="text-brandRed text-3xl font-bold mb-2">
-            {salesStats?.totalSales ?? "0"}
-          </div>
-          <p className="text-xs text-red-600">{salesStats?.growth ?? "-90.99% growth since last month"}</p>
-        </div>
-        <div className="bg-[#FEBC1D] p-3 rounded-lg shadow-md">
-          <div className="flex items-center mb-1">
-            <FaMoneyBillWave className="text-brandRed h-10 w-5 mr-2" />
-            <span className="text-2xl font-medium text-brandRed">Revenue</span>
-          </div>
-          <div className="text-brandRed text-3xl font-bold mb-2">2000</div>
-          <p className="text-xs text-red-600">08% since last month</p>
-        </div>
+           <div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
+      <div className="flex items-center mb-1">
+        <FiUser className="text-brandRed h-10 w-5 mr-2" />
+        <span className="text-2xl font-medium text-brandRed">Seller</span>
+      </div>
+      <div className="text-brandRed text-3xl font-bold mb-2">
+        {sellerStats ? sellerStats.totalSellerCount : "Loading..."}
+      </div>
+     <div className="flex items-center space-x-1">
+  {/* Circular red box with number */}
+ <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
+  {/* Up arrow */}
+  <span className="text-sm">↑</span>
+  {/* Percentage */}
+  <span>{sellerStats ? `${sellerStats.growthPercent}%` : ""}</span>
+</div>
+  {/* Remaining text */}
+  <span className="text-xs text-red-600">since last month</span>
+</div>
+
+
+    </div>
+        <div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
+  <div className="flex items-center mb-1">
+    <LuUserPlus className="text-brandRed h-10 w-5 mr-2" />
+    <span className="text-2xl font-medium text-brandRed">Customer</span>
+  </div>
+  <div className="text-brandRed text-3xl font-bold mb-2">
+    {customerStats?.Customer ?? "85"}
+  </div>
+  {/* Circular red badge with arrow */}
+  <div className="flex items-center space-x-1">
+    <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
+      {/* Up arrow */}
+      <span className="text-sm">↑</span>
+      {/* Percentage */}
+<span>{customerStats && customerStats.growthPercent ? `${customerStats.growthPercent}%` : "214.8%"}</span>
+    </div>
+    {/* Remaining text */}
+    <span className="text-xs text-red-600">since last month</span>
+  </div>
+</div>
+
+
+       <div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
+  <div className="flex items-center mb-1">
+    <LuTicketPercent className="text-brandRed h-10 w-5 mr-2" />
+    <span className="text-2xl font-medium text-brandRed">Sales</span>
+  </div>
+  <div className="text-brandRed text-3xl font-bold mb-2">
+    {salesStats?.totalSales ?? "0"}
+  </div>
+  {/* Circular red badge with arrow */}
+  <div className="flex items-center space-x-1">
+    <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
+      {/* Up/Down arrow */}
+      <span className="text-sm">{salesStats?.growthPercent >= 0 ? "↑" : "↓"}</span>
+      {/* Percentage */}
+      <span>{salesStats?.growthPercent ?? "-90.99%"}</span>
+    </div>
+    {/* Remaining text */}
+    <span className="text-xs text-red-600">since last month</span>
+  </div>
+</div>
+
+     <div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
+  <div className="flex items-center mb-1">
+    <FaMoneyBills className="text-brandRed h-10 w-5 mr-2" />
+    <span className="text-2xl font-medium text-brandRed">Revenue</span>
+  </div>
+  <div className="text-brandRed text-3xl font-bold mb-2">
+    {revenueStats?.totalRevenueTillNow ?? "Loading..."}
+  </div>
+  {/* Circular red badge with arrow */}
+  <div className="flex items-center space-x-1">
+    <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
+      {/* Arrow based on growth */}
+      <span className="text-sm">
+        {revenueStats?.growthPercent >= 0 ? "↑" : "↓"}
+      </span>
+      {/* Percentage */}
+      <span>{revenueStats?.growthPercent ?? "0%"}</span>
+    </div>
+    {/* Remaining text */}
+    <span className="text-xs text-red-600">since last month</span>
+  </div>
+</div>
+
+
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-[#FEBC1D] p-3 rounded-lg shadow-md">
-          <div className="flex items-center mb-1">
-            <FaStore className="text-[#EC2D01] h-5 w-5 mr-2" />
-            <span className="text-sm font-medium text-[#EC2D01]">Total Stores</span>
-          </div>
-          <div className="text-[#EC2D01] text-2xl font-bold mb-2">1200</div>
-          <p className="text-xs text-red-600">0.7% since last month</p>
-        </div>
-        <div className="bg-[#FEBC1D] p-3 rounded-lg shadow-md">
-          <div className="flex items-center mb-1">
-            <FaRegCheckCircle className="text-[#EC2D01] h-5 w-5 mr-2" />
-            <span className="text-sm font-medium text-[#EC2D01]">Active Stores</span>
-          </div>
-          <div className="text-[#EC2D01] text-2xl font-bold mb-2">
-            {activeStores?.["Active Stores"] ?? "11"}
-          </div>
-          <p className="text-xs text-red-600">{activeStores?.growth ?? "0.0% growth in new verified stores since last month"}</p>
-        </div>
-        <div className="bg-[#FEBC1D] p-3 rounded-lg shadow-md">
-          <div className="flex items-center mb-1">
-            <FaShoppingCart className="text-[#EC2D01] h-5 w-5 mr-2" />
-            <span className="text-sm font-medium text-[#EC2D01]">Today's Orders</span>
-          </div>
-          <div className="text-[#EC2D01] text-2xl font-bold mb-2">
-            {todaysOrders?.["Today's Orders"] ?? "0"}
-          </div>
-          <p className="text-xs text-red-600">{todaysOrders?.growth ?? "-100.0% growth since yesterday"}</p>
-        </div>
+    
+
+        <div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
+  <div className="flex items-center mb-1">
+    <span className="text-sm font-medium text-[#EC2D01]">Total Stores</span>
+  </div>
+  <div className="text-[#EC2D01] text-2xl font-bold mb-2">
+    {storeStats?.totalStoresTillNow ?? 0}
+  </div>
+  {/* Circular red badge with arrow */}
+  <div className="flex items-center space-x-1">
+    <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
+      {/* Arrow based on growth */}
+      <span className="text-sm">
+        {storeStats?.["growth Percent"] >= 0 ? "↯" : "↯"}
+      </span>
+      {/* Percentage */}
+      <span>{storeStats?.["growth Percent"] ?? "0"}%</span>
+    </div>
+    {/* Remaining text */}
+    <span className="text-xs text-red-600">since last month</span>
+  </div>
+</div>
+
+
+
+        <div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
+  <div className="flex items-center mb-1">
+    <span className="text-sm font-medium text-[#EC2D01]">Active Stores</span>
+  </div>
+  <div className="text-[#EC2D01] text-2xl font-bold mb-2">
+    {activeStores?.["Active Stores"] ?? "11"}
+  </div>
+  {/* Circular red badge with arrow */}
+  <div className="flex items-center space-x-1">
+    <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
+      {/* Arrow based on growth */}
+      <span className="text-sm">
+        {activeStores?.growthPercent >= 0 ? "↯" : "↯"}
+      </span>
+      {/* Percentage */}
+      <span>{activeStores?.growthPercent ?? "0%"}</span>
+    </div>
+    {/* Remaining text */}
+    <span className="text-xs text-red-600">since last month</span>
+  </div>
+</div>
+
+<div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
+  <div className="flex items-center mb-1">
+    <span className="text-sm font-medium text-[#EC2D01]">Today Orders</span>
+  </div>
+  <div className="text-[#EC2D01] text-2xl font-bold mb-2">
+    {todaysOrders?.count ?? "Loading..."}
+  </div>
+  {/* Circular red badge with arrow */}
+  <div className="flex items-center space-x-1">
+    <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
+      {/* Arrow based on growth */}
+      <span className="text-sm">
+        {todaysOrders?.growthPercent >= 0 ? "↯" : "↯"}
+      </span>
+      {/* Percentage */}
+      <span>{todaysOrders?.growthPercent ?? "0%"}</span>
+    </div>
+    {/* Remaining text */}
+    <span className="text-xs text-red-600">since last month</span>
+  </div>
+</div>
+
+
+     
       </div>
       
       {/* --- Main Content Area --- */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
         <div className="lg:col-span-2 flex flex-col gap-6">
-            {/* Sales Chart */}
-            <div className="bg-white rounded-lg shadow-md p-4">
-                <div className="flex justify-between items-center mb-2">
-                    <h2 className="font-semibold text-lg">Sales</h2>
-                    <div className="flex gap-2">
-                        <button className="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">This Week</button>
-                        <button className="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">This Month</button>
-                        <button className="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">This Year</button>
-                    </div>
-                </div>
-                <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={weeklySalesData}>
-                    <XAxis dataKey="period" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="income" fill="#EC2D01" radius={[8, 8, 0, 0]} />
-                </BarChart>
-                </ResponsiveContainer>
-            </div>
-            
-            {/* Referral Stats */}
-            <div className="bg-white rounded-lg shadow-md p-4">
-                <h2 className="font-semibold text-lg mb-4">Referral Stats</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-[#FEBC1D] p-4 rounded-lg shadow text-center">
-                        <h4 className="text-2xl font-bold text-[#EC2D01]">{totalReferrals?.totalReferrals ?? 0}</h4>
-                        <p className="text-sm font-medium text-brandRed">Total Referrals</p>
-                        
-                    </div>
-                    <div className="bg-[#FEBC1D] p-4 rounded-lg shadow text-center">
-                        <h4 className="text-2xl font-bold text-[#EC2D01]">{activeReferrals?.totalActiveReferrals ?? 0}</h4>
-                        <p className="text-sm font-medium text-brandRed">Active Referrals</p>
-                    </div>
-                    <div className="bg-[#FEBC1D] p-4 rounded-lg shadow text-center">
-                        <h4 className="text-2xl font-bold text-[#EC2D01]">{totalCoins?.breakageRate ?? 0}</h4>
-                        <p className="text-sm font-medium text-brandRed">Total Gullak Coins</p>
-                    </div>
-                    <div className="bg-[#FEBC1D] p-4 rounded-lg shadow text-center">
-                        <h4 className="text-2xl font-bold text-[#EC2D01]">{coinsClaimed?.coinsClaimed ?? 0}</h4>
-                        <p className="text-sm font-medium text-brandRed">Coins Claimed</p>
-                    </div>
-                </div>
-            </div>
+           {/* Sales Chart */}
+<div className="bg-white rounded-lg shadow-md p-4">
+    <div className="flex justify-between items-center mb-2">
+        <h2 className="font-semibold text-lg">Sales</h2>
+        
+        {/* Dropdown for period filter */}
+        <select
+            className="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+        >
+            <option value="This Week">This Week</option>
+            <option value="This Month">This Month</option>
+            <option value="This Year">This Year</option>
+        </select>
+    </div>
+
+    <ResponsiveContainer width="100%" height={250}>
+       <BarChart data={
+    selectedPeriod === "This Week"
+        ? weeklySalesData
+        : selectedPeriod === "This Month"
+        ? monthlySalesData
+        : yearlySalesData
+}>
+
+            <XAxis dataKey="period" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="income" fill="#EC2D01" radius={[8, 8, 0, 0]} />
+        </BarChart>
+    </ResponsiveContainer>
+</div>
+
+
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  {[ 
+    { title: "Total Referrals", value: totalReferrals?.totalReferrals, growth: totalReferrals?.growthPercent },
+    { title: "Active Referrals", value: activeReferrals?.totalActiveReferrals, growth: activeReferrals?.growthPercent },
+    { title: "Total Gullak Coins", value: totalCoins?.totalGullakCoins, growth: totalCoins?.growthPercent },
+    { title: "Coins Claimed", value: coinsClaimed?.coinsClaimed, growth: coinsClaimed?.growthPercent }
+  ].map((item, idx) => (
+    <div key={idx} className="bg-[#FEBC1DB2] p-6 rounded-lg shadow flex flex-col justify-between">
+      <p className="text-orange-600 font-semibold text-base">{item.title}</p>
+      <h4 className="text-orange-600 font-bold text-3xl mt-2">{item.value ?? 0}</h4>
+      <div className="flex items-center mt-4">
+        <div className="bg-red-600 text-white text-xs font-medium px-3 py-1 rounded-full flex items-center">
+          <span className="mr-1">{item.growth >= 0 ? "↝" : "↯"}</span>
+          <span>{item.growth ?? "0"}%</span>
+        </div>
+        <span className="text-orange-600 text-xs ml-2">from last month</span>
+      </div>
+    </div>
+  ))}
+</div>
+
+
+
+
+
+
 
             {/* New Sellers */}
             <div className="bg-white rounded-lg shadow-md p-4">
@@ -352,7 +534,7 @@ export default function Dashboard() {
         {/* Right Column */}
         <div className="lg:col-span-1">
             {/* 10 New Orders */}
-            <div className="bg-white rounded-lg shadow-md p-4 max-h-[800px] h-full overflow-y-auto">
+            <div className="bg-white rounded-lg shadow-md p-4 max-h-[1015px] h-full overflow-y-auto">
                 <h2 className="font-semibold text-lg mb-2">Top 10 New Orders</h2>
                 <table className="w-full text-sm text-left">
                 <thead>
@@ -387,13 +569,13 @@ export default function Dashboard() {
             </div>
         </div>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={coinData}>
+<BarChart data={coinEconomics}>
             <XAxis dataKey="day" />
             <YAxis />
             <Tooltip />
             <Legend />
             <Bar dataKey="issued" name="Coins Issued" fill="#EC2D01" />
-            <Bar dataKey="redeemed" name="Coins Redeemed" fill="#FEBC1D" />
+            <Bar dataKey="redeemed" name="Coins Redeemed" fill="#FEBC1DB2" />
           </BarChart>
         </ResponsiveContainer>
       </div>

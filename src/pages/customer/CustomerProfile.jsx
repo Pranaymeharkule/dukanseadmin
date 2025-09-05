@@ -7,15 +7,17 @@ import axios from "axios";
 const CustomerProfile = () => {
   const navigate = useNavigate();
   const { customerId } = useParams();
-  const [isFlagged, setIsFlagged] = useState(false);
+  const [isFragged, setIsFragged] = useState(false); // Boolean for fraud status
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
   const [orders, setOrders] = useState([]);
   const [referrals, setReferrals] = useState([]);
   const [gullakLedger, setGullakLedger] = useState([]);
   const [showAllOrders, setShowAllOrders] = useState(false);
   const [showAllReferrals, setShowAllReferrals] = useState(false);
   const [showAllGullak, setShowAllGullak] = useState(false);
+  const [isDeactivated, setIsDeactivated] = useState(false); // Boolean status for active/deactivate
   const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
   useEffect(() => {
@@ -36,7 +38,7 @@ const CustomerProfile = () => {
         if (res.data.success) {
           const details = res.data.customerDetails;
 
-          // ✅ Use profile if available, else fallback
+          // Use profile if available
           const profileData = details.profile || details;
 
           setCustomer({
@@ -50,14 +52,29 @@ const CustomerProfile = () => {
               image: profileData.profileImage || null,
             },
             previousOrders: details.previousOrders || [],
-            referrals: details.referrals || [],
+            referrals: details.referralHistory || [],
             coinHistory: details.coinHistory || [],
             isFraud: details.isFraud || false,
+            status: details.status || "active",
           });
 
-          setIsFlagged(details.isFraud || false);
+          // Set fraud status (boolean)
+          const fraudStatus = details.isFraud || false;
+          setIsFragged(fraudStatus);
+          localStorage.setItem(`isFragged_${customerId}`, fraudStatus);
 
-          // ✅ Map orders
+          // Set deactivation status (boolean)
+          // If fraud, then automatically deactivated
+          // Otherwise, check if status is deactivate
+          const deactivatedStatus =
+            fraudStatus || details.status === "deactivate";
+          setIsDeactivated(deactivatedStatus);
+          localStorage.setItem(
+            `isDeactivated_${customerId}`,
+            deactivatedStatus
+          );
+
+          // Map orders
           setOrders(
             (details.previousOrders || []).map((order, index) => ({
               id: order.orderId,
@@ -69,10 +86,20 @@ const CustomerProfile = () => {
             }))
           );
 
-          // ✅ Map referrals
-          setReferrals(details.referrals || []);
+          setReferrals(
+            (details.referralHistory || []).map((ref, idx) => ({
+              id: ref.slNo || idx + 1,
+              date: ref.date || "-",
+              name: ref.personName || "-", // ✅ personName instead of name
+              code: ref.referralCode || "-",
+              via: ref.referredVia || "-",
+              status: ref.status || "-",
+            }))
+          );
 
-          // ✅ Map gullak ledger
+          
+
+          // Map gullak ledger
           setGullakLedger(
             (details.coinHistory || []).map((entry, idx) => ({
               id: idx,
@@ -89,8 +116,9 @@ const CustomerProfile = () => {
       }
     };
 
+    // Always fetch customer details from API
     fetchCustomerDetails();
-  }, [customerId]);
+  }, [customerId, API_BASE_URL]);
 
   const handleToggle = async () => {
     try {
@@ -103,11 +131,17 @@ const CustomerProfile = () => {
       );
 
       if (res.data.success) {
-        setIsFlagged(true);
+        setIsFragged(true);
+        setIsDeactivated(true); // When fraud, automatically deactivate
+        localStorage.setItem(`isFragged_${customerId}`, true);
+        localStorage.setItem(`isDeactivated_${customerId}`, true);
         alert(res.data.message || "Customer flagged as fraud successfully!");
       } else {
         if (res.data.message?.toLowerCase().includes("already")) {
-          setIsFlagged(true);
+          setIsFragged(true);
+          setIsDeactivated(true);
+          localStorage.setItem(`isFragged_${customerId}`, true);
+          localStorage.setItem(`isDeactivated_${customerId}`, true);
           alert("This customer is already marked as fraud.");
         } else {
           alert(res.data.message || "Failed to flag customer!");
@@ -125,8 +159,71 @@ const CustomerProfile = () => {
     }
   };
 
+  const handleToggleStatus = async () => {
+    try {
+      setStatusLoading(true);
+
+      const res = await axios.put(
+        `${API_BASE_URL}/adminCustomer/toggle-status/${customerId}`,
+        {},
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      if (res.data.success) {
+        // If currently fraud and activating, remove fraud status
+        if (isFragged && isDeactivated) {
+          setIsFragged(false);
+          setIsDeactivated(false);
+          localStorage.setItem(`isFragged_${customerId}`, false);
+          localStorage.setItem(`isDeactivated_${customerId}`, false);
+        } else {
+          // Toggle between active and deactivated (only when not fraud)
+          const newDeactivatedStatus = !isDeactivated;
+          setIsDeactivated(newDeactivatedStatus);
+          localStorage.setItem(
+            `isDeactivated_${customerId}`,
+            newDeactivatedStatus
+          );
+        }
+
+        alert(res.data.message || `Customer status changed successfully!`);
+      } else {
+        alert(res.data.message || "Failed to toggle customer status!");
+      }
+    } catch (error) {
+      console.error("Error toggling customer status:", error.response || error);
+      alert(
+        error.response?.data?.message ||
+          error.message ||
+          "Something went wrong while toggling customer status."
+      );
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
   const handleViewOrder = (orderId) => {
     navigate(`/order/details/${orderId}`);
+  };
+
+  // Determine current status for display
+  const getCurrentStatus = () => {
+    if (isFragged) return "fraud";
+    if (isDeactivated) return "deactivated";
+    return "active";
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "active":
+        return "text-green-600";
+      case "deactivated":
+        return "text-orange-600";
+      case "fraud":
+        return "text-red-600";
+      default:
+        return "text-gray-600";
+    }
   };
 
   return (
@@ -226,18 +323,18 @@ const CustomerProfile = () => {
                 </div>
               </div>
 
-              {/* Flag Button */}
-              <div className="flex-shrink-0 ml-6">
+              {/* Action Buttons */}
+              <div className="flex-shrink-0 ml-6 flex flex-col gap-3">
                 <button
                   onClick={handleToggle}
-                  disabled={isFlagged || loading}
+                  disabled={loading}
                   className={`px-5 py-2 rounded border font-bold uppercase tracking-wide transition-colors shadow-sm ${
-                    isFlagged
-                      ? "bg-red-100 text-red-700 border-red-300 cursor-not-allowed"
+                    isFragged
+                      ? "bg-red-100 text-red-700 border-red-300"
                       : "text-red-600 border-red-600 hover:bg-red-50"
                   }`}
                 >
-                  {isFlagged
+                  {isFragged
                     ? "Marked as Fraud"
                     : loading
                     ? "Processing..."
@@ -248,98 +345,98 @@ const CustomerProfile = () => {
           </div>
 
           {/* Orders Section */}
-          <div className="bg-white p-6">
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="font-semibold text-gray-900">
-                Previous Order Details:
-              </h2>
-              <button
-                onClick={() => setShowAllOrders(!showAllOrders)}
-                className="text-blue-600 hover:underline text-sm font-medium"
-              >
-                See all
-              </button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white rounded-lg overflow-hidden">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                      Sl.No
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                      Date
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                      Product Name
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                      Quantity
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                      Total Price
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                      Payment Status
-                    </th>
-                    <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                      View Order
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {(showAllOrders ? orders : orders.slice(0, 3)).length > 0 ? (
-                    (showAllOrders ? orders : orders.slice(0, 3)).map(
-                      (order, index) => (
-                        <tr
-                          key={order.id}
-                          className={
-                            index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                          }
-                        >
-                          <td className="px-4 py-3 text-sm text-gray-900">
-                            {index + 1}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-900">
-                            {order.date}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-900">
-                            {order.product}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-900">
-                            {order.quantity}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-900">
-                            {order.price}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-900">
-                            {order.status}
-                          </td>
-                          <td className="px-4 py-3">
-                            <button
-                              onClick={() => handleViewOrder(order.id)}
-                              className="text-gray-400 hover:text-gray-600"
-                            >
-                              <VscEye size={18} />
-                            </button>
-                          </td>
-                        </tr>
-                      )
-                    )
-                  ) : (
+            <div className="bg-white p-6">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="font-semibold text-gray-900">
+                  Previous Order Details:
+                </h2>
+                <button
+                  onClick={() => setShowAllOrders(!showAllOrders)}
+                  className="text-blue-600 hover:underline text-sm font-medium"
+                >
+                  See all
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full bg-white rounded-lg overflow-hidden">
+                  <thead className="bg-white">
                     <tr>
-                      <td
-                        colSpan="7"
-                        className="px-4 py-3 text-center text-gray-500"
-                      >
-                        No orders found
-                      </td>
+                      <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                        Sl.No
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                        Date
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                        Product Name
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                        Quantity
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                        Total Price
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                        Payment Status
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
+                        View Order
+                      </th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody >
+                    {(showAllOrders ? orders : orders.slice(0, 3)).length > 0 ? (
+                      (showAllOrders ? orders : orders.slice(0, 3)).map(
+                        (order, index) => (
+                          <tr
+                            key={order.id}
+                            className={
+                              index % 2 === 0 ? "bg-[#FFFAFB]" : "bg-white"
+                            }
+                          >
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {index + 1}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {order.date}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {order.product}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {order.quantity}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {order.price}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {order.status}
+                            </td>
+                            <td className="px-4 py-3">
+                              <button
+                                onClick={() => handleViewOrder(order.id)}
+                                className="text-gray-400 hover:text-gray-600"
+                              >
+                                <VscEye size={18} />
+                              </button>
+                            </td>
+                          </tr>
+                        )
+                      )
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan="7"
+                          className="px-4 py-3 text-center text-gray-500"
+                        >
+                          No orders found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
 
           {/* Referral History Section */}
           <div className="bg-white p-6">
@@ -353,8 +450,8 @@ const CustomerProfile = () => {
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="min-w-full bg-white rounded-lg overflow-hidden">
-                <thead className="bg-gray-50">
+              <table className="w-full bg-white rounded-lg overflow-hidden">
+                <thead className="bg-white">
                   <tr>
                     <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
                       Sl.No
@@ -376,7 +473,7 @@ const CustomerProfile = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody>
                   {(showAllReferrals ? referrals : referrals.slice(0, 3))
                     .length > 0 ? (
                     (showAllReferrals ? referrals : referrals.slice(0, 3)).map(
@@ -384,7 +481,7 @@ const CustomerProfile = () => {
                         <tr
                           key={ref.id}
                           className={
-                            index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                            index % 2 === 0 ? "bg-[#FFFAFB]" : "bg-white"
                           }
                         >
                           <td className="px-4 py-3 text-sm text-gray-900">
@@ -435,8 +532,8 @@ const CustomerProfile = () => {
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="min-w-full bg-white rounded-lg overflow-hidden">
-                <thead className="bg-gray-50">
+              <table className="w-full bg-white rounded-lg overflow-hidden">
+                <thead className="bg-white">
                   <tr>
                     <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
                       Sl.No
@@ -458,7 +555,7 @@ const CustomerProfile = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody>
                   {(showAllGullak ? gullakLedger : gullakLedger.slice(0, 3))
                     .length > 0 ? (
                     (showAllGullak
@@ -467,7 +564,7 @@ const CustomerProfile = () => {
                     ).map((entry, index) => (
                       <tr
                         key={entry.id}
-                        className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                        className={index % 2 === 0 ? "bg-[#FFFAFB]" : "bg-white"}
                       >
                         <td className="px-4 py-3 text-sm text-gray-900">
                           {index + 1}
@@ -507,8 +604,20 @@ const CustomerProfile = () => {
           {/* Action Buttons */}
           <div className="bg-white px-6 py-4">
             <div className="flex justify-center gap-4">
-              <button className="px-6 py-2 border border-red-500 text-red-600 rounded-md font-medium hover:bg-red-50">
-                Deactivate
+              <button
+                onClick={handleToggleStatus}
+                disabled={statusLoading}
+                className={`px-6 py-2 border rounded-md font-medium transition-colors ${
+                  isDeactivated
+                    ? "border-green-500 text-green-600 hover:bg-green-50"
+                    : "border-red-500 text-red-600 hover:bg-red-50"
+                }`}
+              >
+                {statusLoading
+                  ? "Processing..."
+                  : isDeactivated
+                  ? "Activate"
+                  : "Deactivate"}
               </button>
               <button
                 onClick={() => navigate(`/customer/edit/${customerId}`)}

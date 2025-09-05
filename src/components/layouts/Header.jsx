@@ -13,8 +13,12 @@ export default function Header({ onMenuClick }) {
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef();
-  const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
+
+  const dispatch = useDispatch();
+  const [logoutAdmin] = useLogoutAdminMutation();
+
+  // Profile image state
+  const [profileImage, setProfileImage] = useState(null);
 
   const routes = [
     { keyword: "dashboard", path: "/dashboard" },
@@ -51,13 +55,42 @@ export default function Header({ onMenuClick }) {
       setSuggestions([]); // clear suggestions on navigate
     }
   };
+
+  // Hardcoded token
+  const token =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM3N2Q5OTk2NGQ2ZmQ1OTJiNDVlMiIsImlhdCI6MTc1NzA2Njk2NiwiZXhwIjoxNzU3NjcxNzY2fQ.g2ie8SGnFDNvkayFkXh1-s9HE4ecGFPlMIL62V0QTxE";
+
+  // Fetch profile image from API
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch(
+          "https://dukanse-be-f5w4.onrender.com/api/admin/getProfile",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`, // ✅ Correct format
+            },
+          }
+        );
+        const data = await response.json();
+        if (response.ok && data?.admin?.profileImage) {
+          setProfileImage(data.admin.profileImage); // ✅ Correct path
+        } else {
+          console.error("Failed to fetch profile:", data?.message);
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   // Toggle dropdown on profile click
   const handleToggleDropdown = () => {
     setShowDropdown((prev) => !prev);
   };
-
-  const dispatch = useDispatch();
-  const [logoutAdmin] = useLogoutAdminMutation();
 
   const handleLogout = async () => {
     try {
@@ -157,7 +190,7 @@ export default function Header({ onMenuClick }) {
         {/* Bell Icon */}
         <button
           aria-label="Notifications"
-          onClick={() => navigate("/notification-page")}
+          onClick={() => navigate("/notification/AllNotification")}
           className="relative flex items-center justify-center text-2xl"
         >
           <FaRegBell />
@@ -170,7 +203,7 @@ export default function Header({ onMenuClick }) {
             className="flex items-center gap-2 "
           >
             <img
-              src={Dummy_pic}
+              src={profileImage || Dummy_pic}
               alt="Profile"
               className="w-8 h-8 rounded-full object-cover border border-gray-300"
             />
