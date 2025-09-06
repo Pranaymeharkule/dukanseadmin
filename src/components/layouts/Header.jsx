@@ -20,6 +20,10 @@ export default function Header({ onMenuClick }) {
   // Profile image state
   const [profileImage, setProfileImage] = useState(null);
 
+  // Search state
+  const [query, setQuery] = useState("");        // ✅ Make sure this exists
+  const [suggestions, setSuggestions] = useState([]);  // ✅ Make sure this exists
+
   const routes = [
     { keyword: "dashboard", path: "/dashboard" },
     { keyword: "customer", path: "/customer" },
@@ -41,18 +45,17 @@ export default function Header({ onMenuClick }) {
     setQuery(value);
 
     if (lower.trim() === "") {
-      setSuggestions([]); // clear if input is empty
+      setSuggestions([]);
       return;
     }
-    // Filter suggestions
+
     const filtered = routes.filter((r) => r.keyword.includes(lower));
     setSuggestions(filtered);
 
-    // If exact match, navigate
     const match = routes.find((r) => r.keyword === lower);
     if (match) {
       navigate(match.path);
-      setSuggestions([]); // clear suggestions on navigate
+      setSuggestions([]);
     }
   };
 
@@ -69,13 +72,13 @@ export default function Header({ onMenuClick }) {
           {
             method: "GET",
             headers: {
-              Authorization: `Bearer ${token}`, // ✅ Correct format
+              Authorization: `Bearer ${token}`,
             },
           }
         );
         const data = await response.json();
         if (response.ok && data?.admin?.profileImage) {
-          setProfileImage(data.admin.profileImage); // ✅ Correct path
+          setProfileImage(data.admin.profileImage);
         } else {
           console.error("Failed to fetch profile:", data?.message);
         }
@@ -87,7 +90,6 @@ export default function Header({ onMenuClick }) {
     fetchProfile();
   }, []);
 
-  // Toggle dropdown on profile click
   const handleToggleDropdown = () => {
     setShowDropdown((prev) => !prev);
   };
@@ -95,7 +97,7 @@ export default function Header({ onMenuClick }) {
   const handleLogout = async () => {
     try {
       await logoutAdmin().unwrap();
-      dispatch(logout()); // clear persisted redux state
+      dispatch(logout());
       toast.success("Logout successful");
       navigate("/");
     } catch (err) {
@@ -104,13 +106,11 @@ export default function Header({ onMenuClick }) {
     }
   };
 
-  // Navigate to profile
   const handleGoToProfile = () => {
     navigate("/profile");
-    setShowDropdown(false); // Close dropdown
+    setShowDropdown(false);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -200,7 +200,7 @@ export default function Header({ onMenuClick }) {
         <div className="relative">
           <div
             onClick={handleToggleDropdown}
-            className="flex items-center gap-2 "
+            className="flex items-center gap-2"
           >
             <img
               src={profileImage || Dummy_pic}
@@ -210,7 +210,6 @@ export default function Header({ onMenuClick }) {
             <FaChevronDown className="text-sm text-gray-600" />
           </div>
 
-          {/* Dropdown menu */}
           {showDropdown && (
             <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg border z-50">
               <button
