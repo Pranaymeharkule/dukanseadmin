@@ -471,6 +471,8 @@
             </Layout>
           }
         />
+        
+        
         <Route
           path="/faq/edit/:id"
           element={
