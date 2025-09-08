@@ -256,7 +256,7 @@ const Customer = () => {
     <div className="max-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header Card - Added shadow */}
-        <div className="bg-white p-4 rounded-lg shadow-md mb-6">
+        <div className="bg-white p-4 rounded-lg shadow mb-6">
           <div className="flex items-center justify-between">
             {/* View type buttons */}
             <div className="flex items-center gap-2">
@@ -547,7 +547,7 @@ const Customer = () => {
                         colSpan="10"
                         className="text-center p-8 text-gray-500"
                       >
-                        No customers found
+                        Loading
                       </td>
                     </tr>
                     {/* Fill remaining rows to keep table height same */}

@@ -1,3 +1,4 @@
+// src/pages/helpsupport/CustomerComplaints.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -32,7 +33,7 @@ const StatusBadge = ({ status, onClick }) => {
 
   return (
     <span
-      className={`${baseClasses} ${statusClasses[status] || "bg-gray-500"}`}
+      className={`${baseClasses} ${statusClasses[status] || "text-gray-500"}`}
       onClick={
         status !== "Resolved" && status !== "Solved" ? onClick : undefined
       }
@@ -53,103 +54,97 @@ const ComplaintsTable = ({ data = [], onDelete, onResolve }) => {
   const rowsPerPage = 4;
 
   return (
-    <div className="bg-white rounded-md m-2 p-4 shadow">
-      <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
-        <div className="max-h-[490px] min-w-[1000px]">
-          <table className="w-full table-auto">
-            <thead className="bg-brandYellow text-white text-center">
-              <tr className="text-black text-sm">
-                <th className="py-3 px-4 text-base text-left">Store</th>
-                <th className="py-3 px-4 text-base text-left">Customer Name</th>
-                <th className="py-3 px-4 text-base text-left">Complaints</th>
-                <th className="py-3 px-4 text-base text-left">Status</th>
-                <th className="py-3 px-4 text-base text-left">Date</th>
-                <th className="py-3 px-4 text-base text-left">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {data
-                .slice(
-                  (currentPage - 1) * rowsPerPage,
-                  currentPage * rowsPerPage
-                )
-                .map((item, index) => (
-                  <tr
-                    key={item._id || item.id || `complaint-${index}`}
-                    className="hover:bg-gray-50 transition-colors duration-150"
-                  >
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {item.store}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {item.customerName}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-600 max-w-xs truncate">
-                      {item.description}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <StatusBadge
-                        status={item.status}
-                        onClick={() => onResolve(item)}
-                      />
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                      {new Date(item.createdAt).toLocaleDateString("en-IN")}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-4">
-                        <button
-                          onClick={() => onDelete(item)}
-                          className="focus:outline-none"
-                          title="Delete Complaint"
-                        >
-                          <TrashIcon />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
+    <div className="bg-white rounded-md shadow">
+      <div className="overflow-x-auto">
+        <table className="w-full table-auto">
+          <thead className="bg-brandYellow text-white text-center">
+            <tr className="text-black text-sm">
+              <th className="py-3 px-4 text-base text-left">Store</th>
+              <th className="py-3 px-4 text-base text-left">Customer Name</th>
+              <th className="py-3 px-4 text-base text-left">Complaint</th>
+              <th className="py-3 px-4 text-base text-left">Status</th>
+              <th className="py-3 px-4 text-base text-left">Date</th>
+              <th className="py-3 px-4 text-base text-left">Action</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {data
+              .slice(
+                (currentPage - 1) * rowsPerPage,
+                currentPage * rowsPerPage
+              )
+              .map((item, index) => (
+                <tr
+                  key={item._id || item.id || `complaint-${index}`}
+                  className="hover:bg-gray-50 transition-colors duration-150"
+                >
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {item.store}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {item.customerName}
+                  </td>
+                  <td className="px-4 py-4 text-sm text-gray-600 max-w-xs truncate">
+                    {item.description}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <StatusBadge
+                      status={item.status}
+                      onClick={() => onResolve(item)}
+                    />
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {new Date(item.createdAt).toLocaleDateString("en-IN")}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => onDelete(item)}
+                      className="focus:outline-none"
+                      title="Delete Complaint"
+                    >
+                      <TrashIcon />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
       </div>
 
       {/* Pagination */}
-      {Math.ceil(data.length / rowsPerPage) > 1 && (
-        <div className="flex justify-center items-center mt-4 space-x-2">
+      <div className="flex justify-center items-center mt-4 space-x-2">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className="px-2 py-1 text-red-500 hover:text-red-700 disabled:opacity-50"
+        >
+          &lt;
+        </button>
+        {[...Array(Math.ceil(data.length / rowsPerPage) || 1)].map((_, index) => (
           <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-2 py-1 text-red-500 hover:text-red-700 disabled:opacity-50"
+            key={`page-${index + 1}`}
+            onClick={() => setCurrentPage(index + 1)}
+            className={`px-3 py-1 rounded font-medium ${
+              currentPage === index + 1
+                ? "bg-brandYellow text-red-500 border-red-500"
+                : "bg-white text-red-500 border border-red-500 hover:text-red-700 hover:border-red-700"
+            }`}
           >
-            &lt;
+            {index + 1}
           </button>
-          {[...Array(Math.ceil(data.length / rowsPerPage))].map((_, index) => (
-            <button
-              key={`page-${index + 1}`}
-              onClick={() => setCurrentPage(index + 1)}
-              className={`px-3 py-1 rounded font-medium ${
-                currentPage === index + 1
-                  ? "bg-brandYellow text-red-500 border-red-500"
-                  : "bg-white text-red-500 border-red-500 hover:text-red-700 hover:border-red-700"
-              }`}
-            >
-              {index + 1}
-            </button>
-          ))}
-          <button
-            onClick={() =>
-              setCurrentPage((prev) =>
-                Math.min(prev + 1, Math.ceil(data.length / rowsPerPage))
-              )
-            }
-            disabled={currentPage === Math.ceil(data.length / rowsPerPage)}
-            className="px-2 py-1 text-red-500 hover:text-red-700 disabled:opacity-50"
-          >
-            &gt;
-          </button>
-        </div>
-      )}
+        ))}
+        <button
+          onClick={() =>
+            setCurrentPage((prev) =>
+              Math.min(prev + 1, Math.ceil(data.length / rowsPerPage) || 1)
+            )
+          }
+          disabled={currentPage === Math.ceil(data.length / rowsPerPage) || 1}
+          className="px-2 py-1 text-red-500 hover:text-red-700 disabled:opacity-50"
+        >
+          &gt;
+        </button>
+      </div>
     </div>
   );
 };
@@ -164,7 +159,7 @@ export default function CustomerComplaints() {
 
   const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
   const TOKEN =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM3N2Q5OTk2NGQ2ZmQ1OTJiNDVlMiIsImlhdCI6MTc1NzA2Njk2NiwiZXhwIjoxNzU3NjcxNzY2fQ.g2ie8SGnFDNvkayFkXh1-s9HE4ecGFPlMIL62V0QTxE";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM3N2Q5OTk2NGQ2ZmQ1OTJiNDVlMiIsImlhdCI6MTc1NzE0ODk2NiwiZXhwIjoxNzU3NzUzNzY2fQ.WNvKwkIgZKhG55pXWqoP4DDSqb7j_DrukoeFAPf80XI";
 
   useEffect(() => {
     const fetchComplaints = async () => {
@@ -198,20 +193,21 @@ export default function CustomerComplaints() {
     setIsDeleteModalOpen(true);
   };
 
-  // ✅ Delete API call when clicking "Yes"
   const confirmDelete = async () => {
     if (!currentItem?._id && !currentItem?.id) return;
-    const docId = currentItem._id || currentItem.id;
+    const complaintId = currentItem._id || currentItem.id;
 
     try {
-      await axios.delete(`${API_BASE_URL}/adminSupport/reSolve/${docId}`, {
+      await axios.delete(`${API_BASE_URL}/adminSupport/delete/${complaintId}`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${TOKEN}`,
         },
       });
 
-      setComplaints((prev) => prev.filter((c) => c._id !== docId && c.id !== docId));
+      setComplaints((prev) =>
+        prev.filter((c) => c._id !== complaintId && c.id !== complaintId)
+      );
     } catch (error) {
       console.error("Error deleting complaint:", error.response?.data || error);
     }
@@ -225,7 +221,6 @@ export default function CustomerComplaints() {
     setCurrentItem(null);
   };
 
-  // ✅ Resolve Status API
   const handleResolveStatus = async (item) => {
     if (!item._id && !item.id) return;
     const docId = item._id || item.id;
@@ -261,16 +256,16 @@ export default function CustomerComplaints() {
   return (
     <>
       <div className="bg-gray-100 p-3">
+        {/* Header */}
         <div className="bg-white px-4 py-3 rounded-md shadow">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Help & Support
-          </h2>
+          <h2 className="text-lg text-gray-800">Help & Support</h2>
         </div>
 
+        {/* Navigation */}
         <div className="bg-white px-4 py-3 mt-4 rounded-md shadow flex flex-wrap gap-3">
           <button
             onClick={() => navigate("/helpSupport")}
-            className={`px-4 py-2 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
+            className={`px-2 py-1 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
               location.pathname === "/helpSupport"
                 ? "bg-[rgb(254,188,29)] text-white"
                 : ""
@@ -280,9 +275,9 @@ export default function CustomerComplaints() {
           </button>
           <button
             onClick={() => navigate("/helpSupport/customer-complaints")}
-            className={`px-4 py-2 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
+            className={`px-2 py-1 rounded-md border text-[rgb(236,45,1)] ${
               location.pathname === "/helpSupport/customer-complaints"
-                ? "bg-[rgb(254,188,29)] "
+                ? "bg-[rgb(254,188,29)]"
                 : ""
             }`}
           >
@@ -290,9 +285,9 @@ export default function CustomerComplaints() {
           </button>
           <button
             onClick={() => navigate("/helpSupport/customer-support-number")}
-            className={`px-4 py-2 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
+            className={`px-2 py-1 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
               location.pathname === "/helpSupport/customer-support-number"
-                ? "bg-[rgb(254,188,29)] "
+                ? "bg-[rgb(254,188,29)]"
                 : ""
             }`}
           >
@@ -300,9 +295,9 @@ export default function CustomerComplaints() {
           </button>
           <button
             onClick={() => navigate("/helpSupport/faq")}
-            className={`px-4 py-2 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
+            className={`px-2 py-1 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
               location.pathname === "/helpSupport/faq"
-                ? "bg-[rgb(254,188,29)] "
+                ? "bg-[rgb(254,188,29)]"
                 : ""
             }`}
           >
@@ -310,17 +305,17 @@ export default function CustomerComplaints() {
           </button>
         </div>
 
-        <div className="bg-white rounded-md m-2 p-4 shadow">
-          <main className="mt-6">
-            <ComplaintsTable
-              data={complaints}
-              onDelete={handleDeleteClick}
-              onResolve={handleResolveStatus}
-            />
-          </main>
+        {/* Complaints Table */}
+        <div className="bg-white rounded-md p-2 mt-4 shadow">
+          <ComplaintsTable
+            data={complaints}
+            onDelete={handleDeleteClick}
+            onResolve={handleResolveStatus}
+          />
         </div>
       </div>
 
+      {/* Delete Modal */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white rounded-lg p-6 w-full max-w-sm shadow-lg">

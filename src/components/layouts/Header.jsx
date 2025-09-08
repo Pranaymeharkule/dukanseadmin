@@ -190,7 +190,7 @@ export default function Header({ onMenuClick }) {
         {/* Bell Icon */}
         <button
           aria-label="Notifications"
-          onClick={() => navigate("/notification/AllNotification")}
+          onClick={() => navigate("/send-notification")}
           className="relative flex items-center justify-center text-2xl"
         >
           <FaRegBell />

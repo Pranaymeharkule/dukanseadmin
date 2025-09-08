@@ -62,16 +62,17 @@ export default function CustomerSupportNumber() {
 
   return (
     <div className="bg-gray-100 p-3">
+      
       {/* Header */}
       <div className="bg-white px-4 py-3 rounded-md shadow">
-        <h2 className="text-lg font-semibold text-gray-800">Help & Support</h2>
+        <h2 className="text-lg  text-gray-800">Help & Support</h2>
       </div>
 
       {/* Navigation Buttons */}
       <div className="bg-white px-4 py-3 mt-4 rounded-md shadow flex flex-wrap gap-3">
         <button
           onClick={() => navigate("/helpSupport")}
-          className={`px-4 py-2 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
+          className={`px-2 py-1 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
             location.pathname === "/helpSupport" ? "bg-[rgb(254,188,29)] " : ""
           }`}
         >
@@ -80,7 +81,7 @@ export default function CustomerSupportNumber() {
 
         <button
           onClick={() => navigate("/helpSupport/customer-complaints")}
-          className={`px-4 py-2 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
+          className={`px-2 py-1 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
             location.pathname === "/helpSupport/customer-complaints"
               ? "bg-[rgb(254,188,29)] "
               : ""
@@ -91,7 +92,7 @@ export default function CustomerSupportNumber() {
 
         <button
           onClick={() => navigate("/helpSupport/customer-support-number")}
-          className={`px-4 py-2 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
+          className={`px-2 py-1 rounded-md border  shadow text-[rgb(236,45,1)] ${
             location.pathname === "/helpSupport/customer-support-number"
               ? "bg-[rgb(254,188,29)] "
               : ""
@@ -102,7 +103,7 @@ export default function CustomerSupportNumber() {
 
         <button
           onClick={() => navigate("/helpSupport/faq")}
-          className={`px-4 py-2 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
+          className={`px-2 py-1 rounded-md border border-[rgb(236,45,1)] text-[rgb(236,45,1)] ${
             location.pathname === "/helpSupport/faq"
               ? "bg-[rgb(254,188,29)] "
               : ""
@@ -113,13 +114,14 @@ export default function CustomerSupportNumber() {
       </div>
 
       {/* Content Area */}
-      <div className="bg-white rounded-md m-2 p-4 shadow">
-        <main className="mt-6">
+      <div className="bg-white rounded-md mt-4  shadow">
+      <div className="w-full bg-white rounded-lg  min-h-[calc(100vh-200px)]">
+        <main className="">
           <form
             onSubmit={handleSave}
             className="p-6 flex flex-col min-h-[300px]"
           >
-            <label className="block text-gray-800 font-medium mb-2">
+            <label className="block text-gray-800 font-semibold mb-2">
               Customer Support Number
             </label>
 
@@ -134,7 +136,7 @@ export default function CustomerSupportNumber() {
               className="w-full border border-gray-300 rounded px-3 py-3 focus:outline-none focus:ring-2 focus:ring-[#FEBC1D]"
             />
 
-            <div className="flex justify-center mt-auto">
+            <div className="flex justify-center mt-[19rem]">
               <button
                 type="submit"
                 disabled={loading}
@@ -145,6 +147,7 @@ export default function CustomerSupportNumber() {
             </div>
           </form>
         </main>
+      </div>
       </div>
     </div>
   );
