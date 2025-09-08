@@ -113,18 +113,18 @@ const EditProduct = () => {
   };
 
   return (
-    <div className="bg-gray-100">
-      {/* Header */}
-      <div className="bg-white px-4 py-3 shadow-md sticky top-0 z-10 flex items-center space-x-2">
+    <div className="p-5 bg-gray-100 min-h-screen flex flex-col">
+      {/* Header Card */}
+      <div className="flex items-center gap-3 bg-white px-4 py-3 rounded-md shadow mb-4 sticky top-0 z-10">
         <BsArrowLeftCircle
           className="text-2xl cursor-pointer"
           onClick={() => navigate(-1)}
         />
-        <h2 className="text-xl font-semibold">Edit Product</h2>
+        <h2 className="text-xl font-semibold text-gray-800">Edit Product Details</h2>
       </div>
 
       {/* Product Card */}
-      <div className="overflow-x-auto scrollbar-thin bg-white mt-2 p-4 rounded shadow">
+      <div className="bg-white rounded-md shadow flex-1 flex flex-col min-h-0 px-6 py-6 overflow-x-auto scrollbar-hidden">
         <div className="max-h-[430px] min-w-[800px]">
           <div className="flex gap-6 mb-6">
             {/* Front Image */}
@@ -175,33 +175,13 @@ const EditProduct = () => {
           </div>
 
           {/* Form Inputs */}
-          <div className="space-y-2 text-sm text-gray-800">
+          <div className="space-y-3 text-sm text-gray-800">
             <div>
               <label className="font-bold">Name of Product</label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Price (₹)</label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Pack Of</label>
-              <input
-                type="text"
-                name="packOf"
-                value={formData.packOf}
                 onChange={handleChange}
                 className="w-full mt-1 p-2 border rounded"
               />
@@ -237,6 +217,26 @@ const EditProduct = () => {
               />
             </div>
             <div>
+              <label className="font-bold">Price (₹)</label>
+              <input
+                type="number"
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                className="w-full mt-1 p-2 border rounded"
+              />
+            </div>
+            <div>
+              <label className="font-bold">Pack Of</label>
+              <input
+                type="text"
+                name="packOf"
+                value={formData.packOf}
+                onChange={handleChange}
+                className="w-full mt-1 p-2 border rounded"
+              />
+            </div>
+            <div>
               <label className="font-bold">Maximum Shelf Life</label>
               <input
                 type="text"
@@ -267,20 +267,24 @@ const EditProduct = () => {
               ></textarea>
             </div>
           </div>
+          <div className="bg-white rounded-md px-4 py-3 sticky flex justify-center">
+            <button
+              className="w-[200px] h-[50px] bg-brandYellow rounded-[10px] px-[10px] py-[10px] 
+               flex items-center justify-center gap-2 hover:opacity-90 transition"
+              onClick={handleSave}
+            >
+              <span
+                className="font-[Poppins] text-[#EC2D01] font-semibold text-[20px] leading-[100%] tracking-normal 
+                 text-center align-middle"
+              >
+                Save
+              </span>
+            </button>
+            {showSuccess && (
+              <SuccessOverlay message="Your Information has been saved successfully !" />
+            )}
+          </div>
         </div>
-      </div>
-
-      {/* Save Button */}
-      <div className="bg-white px-1 py-2 sticky bottom-0 z-10 flex justify-center border-t">
-        <button
-          className="bg-brandYellow text-brandRed px-5 py-1.5 rounded hover:bg-yellow-600"
-          onClick={handleSave}
-        >
-          Save
-        </button>
-        {showSuccess && (
-          <SuccessOverlay message="Your Information has been saved successfully !" />
-        )}
       </div>
     </div>
   );

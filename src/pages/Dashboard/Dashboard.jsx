@@ -186,23 +186,10 @@ if (ordersRes.data) {
         setRevenueStats(revenueRes.data?.data || null);   // ✅ new line
         setStoreStats(totalStoreRes.data?.totalStores || null);
 
-        // --- Coin Economics ---
-const coinEcoRes = await axios.get(`${API_BASE_URL}/coinEconomics`);
-if (coinEcoRes.data?.success) {
-  const apiData = coinEcoRes.data.data;
+        
 
-  const formattedCoinEco = [
-    { day: "Mon", issued: apiData.Man?.issued || 0, redeemed: apiData.Man?.redeemed || 0 },
-    { day: "Tue", issued: apiData.Tue?.issued || 0, redeemed: apiData.Tue?.redeemed || 0 },
-    { day: "Wed", issued: apiData.Wed?.issued || 0, redeemed: apiData.Wed?.redeemed || 0 },
-    { day: "Thu", issued: apiData.Thu?.issued || 0, redeemed: apiData.Thu?.redeemed || 0 },
-    { day: "Fri", issued: apiData.Fri?.issued || 0, redeemed: apiData.Fri?.redeemed || 0 },
-    { day: "Sat", issued: apiData.Sat?.issued || 0, redeemed: apiData.Sat?.redeemed || 0 },
-    { day: "Sun", issued: apiData.Sun?.issued || 0, redeemed: apiData.Sun?.redeemed || 0 },
-  ];
 
-  setCoinEconomics(formattedCoinEco);
-}
+
 
 
 
@@ -250,6 +237,32 @@ if (coinEcoRes.data?.success) {
     fetchReferralStats();
   }, []);
 
+  // --- Coin Economics ---
+const fetchCoinEconomics = async (period = "week") => {
+  try {
+    const coinEcoRes = await axios.get(`${API_BASE_URL}/coinEconomics?period=${period}`);
+    if (coinEcoRes.data?.success) {
+      const apiData = coinEcoRes.data.data;
+
+      const formattedCoinEco = [
+        { day: "Mon", issued: apiData.Mon?.issued || 0, redeemed: apiData.Mon?.redeemed || 0 },
+        { day: "Tue", issued: apiData.Tue?.issued || 0, redeemed: apiData.Tue?.redeemed || 0 },
+        { day: "Wed", issued: apiData.Wed?.issued || 0, redeemed: apiData.Wed?.redeemed || 0 },
+        { day: "Thu", issued: apiData.Thu?.issued || 0, redeemed: apiData.Thu?.redeemed || 0 },
+        { day: "Fri", issued: apiData.Fri?.issued || 0, redeemed: apiData.Fri?.redeemed || 0 },
+        { day: "Sat", issued: apiData.Sat?.issued || 0, redeemed: apiData.Sat?.redeemed || 0 },
+        { day: "Sun", issued: apiData.Sun?.issued || 0, redeemed: apiData.Sun?.redeemed || 0 },
+      ];
+
+      setCoinEconomics(formattedCoinEco);
+    }
+  } catch (err) {
+    console.error("Coin Economics API error:", err);
+  }
+};
+
+
+
  
   const stateAOVCards = [
     { label: "Customer AOV", value: "1000", change: "12%" },
@@ -266,6 +279,14 @@ const [selectedPeriod, setSelectedPeriod] = useState("This Week");
 const monthlySalesData = [ /* your monthly data */ ];
 const yearlySalesData = [ /* your yearly data */ ];
 
+// --- Fetch coin economics whenever selectedPeriod changes ---
+useEffect(() => {
+  if (selectedPeriod === "This Week") fetchCoinEconomics("week");
+  if (selectedPeriod === "This Month") fetchCoinEconomics("month");
+  if (selectedPeriod === "This Year") fetchCoinEconomics("year");
+}, [selectedPeriod]);
+
+
 
   return (
     <div className="p-4 space-y-6 bg-[#F5F5F5]">
@@ -274,7 +295,7 @@ const yearlySalesData = [ /* your yearly data */ ];
            <div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
       <div className="flex items-center mb-1">
         <FiUser className="text-brandRed h-10 w-5 mr-2" />
-        <span className="text-2xl font-medium text-brandRed">Seller</span>
+        <span className="text-2xl font-bold text-brandRed">Seller</span>
       </div>
       <div className="text-brandRed text-3xl font-bold mb-2">
         {sellerStats ? sellerStats.totalSellerCount : "Loading..."}
@@ -288,7 +309,7 @@ const yearlySalesData = [ /* your yearly data */ ];
   <span>{sellerStats ? `${sellerStats.growthPercent}%` : ""}</span>
 </div>
   {/* Remaining text */}
-  <span className="text-xs text-red-600">since last month</span>
+  <span className="text-xs text-red-600">Since last month</span>
 </div>
 
 
@@ -296,7 +317,7 @@ const yearlySalesData = [ /* your yearly data */ ];
         <div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
   <div className="flex items-center mb-1">
     <LuUserPlus className="text-brandRed h-10 w-5 mr-2" />
-    <span className="text-2xl font-medium text-brandRed">Customer</span>
+    <span className="text-2xl font-bold text-brandRed">Customer</span>
   </div>
   <div className="text-brandRed text-3xl font-bold mb-2">
     {customerStats?.Customer ?? "85"}
@@ -310,7 +331,7 @@ const yearlySalesData = [ /* your yearly data */ ];
 <span>{customerStats && customerStats.growthPercent ? `${customerStats.growthPercent}%` : "214.8%"}</span>
     </div>
     {/* Remaining text */}
-    <span className="text-xs text-red-600">since last month</span>
+    <span className="text-xs text-red-600">Since last month</span>
   </div>
 </div>
 
@@ -318,7 +339,7 @@ const yearlySalesData = [ /* your yearly data */ ];
        <div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
   <div className="flex items-center mb-1">
     <LuTicketPercent className="text-brandRed h-10 w-5 mr-2" />
-    <span className="text-2xl font-medium text-brandRed">Sales</span>
+    <span className="text-2xl font-bold text-brandRed">Sales</span>
   </div>
   <div className="text-brandRed text-3xl font-bold mb-2">
     {salesStats?.totalSales ?? "0"}
@@ -332,14 +353,14 @@ const yearlySalesData = [ /* your yearly data */ ];
       <span>{salesStats?.growthPercent ?? "-90.99%"}</span>
     </div>
     {/* Remaining text */}
-    <span className="text-xs text-red-600">since last month</span>
+    <span className="text-xs text-red-600">Since last month</span>
   </div>
 </div>
 
      <div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
   <div className="flex items-center mb-1">
     <FaMoneyBills className="text-brandRed h-10 w-5 mr-2" />
-    <span className="text-2xl font-medium text-brandRed">Revenue</span>
+    <span className="text-2xl font-bold text-brandRed">Revenue</span>
   </div>
   <div className="text-brandRed text-3xl font-bold mb-2">
     {revenueStats?.totalRevenueTillNow ?? "Loading..."}
@@ -355,7 +376,7 @@ const yearlySalesData = [ /* your yearly data */ ];
       <span>{revenueStats?.growthPercent ?? "0%"}</span>
     </div>
     {/* Remaining text */}
-    <span className="text-xs text-red-600">since last month</span>
+    <span className="text-xs text-red-600">Since last month</span>
   </div>
 </div>
 
@@ -367,7 +388,7 @@ const yearlySalesData = [ /* your yearly data */ ];
 
         <div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
   <div className="flex items-center mb-1">
-    <span className="text-sm font-medium text-[#EC2D01]">Total Stores</span>
+    <span className="text-sm font-bold text-[#EC2D01]">Total Stores</span>
   </div>
   <div className="text-[#EC2D01] text-2xl font-bold mb-2">
     {storeStats?.totalStoresTillNow ?? 0}
@@ -383,7 +404,7 @@ const yearlySalesData = [ /* your yearly data */ ];
       <span>{storeStats?.["growth Percent"] ?? "0"}%</span>
     </div>
     {/* Remaining text */}
-    <span className="text-xs text-red-600">since last month</span>
+    <span className="text-xs text-red-600">Since last month</span>
   </div>
 </div>
 
@@ -391,7 +412,7 @@ const yearlySalesData = [ /* your yearly data */ ];
 
         <div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
   <div className="flex items-center mb-1">
-    <span className="text-sm font-medium text-[#EC2D01]">Active Stores</span>
+    <span className="text-sm font-bold text-[#EC2D01]">Active Stores</span>
   </div>
   <div className="text-[#EC2D01] text-2xl font-bold mb-2">
     {activeStores?.["Active Stores"] ?? "11"}
@@ -407,13 +428,13 @@ const yearlySalesData = [ /* your yearly data */ ];
       <span>{activeStores?.growthPercent ?? "0%"}</span>
     </div>
     {/* Remaining text */}
-    <span className="text-xs text-red-600">since last month</span>
+    <span className="text-xs text-red-600">Since last month</span>
   </div>
 </div>
 
 <div className="bg-[#FEBC1DB2] p-3 rounded-lg shadow-md">
   <div className="flex items-center mb-1">
-    <span className="text-sm font-medium text-[#EC2D01]">Today Orders</span>
+    <span className="text-sm font-bold text-[#EC2D01]">Today's Orders</span>
   </div>
   <div className="text-[#EC2D01] text-2xl font-bold mb-2">
     {todaysOrders?.count ?? "Loading..."}
@@ -429,7 +450,7 @@ const yearlySalesData = [ /* your yearly data */ ];
       <span>{todaysOrders?.growthPercent ?? "0%"}</span>
     </div>
     {/* Remaining text */}
-    <span className="text-xs text-red-600">since last month</span>
+    <span className="text-xs text-red-600">Since last month</span>
   </div>
 </div>
 
@@ -441,144 +462,250 @@ const yearlySalesData = [ /* your yearly data */ ];
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
         <div className="lg:col-span-2 flex flex-col gap-6">
-           {/* Sales Chart */}
-<div className="bg-white rounded-lg shadow-md p-4">
-    <div className="flex justify-between items-center mb-2">
-        <h2 className="font-semibold text-lg">Sales</h2>
-        
-        {/* Dropdown for period filter */}
-        <select
-            className="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
-            value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
-        >
-            <option value="This Week">This Week</option>
-            <option value="This Month">This Month</option>
-            <option value="This Year">This Year</option>
-        </select>
-    </div>
 
-    <ResponsiveContainer width="100%" height={250}>
-       <BarChart data={
-    selectedPeriod === "This Week"
-        ? weeklySalesData
-        : selectedPeriod === "This Month"
-        ? monthlySalesData
-        : yearlySalesData
-}>
+{/* Sales Chart */}
+<div
+  className="bg-white rounded-md shadow-md"
+  style={{
+    width: "750px",
+    height: "350px",
+    opacity: 1,
+    borderRadius: "10px",
+    padding: "10px",
+    gap: "28px",
+  }}
+>
+  <div className="flex justify-between items-center mb-2">
+    <h2 className="font-semibold text-lg">Sales</h2>
 
-            <XAxis dataKey="period" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="income" fill="#EC2D01" radius={[8, 8, 0, 0]} />
-        </BarChart>
-    </ResponsiveContainer>
+    {/* Dropdown for period filter */}
+    <select
+      className="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
+      value={selectedPeriod}
+      onChange={(e) => setSelectedPeriod(e.target.value)}
+    >
+      <option value="This Week">This Week</option>
+      <option value="This Month">This Month</option>
+      <option value="This Year">This Year</option>
+    </select>
+  </div>
+
+  <ResponsiveContainer width="100%" height={250}>
+    <BarChart
+      data={
+        selectedPeriod === "This Week"
+          ? weeklySalesData
+          : selectedPeriod === "This Month"
+          ? monthlySalesData && monthlySalesData.length > 0
+            ? monthlySalesData
+            : [{ period: "No Data", income: 0 }]
+          : yearlySalesData && yearlySalesData.length > 0
+          ? yearlySalesData
+          : [{ period: "No Data", income: 0 }]
+      }
+    >
+      <XAxis dataKey="period" axisLine={false} tickLine={false} />
+      <YAxis axisLine={false} tickLine={false} />
+      <Tooltip />
+      <Bar dataKey="income" fill="#EC2D01" radius={[8, 8, 0, 0]} />
+    </BarChart>
+  </ResponsiveContainer>
 </div>
 
+{/* Referral Program Stats Section */}
+<div
+  className="bg-white rounded-lg shadow-md"
+  style={{
+    width: "750px",
+    height: "400px",
+    opacity: 1,
+    borderRadius: "10px",
+    padding: "10px",
+    gap: "28px",
+  }}
+>
+  {/* Heading row */}
+  <div className="flex justify-between items-center mb-6">
+    <h2 className="text-left font-poppins font-semibold text-[24px] leading-[100%] tracking-[0%]">
+      Referral Program Stats
+    </h2>
 
-<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-  {[ 
+    <a
+      href="#"
+      className="font-poppins font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#0057AD] underline decoration-[#0057AD] decoration-solid"
+    >
+      See more
+    </a>
+  </div>
+
+  {/* Cards */}
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-5 justify-center">
+  {[
     { title: "Total Referrals", value: totalReferrals?.totalReferrals, growth: totalReferrals?.growthPercent },
     { title: "Active Referrals", value: activeReferrals?.totalActiveReferrals, growth: activeReferrals?.growthPercent },
     { title: "Total Gullak Coins", value: totalCoins?.totalGullakCoins, growth: totalCoins?.growthPercent },
-    { title: "Coins Claimed", value: coinsClaimed?.coinsClaimed, growth: coinsClaimed?.growthPercent }
+    { title: "Coins Claimed", value: coinsClaimed?.coinsClaimed, growth: coinsClaimed?.growthPercent },
   ].map((item, idx) => (
-    <div key={idx} className="bg-[#FEBC1DB2] p-6 rounded-lg shadow flex flex-col justify-between">
-      <p className="text-orange-600 font-semibold text-base">{item.title}</p>
-      <h4 className="text-orange-600 font-bold text-3xl mt-2">{item.value ?? 0}</h4>
-      <div className="flex items-center mt-4">
-        <div className="bg-red-600 text-white text-xs font-medium px-3 py-1 rounded-full flex items-center">
+    <div
+      key={idx}
+      className="bg-[#FEBC1DB2] w-[300px] h-[140px] p-4 rounded-[10px] shadow border-2 border-[#FEBC1D] flex flex-col justify-between"
+    >
+      <p className="text-[#EC2D01] font-semibold text-base">{item.title}</p>
+      <h4 className="text-[#EC2D01] font-bold text-3xl ">{item.value ?? 0}</h4>
+      <div className="flex items-center ">
+        <div
+          className={`${
+            item.growth >= 0 ? "bg-green-600" : "bg-red-600"
+          } text-white text-xs font-medium px-3 py-1 rounded-full flex items-center`}
+        >
           <span className="mr-1">{item.growth >= 0 ? "↝" : "↯"}</span>
           <span>{item.growth ?? "0"}%</span>
         </div>
-        <span className="text-orange-600 text-xs ml-2">from last month</span>
+        <span className="text-[#EC2D01] text-xs ml-2">from last month</span>
       </div>
     </div>
   ))}
 </div>
 
+</div>
+
+{/* New Sellers */}
+<div
+  className="bg-white rounded-lg shadow-md"
+  style={{
+    width: "750px",
+    height: "350px",
+    opacity: 1,
+    borderRadius: "10px",
+    padding: "10px",
+    gap: "28px",
+  }}
+>
+  {/* Heading row */}
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="font-semibold text-lg">New Sellers</h2>
+    <a
+      href="#"
+      className="font-poppins font-semibold text-[16px] text-[#0057AD] underline decoration-[#0057AD] decoration-solid"
+    >
+      See more
+    </a>
+  </div>
+
+  {/* Table */}
+  <div className="overflow-x-auto">
+    <table className="w-full text-sm text-left border-collapse">
+      <thead>
+        <tr>
+          <th className="py-3 px-4 text-left">Store</th>
+          <th className="py-3 px-4 text-left">Owner</th>
+          <th className="py-3 px-4 text-left">Email</th>
+          <th className="py-3 px-4 text-left">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {newSellers.map((s, i) => (
+          <tr key={i} className="border-b hover:bg-gray-50">
+            <td className="py-2 px-4">{s.store}</td>
+            <td className="py-2 px-4">{s.owner}</td>
+            <td className="py-2 px-4">{s.email || "-"}</td>
+            <td className="py-2 px-4">{s.date}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
 
 
-
-
-
-
-            {/* New Sellers */}
-            <div className="bg-white rounded-lg shadow-md p-4">
-                <h2 className="font-semibold text-lg mb-2">New Sellers</h2>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                        <thead>
-                            <tr>
-                                <th className="py-2 px-1">Store</th>
-                                <th className="py-2 px-1">Owner</th>
-                                <th className="py-2 px-1">Email</th>
-                                <th className="py-2 px-1">Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {newSellers.map((s, i) => (
-                            <tr key={i} className="border-b">
-                                <td className="py-2 px-1">{s.store}</td>
-                                <td className="py-2 px-1">{s.owner}</td>
-                                <td className="py-2 px-1">{s.email || "-"}</td>
-                                <td className="py-2 px-1">{s.date}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
 
-        {/* Right Column */}
-        <div className="lg:col-span-1">
-            {/* 10 New Orders */}
-            <div className="bg-white rounded-lg shadow-md p-4 max-h-[1015px] h-full overflow-y-auto">
-                <h2 className="font-semibold text-lg mb-2">Top 10 New Orders</h2>
-                <table className="w-full text-sm text-left">
-                <thead>
-                    <tr>
-                    <th className="py-2">Order Id</th>
-                    <th className="py-2">Name</th>
-                    <th className="py-2">Location</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {recentOrders.map((order, idx) => (
-                    <tr key={idx} className="border-b">
-                        <td className="py-2">{order.orderNumber}</td>
-                        <td className="py-2">{order.customerName || "-"}</td>
-                        <td className="py-2">Nagpur</td>
-                    </tr>
-                    ))}
-                </tbody>
-                </table>
-            </div>
-        </div>
+       {/* Right Column */}
+<div className="lg:col-span-1">
+
+
+ {/* 10 New Orders */}
+<div
+  className="bg-white rounded-lg shadow-md overflow-y-auto"
+  style={{
+    width: "500px",   // increased width
+    height: "1150px",
+    opacity: 1,
+    borderRadius: "10px",
+    padding: "10px",
+    gap: "10px",
+    position: "relative",
+    marginLeft: "-75px",  // pull towards left
+  }}
+>
+
+
+
+  {/* Heading row */}
+  <div className="flex justify-between items-center mb-2">
+    <h2 className="font-semibold text-lg">10 New Orders</h2>
+    <a
+      href="#"
+      className="font-poppins font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#0057AD] underline decoration-[#0057AD] decoration-solid"
+    >
+      See more
+    </a>
+  </div>
+
+  {/* Table */}
+  <table className="w-full text-sm text-left">
+    <thead>
+      <tr className="border-b">
+        <th className="py-2">Order Id</th>
+        <th className="py-2">Name</th>
+        <th className="py-2">Location</th>
+      </tr>
+    </thead>
+    <tbody>
+      {recentOrders.map((order, idx) => (
+        <tr key={idx} className="border-b">
+          <td className="py-2">{order.orderNumber}</td>
+          <td className="py-2">{order.customerName || "-"}</td>
+          <td className="py-2">Nagpur</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+</div>
+
       </div>
       
-      {/* --- Coin Economics --- */}
-      <div className="bg-white rounded-lg shadow-md p-4">
-        <div className="flex justify-between items-center mb-2">
-            <h2 className="font-semibold text-lg">Coin Economics</h2>
-            <div className="flex gap-2">
-                <button className="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">This Week</button>
-                <button className="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">This Month</button>
-                <button className="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">This Year</button>
-            </div>
-        </div>
-        <ResponsiveContainer width="100%" height={300}>
-<BarChart data={coinEconomics}>
-            <XAxis dataKey="day" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="issued" name="Coins Issued" fill="#EC2D01" />
-            <Bar dataKey="redeemed" name="Coins Redeemed" fill="#FEBC1DB2" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+ {/* --- Coin Economics --- */}
+<div className="bg-white rounded-lg shadow-md p-4">
+  <div className="flex justify-between items-center mb-2">
+    <h2 className="font-semibold text-lg">Coin Economics</h2>
+
+    {/* Dropdown for filter */}
+    <select
+      className="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
+      value={selectedPeriod}
+      onChange={(e) => setSelectedPeriod(e.target.value)}
+    >
+      <option value="This Week">This Week</option>
+      <option value="This Month">This Month</option>
+      <option value="This Year">This Year</option>
+    </select>
+  </div>
+
+  <ResponsiveContainer width="100%" height={300}>
+    <BarChart data={coinEconomics}>
+      <XAxis dataKey="day" axisLine={false} tickLine={false} />
+      <YAxis axisLine={false} tickLine={false} />
+      <Tooltip />
+      <Legend />
+      <Bar dataKey="issued" name="Coins Issued" fill="#EC2D01" />
+      <Bar dataKey="redeemed" name="Coins Redeemed" fill="#FEBC1DB2" />
+    </BarChart>
+  </ResponsiveContainer>
+</div>
+
 
       {/* AOV Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -596,94 +723,141 @@ const yearlySalesData = [ /* your yearly data */ ];
       </div>
       
       {/* User Lists */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <h2 className="font-semibold text-lg mb-2">Top Ordered Items</h2>
-            <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                    <thead>
-                        <tr>
-                            <th className="py-2 px-1">Rank</th>
-                            <th className="py-2 px-1">Item</th>
-                            <th className="py-2 px-1">Quantity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {topOrderedItems.map((item, i) => (
-                        <tr key={i} className="border-b">
-                            <td className="py-2 px-1">{item.rank}</td>
-                            <td className="py-2 px-1">{item.item}</td>
-                            <td className="py-2 px-1">{item.quantity}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <h2 className="font-semibold text-lg mb-2">Most Active Users</h2>
-            <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                    <thead>
-                        <tr>
-                            <th className="py-2 px-1">Name</th>
-                            <th className="py-2 px-1">Orders</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {mostActiveUsers.map((u, i) => (
-                        <tr key={i} className="border-b">
-                            <td className="py-2 px-1">{u.name}</td>
-                            <td className="py-2 px-1">{u.ordersPlaced || u.ordersplaced}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <h2 className="font-semibold text-lg mb-2">Most Inactive Users</h2>
-            <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                    <thead>
-                        <tr>
-                            <th className="py-2 px-1">Name</th>
-                            <th className="py-2 px-1">Number</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {inactiveUsers.map((u, i) => (
-                        <tr key={i} className="border-b">
-                            <td className="py-2 px-1">{u.customerName || "-"}</td>
-                            <td className="py-2 px-1">{u.phoneNumber}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <h2 className="font-semibold text-lg mb-2">New Customers</h2>
-            <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left">
-                    <thead>
-                        <tr>
-                            <th className="py-2 px-1">Name</th>
-                            <th className="py-2 px-1">Number</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {newCustomers.map((c, i) => (
-                        <tr key={i} className="border-b">
-                            <td className="py-2 px-1">{c.name || "-"}</td>
-                            <td className="py-2 px-1">{c.number}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-            </div>
-          </div>
-      </div>
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  {/* Top Ordered Items */}
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="font-bold text-lg">Top Ordered Items</h2>
+      <a
+        href="#"
+        className="font-poppins font-semibold text-[16px] text-[#0057AD] underline decoration-[#0057AD] decoration-solid"
+      >
+        See more
+      </a>
+    </div>
+    <div className="overflow-x-auto">
+      <table className="w-full text-lg text-left border-collapse">
+        <thead>
+          <tr>
+            <th className="py-3 px-4">Item</th>
+            <th className="py-3 px-4">Brand</th>
+            <th className="py-3 px-4">Quantity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {topOrderedItems.map((item, i) => (
+            <tr key={i} className="border-b hover:bg-gray-50">
+              <td className="py-2 px-4">{item.item}</td>
+              <td className="py-2 px-4">{item.brand || "-"}</td>
+              <td className="py-2 px-4">{item.quantity}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {/* Most Active Users */}
+<div className="bg-white rounded-lg shadow-md p-6">
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="font-bold text-lg">Most Active Users</h2>
+    <a
+      href="#"
+      className="font-poppins font-semibold text-[16px] text-[#0057AD] underline decoration-[#0057AD] decoration-solid"
+    >
+      See more
+    </a>
+  </div>
+  <table className="w-full text-lg text-left border-collapse">
+    <thead>
+      <tr>
+        <th className="py-3 px-4">Name</th>
+        <th className="py-3 px-4">Number</th>
+        <th className="py-3 px-4">Email</th>
+        <th className="py-3 px-4">Orders</th>
+      </tr>
+    </thead>
+    <tbody>
+      {mostActiveUsers.map((u, i) => (
+        <tr key={i} className="border-b hover:bg-gray-50">
+          <td className="py-2 px-4 max-w-[150px] truncate">{u.name}</td>
+          <td className="py-2 px-4 max-w-[130px] truncate">{u.number || "-"}</td>
+          <td className="py-2 px-4 max-w-[200px] truncate">{u.email || "-"}</td>
+          <td className="py-2 px-4">{u.ordersPlaced || u.ordersplaced}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+{/* Most Inactive Users */}
+<div className="bg-white rounded-lg shadow-md p-6">
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="font-bold text-lg">Most Inactive Users</h2>
+    <a
+      href="#"
+      className="font-poppins font-semibold text-[16px] text-[#0057AD] underline decoration-[#0057AD] decoration-solid"
+    >
+      See more
+    </a>
+  </div>
+  <table className="w-full text-lg text-left border-collapse">
+    <thead>
+      <tr>
+        <th className="py-3 px-4">Name</th>
+        <th className="py-3 px-4">Number</th>
+        <th className="py-3 px-4">Email</th>
+      </tr>
+    </thead>
+    <tbody>
+      {inactiveUsers.map((u, i) => (
+        <tr key={i} className="border-b hover:bg-gray-50">
+          <td className="py-2 px-4 max-w-[150px] truncate">{u.customerName || "-"}</td>
+          <td className="py-2 px-4 max-w-[130px] truncate">{u.phoneNumber || "-"}</td>
+          <td className="py-2 px-4 max-w-[200px] truncate">{u.email || "-"}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+
+
+  {/* New Customers */}
+  <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="font-bold text-lg">New Customers</h2>
+      <a
+        href="#"
+        className="font-poppins font-semibold text-[16px] text-[#0057AD] underline decoration-[#0057AD] decoration-solid"
+      >
+        See more
+      </a>
+    </div>
+    <div className="overflow-x-auto">
+      <table className="w-full text-lg text-left border-collapse">
+        <thead>
+          <tr>
+            <th className="py-3 px-4">Name</th>
+            <th className="py-3 px-4">Number</th>
+            <th className="py-3 px-4">Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          {newCustomers.map((c, i) => (
+            <tr key={i} className="border-b hover:bg-gray-50">
+              <td className="py-2 px-4">{c.name || "-"}</td>
+              <td className="py-2 px-4">{c.number || "-"}</td>
+              <td className="py-2 px-4">{c.email || "-"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
       
       {/* Map and Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

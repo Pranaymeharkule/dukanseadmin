@@ -78,173 +78,185 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="bg-gray-100">
-      {/* Header */}
-      <div className="bg-white px-4 py-3 shadow-md sticky top-0 z-10 flex items-center space-x-2">
+    <div className="bg-gray-100 max-h-screen p-4 space-y-4">
+      {/* Header Card */}
+      <div className="bg-white px-4 py-4 shadow-md rounded flex items-center space-x-2">
         <BsArrowLeftCircle
           className="text-2xl cursor-pointer"
           onClick={() => navigate(-1)}
         />
-        <h2 className="text-xl font-semibold">Add Product</h2>
+        <h2
+          className="font-[Poppins] font-medium text-[24px] leading-[24px] tracking-[0px] 
+               text-center align-middle font-normal tabular-nums proportional-nums text-[#262626]"
+        >
+          Add Product
+        </h2>
       </div>
 
-      {/* Product Card */}
-      <div className="overflow-x-auto scrollbar-thin bg-white mt-2 p-4 rounded shadow">
-        <div className="max-h-[430px] min-w-[800px]">
-          <div className="flex gap-6 mb-6">
-            {/* Front Image */}
-            <div className="w-52 h-[290px] bg-white rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 shadow">
-              <img
-                src={attaPreview}
-                alt="Front View"
-                className="w-full h-48 object-contain"
-              />
-              <label className="w-full">
-                <div className="bg-brandYellow text-brandRed font-semibold rounded-md py-2 text-center cursor-pointer hover:bg-yellow-500">
-                  <span className="flex items-center justify-center gap-1">
-                    <GrUpload className="text-lg" />
-                    Upload
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAttaChange}
-                    className="hidden"
-                  />
-                </div>
-              </label>
+      {/* Product Form Card */}
+      <div className="bg-white p-4 rounded shadow mt-3">
+        <div className="overflow-x-auto scrollbar-hidden">
+          <div className="max-h-[500px] min-w-[800px]">
+            <div className="flex gap-6 mb-6">
+              {/* Front Image */}
+              <div className="w-52 h-[290px] bg-white rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 shadow">
+                <img
+                  src={attaPreview}
+                  alt="Front View"
+                  className="w-full h-48 object-contain"
+                />
+                <label className="w-full">
+                  <div className="bg-brandYellow text-brandRed font-semibold rounded-md py-2 text-center cursor-pointer hover:bg-yellow-500">
+                    <span className="flex items-center justify-center gap-1">
+                      <GrUpload className="text-lg" />
+                      Upload
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAttaChange}
+                      className="hidden"
+                    />
+                  </div>
+                </label>
+              </div>
+
+              {/* Back Image */}
+              <div className="w-52 h-[290px] bg-white rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 shadow">
+                <img
+                  src={backImgPreview}
+                  alt="Back View"
+                  className="w-full h-48 object-contain"
+                />
+                <label className="w-full">
+                  <div className="bg-brandYellow text-brandRed font-semibold rounded-md py-2 text-center cursor-pointer hover:bg-yellow-500">
+                    <span className="flex items-center justify-center gap-1">
+                      <GrUpload className="text-lg" />
+                      Upload
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBackImgChange}
+                      className="hidden"
+                    />
+                  </div>
+                </label>
+              </div>
             </div>
 
-            {/* Back Image */}
-            <div className="w-52 h-[290px] bg-white rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 shadow">
-              <img
-                src={backImgPreview}
-                alt="Back View"
-                className="w-full h-48 object-contain"
-              />
-              <label className="w-full">
-                <div className="bg-brandYellow text-brandRed font-semibold rounded-md py-2 text-center cursor-pointer hover:bg-yellow-500">
-                  <span className="flex items-center justify-center gap-1">
-                    <GrUpload className="text-lg" />
-                    Upload
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleBackImgChange}
-                    className="hidden"
-                  />
-                </div>
-              </label>
-            </div>
-          </div>
-          {/* Form Inputs */}
-          <div className="space-y-2 text-sm text-gray-800">
-            <div>
-              <label className="font-bold">Name of Product</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Price (₹)</label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Pack Of</label>
-              <input
-                type="text"
-                name="packOf"
-                value={formData.packOf}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Brand</label>
-              <input
-                type="text"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Type</label>
-              <input
-                type="text"
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Net Weight</label>
-              <input
-                type="text"
-                name="weight"
-                value={formData.weight}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Maximum Shelf Life</label>
-              <input
-                type="text"
-                name="shelfLife"
-                value={formData.shelfLife}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Nutrient Content</label>
-              <input
-                type="text"
-                name="nutrient"
-                value={formData.nutrient}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Product Description</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={4}
-                className="w-full mt-1 p-2 border rounded"
-              ></textarea>
+            {/* Form Inputs */}
+            <div className="space-y-4 text-sm text-gray-800">
+              <div>
+                <label className="">Name of Product</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full mt-1 p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="">Brand</label>
+                <input
+                  type="text"
+                  name="brand"
+                  value={formData.brand}
+                  onChange={handleChange}
+                  className="w-full mt-1 p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="">Type</label>
+                <input
+                  type="text"
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                  className="w-full mt-1 p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="">Net Weight</label>
+                <input
+                  type="text"
+                  name="weight"
+                  value={formData.weight}
+                  onChange={handleChange}
+                  className="w-full mt-1 p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="">Price (₹)</label>
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  className="w-full mt-1 p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="">Pack Of</label>
+                <input
+                  type="text"
+                  name="packOf"
+                  value={formData.packOf}
+                  onChange={handleChange}
+                  className="w-full mt-1 p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="">Maximum Shelf Life</label>
+                <input
+                  type="text"
+                  name="shelfLife"
+                  value={formData.shelfLife}
+                  onChange={handleChange}
+                  className="w-full mt-1 p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="">Nutrient Content</label>
+                <input
+                  type="text"
+                  name="nutrient"
+                  value={formData.nutrient}
+                  onChange={handleChange}
+                  className="w-full mt-1 p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="">Product Description</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={4}
+                  className="w-full mt-1 p-2 border rounded"
+                ></textarea>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Save Button */}
-      <div className="bg-white px-1 py-2 sticky bottom-0 z-10 flex justify-center border-t">
-        <button
-          className="bg-brandYellow text-brandRed px-5 py-1.5 rounded hover:bg-yellow-600 font-bold"
-          onClick={handleSave}
-        >
-          Add
-        </button>
-        {showSuccess && (
-          <SuccessOverlay message="Product is successfully added in the master catalog" />
-        )}
+        {/* Save Button Card */}
+        <div className="bg-white px-4 py-3 shadow flex justify-center sticky bottom-0 z-10 border-t">
+          <button
+            className="bg-[#FEBC1D] text-[#EC2D01] 
+               w-[200px] h-[50px] rounded-[10px] 
+               px-[10px] py-[10px] flex items-center justify-center gap-2 
+               font-[Poppins] font-semibold text-[20px] leading-[20px] 
+               tracking-[0px] text-center align-middle 
+               hover:bg-yellow-600"
+            onClick={handleSave}
+          >
+            Add
+          </button>
+          {showSuccess && (
+            <SuccessOverlay message="Product is successfully added in the master catalog" />
+          )}
+        </div>
       </div>
     </div>
   );

@@ -4,9 +4,9 @@ import { useGetProductByIdQuery } from "../../redux/apis/productApi";
 
 const ProductDetails = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); 
+  const { id } = useParams();
   const { data, isLoading, isError } = useGetProductByIdQuery(id, {
-    refetchOnMountOrArgChange: true, 
+    refetchOnMountOrArgChange: true,
   });
 
   if (isLoading) return <div className="p-4">Loading...</div>;
@@ -16,20 +16,20 @@ const ProductDetails = () => {
   const product = data?.product;
 
   return (
-    <div className=" bg-gray-100 ">
-      {/* Header */}
-      {/* Header */}
-      <div className="bg-white px-4 py-3 shadow-md sticky top-0 z-0 flex items-center space-x-2">
-        <BsArrowLeftCircle
-          className="text-2xl cursor-pointer"
-          onClick={() => navigate(-1)}
-        />
-        <h2 className="text-xl font-semibold">Product Detail</h2>
-      </div>
+    <div className=" bg-gray-100 gap-4 p-4">
+      {/* Page Wrapper with grey background */}
+        {/* Header Card */}
+        <div className="bg-white px-4 py-4 rounded-lg] sticky top-4 z-10 flex items-center gap-3">
+          <BsArrowLeftCircle
+            className="text-2xl cursor-pointer"
+            onClick={() => navigate(-1)}
+          />
+          <h2 className="text-xl font-semibold">View Product Detail</h2>
+        </div>
 
       {/* Product Card */}
-      <div className=" overflow-x-auto scrollbar-thin  bg-white mt-2 p-2 rounded shadow">
-        <div className="max-h-[440px] min-w-[800px]">
+      <div className="overflow-x-auto scrollbar-thin bg-white mt-4 px-4 rounded shadow">
+        <div className="max-h-full min-w-full p-4">
           {/* Images */}
           <div className="flex space-x-6 mb-6">
             <img
@@ -45,50 +45,89 @@ const ProductDetails = () => {
           </div>
 
           {/* Product Name & Price */}
-          <div className="text-sm font-medium text-white bg-yellow-500 w-fit px-3 py-1 mt-2 rounded">
-            Price: ₹ {product?.price}
+          <div className="mt-2">
+            {/* Product Name */}
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              {product?.productName || "Product Name"}
+            </h3>
+
+            {/* Price Tag */}
+            <div className="text-sm font-semibold text-gray-800 bg-yellow-400 w-fit px-3 py-1 rounded">
+              Price: ₹ {product?.price}
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-1 gap-5 mt-4 text-sm text-gray-800">
-            <p className="flex">
-              <span className="w-48 font-semibold">Pack Of:</span>
-              <span>{product?.productDetails?.packOf}</span>
-            </p>
-            <p className="flex">
-              <span className="w-48 font-semibold">Brand:</span>
-              <span>{product.brand}</span>
-            </p>
-            <p className="flex">
-              <span className="w-48 font-semibold">Type:</span>
-              <span>{product.productType}</span>
-            </p>
-            <p className="flex">
-              <span className="w-48 font-semibold">Net Weight:</span>
-              <span>{product?.productDetails?.netWeight}</span>
-            </p>
-            <p className="flex">
-              <span className="w-48 font-semibold">Maximum Shelf Life:</span>
-              <span>{product?.productDetails?.shelfLife}</span>
-            </p>
-            <p className="flex">
-              <span className="w-48 font-semibold">Nutrient Content:</span>
-              <span>{product?.productDetails?.nutrientContent}</span>
-            </p>
-            <p className="flex">
-              <span className="w-48 font-semibold">Description:</span>
-              <span>{product?.productDetails?.productDescription}</span>
-            </p>
+          {/* Product Details Section */}
+          <div className="mt-6">
+            <div className="grid grid-cols-1 gap-5 text-sm text-gray-800">
+              <h3 className="text-lg font-medium text-gray-800 mb-2">
+                Product Details
+              </h3>
+
+              <p className="flex">
+                <span className="w-48 font-medium flex-shrink-0">Pack Of:</span>
+                <span className="flex-1">
+                  {product?.productDetails?.packOf}
+                </span>
+              </p>
+
+              <p className="flex">
+                <span className="w-48 font-medium flex-shrink-0">Brand:</span>
+                <span className="flex-1">{product.brand}</span>
+              </p>
+
+              <p className="flex">
+                <span className="w-48 font-medium flex-shrink-0">Type:</span>
+                <span className="flex-1">{product.productType}</span>
+              </p>
+
+              <p className="flex">
+                <span className="w-48 font-medium flex-shrink-0">
+                  Net Weight:
+                </span>
+                <span className="flex-1">
+                  {product?.productDetails?.netWeight}
+                </span>
+              </p>
+
+              <p className="flex">
+                <span className="w-48 font-medium flex-shrink-0">
+                  Maximum Shelf Life:
+                </span>
+                <span className="flex-1">
+                  {product?.productDetails?.shelfLife}
+                </span>
+              </p>
+
+              <p className="flex">
+                <span className="w-48 font-medium flex-shrink-0">
+                  Nutrient Content:
+                </span>
+                <span className="flex-1">
+                  {product?.productDetails?.nutrientContent}
+                </span>
+              </p>
+
+              <p className="flex">
+                <span className="w-48 font-medium flex-shrink-0">
+                  Product Description:
+                </span>
+                <span className="flex-1">
+                  {product?.productDetails?.productDescription}
+                </span>
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-      {/* Edit Button */}
-      <div className="bg-white px-2 py-2  sticky bottom-0 z-8 flex justify-center ">
-        <button
-          className="bg-yellow-500 text-white px-6 py-2 rounded hover:bg-yellow-600"
-          onClick={() => navigate(`/product/detail/edit/${id}`)}
-        >
-          Edit
-        </button>
+        {/* Edit Button */}
+        <div className="bg-white flex justify-center mt-6 p-4">
+          <button
+            className="w-[200px] h-[50px] rounded-[10px] bg-[#FEBC1D] text-[#EC2D01] font-poppins font-semibold text-[20px] leading-[100%] text-center px-[10px] py-[10px] opacity-100 hover:opacity-90"
+            onClick={() => navigate(`/product/detail/edit/${id}`)}
+          >
+            Edit
+          </button>
+        </div>
       </div>
     </div>
   );
