@@ -46,6 +46,8 @@
   import EditOfferTerms from "../pages/offer/EditOfferTerms";
   import ViewTermCondition from "../pages/offer/ViewTermCondition";
   import OrderDetails from "../pages/order/OrderDetails";   
+  import RiskMonitoring from "../pages/monitoring/RiskMonitoring";
+
 
   const AppRoutes = () => {
     const [activeTab, setActiveTab] = useState("/");
@@ -501,9 +503,17 @@
           element={<Layout activeTab={activeTab} setActiveTab={setActiveTab}><EditTermsCondition /></Layout>}
         />
 
-
-
+           <Route
+        path="/monitoring"
+        element={
+          <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
+            <RiskMonitoring />
+          </Layout>
+        }
+      />
       </Routes>
+
+      
     );
   };
 

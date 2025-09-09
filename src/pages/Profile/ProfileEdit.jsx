@@ -148,7 +148,7 @@ const ProfileEdit = () => {
                 className="text-gray-700 md:text-black"
               />
             </button>
-            <h2 className="text-lg md:text-xl font-semibold"> Edit Profile</h2>
+            <h2 className="text-lg md:text-xl font-semibold"> Edit Admin Profile</h2>
           </div>
         </div>
 

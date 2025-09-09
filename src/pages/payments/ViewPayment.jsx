@@ -17,19 +17,18 @@ const ViewPayment = () => {
     if (orderId) {
       // Check if API_BASE_URL is available
       if (!API_BASE_URL) {
-        setError("API configuration is missing. Please check your environment variables.");
+        setError(
+          "API configuration is missing. Please check your environment variables."
+        );
         setLoading(false);
         return;
       }
 
       axios
-        .get(
-          `${API_BASE_URL}/payments/getPaymentDetailsById/${orderId}`,
-          {
-            params: { t: new Date().getTime() }, // 🔹 prevent 304 cache issue
-            headers: { "Cache-Control": "no-cache" }, // 🔹 force fresh data
-          }
-        )
+        .get(`${API_BASE_URL}/payments/getPaymentDetailsById/${orderId}`, {
+          params: { t: new Date().getTime() }, // 🔹 prevent 304 cache issue
+          headers: { "Cache-Control": "no-cache" }, // 🔹 force fresh data
+        })
         .then((res) => {
           if (res.data.success) {
             setPayment(res.data.paymentById);
@@ -46,7 +45,9 @@ const ViewPayment = () => {
             setError(`Server Error: ${errorMessage}`);
           } else if (err.request) {
             // Network error
-            setError("Network error. Please check your connection and try again.");
+            setError(
+              "Network error. Please check your connection and try again."
+            );
           } else {
             // Other error
             setError("Failed to fetch payment details");
@@ -58,6 +59,22 @@ const ViewPayment = () => {
       setLoading(false);
     }
   }, [orderId, API_BASE_URL]);
+
+  // Function to get payment status styling
+  const getPaymentStatusStyle = (status) => {
+    switch (status?.toLowerCase()) {
+      case "success":
+      case "successful":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "failed":
+      case "failure":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen">
@@ -97,7 +114,9 @@ const ViewPayment = () => {
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
                 />
               </svg>
-              <p className="text-lg font-medium">Error Loading Payment Details</p>
+              <p className="text-lg font-medium">
+                Error Loading Payment Details
+              </p>
               <p className="text-sm mt-2">{error}</p>
             </div>
             <button
@@ -112,6 +131,11 @@ const ViewPayment = () => {
             <div className="grid grid-cols-2">
               <span className="font-semibold text-gray-700">Order ID</span>
               <span>{payment.orderId || "--"}</span>
+            </div>
+
+            <div className="grid grid-cols-2">
+              <span className="font-semibold text-gray-700">Location</span>
+              <span>{payment.location || "--"}</span>
             </div>
 
             <div className="grid grid-cols-2">
@@ -138,8 +162,8 @@ const ViewPayment = () => {
               <span
                 className={`px-2 py-1 rounded text-xs font-medium ${
                   payment.modeOfPayment === "Cash"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-blue-100 text-blue-700"
+                    ? "text-green-700"
+                    : "text-green-700"
                 }`}
               >
                 {payment.modeOfPayment || "--"}
@@ -150,6 +174,17 @@ const ViewPayment = () => {
               <span className="font-semibold text-gray-700">Total Amount</span>
               <span className="text-green-600 font-semibold">
                 ₹{payment.totalAmount || 0}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2">
+              <span className="font-semibold text-gray-700">Payment Status</span>
+              <span
+                className={`px-2 py-1 rounded text-xs font-medium ${getPaymentStatusStyle(
+                  payment.paymentStatus
+                )}`}
+              >
+                {payment.paymentStatus || "--"}
               </span>
             </div>
           </div>
