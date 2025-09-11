@@ -1,69 +1,167 @@
 // src/pages/settings/PrivacyPolicy.jsx
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiEdit } from "react-icons/fi";
-import Breadcrumb from "../../components/breadcrumbs/Breadcrumbs";
+import { BsArrowLeftCircle } from "react-icons/bs";
 
-export default function PrivacyPolicy() {
-  const navigate = useNavigate();
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+// ============================================================================
+// Presentational Component
+// ============================================================================
+const PrivacyContent = ({ isLoading, privacy }) => {
+  if (isLoading) {
+    return (
+      <div className="text-center text-gray-500 py-10">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
-  const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
-
-  useEffect(() => {
-    const fetchPrivacyPolicy = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/settings/getUserPrivacy`);
-        if (!res.ok) throw new Error("Network response was not ok");
-        const data = await res.json();
-        setContent(data?.privacyPolicy?.description || "No privacy policy found.");
-      } catch (err) {
-        console.error("Failed to fetch privacy policy:", err);
-        setError("Failed to load privacy policy. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPrivacyPolicy();
-  }, [API_BASE_URL]);
+  if (!privacy) {
+    return (
+      <p className="text-center text-gray-500 py-10">
+        No Privacy Policy found.
+      </p>
+    );
+  }
 
   return (
-    // Main container uses flex-col to stack children vertically and h-full to occupy available height
-    <div className="flex flex-col h-full p-4">
+    <>
+      {/* Dynamically inserted HTML content */}
+      <div
+        className="prose prose-base max-w-none text-gray-700 leading-relaxed"
+        dangerouslySetInnerHTML={{ __html: privacy.description }}
+      />
+    </>
+  );
+};
+
+// ============================================================================
+// Container Component
+// ============================================================================
+export default function PrivacyPolicy() {
+  const navigate = useNavigate();
+  const [privacy, setPrivacy] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [effectiveDate, setEffectiveDate] = useState("");
+
+  useEffect(() => {
+    async function fetchPrivacy() {
+      setIsLoading(true);
+      try {
+        const response = await fetch(
+          "https://dukanse-be.onrender.com/api/settings/getUserPrivacy"
+        );
+        const result = await response.json();
+
+        // Prefer result.privacyPolicy (as your other component used result.termsAndCondition)
+        if (result.success && result.privacyPolicy) {
+          const data = result.privacyPolicy;
+
+          if (data.createdAt) {
+            const dateObj = new Date(data.createdAt);
+            const formattedDate = dateObj.toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            });
+            setEffectiveDate(formattedDate);
+          }
+
+          setPrivacy(data);
+        } else if (result.privacyPolicy) {
+          // handle when success flag missing but payload exists
+          const data = result.privacyPolicy;
+          if (data.createdAt) {
+            const dateObj = new Date(data.createdAt);
+            const formattedDate = dateObj.toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            });
+            setEffectiveDate(formattedDate);
+          }
+          setPrivacy(data);
+        } else {
+          // fallback
+          setPrivacy({
+            description: `<p>Error loading privacy policy.</p>`,
+          });
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+        setPrivacy({
+          description:
+            `<p>Error loading privacy policy. Please try again later.</p>`,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchPrivacy();
+  }, []);
+
+  const handleEdit = () => {
+    navigate("/privacy-policy/edit");
+  };
+
+  return (
+    <div className="min-h-screen w-full bg-gray-100 p-3">
       {/* Header */}
-      <div className="flex justify-start items-center shadow p-2 rounded-md mb-4">
-        <Breadcrumb titles={["Privacy Policy"]} />
-      </div>
+      <div className="flex items-center mb-4 bg-white px-4 py-3 rounded-md shadow">
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate(-1)}>
+              <BsArrowLeftCircle
+                size={20}
+                className="text-gray-700 md:text-black"
+              />
+            </button>
+            <h2 className="text-lg text-gray-800 font-medium">
+               Privacy Policy
+            </h2>
+          </div>
+        </div>
 
-      {/* Privacy Policy Content */}
-      {/* flex-grow allows this div to take up all available space, pushing the button to the bottom */}
-      <div className="flex-grow overflow-y-auto scrollbar-hide p-6 border border-gray-200 rounded-md prose mb-4">
-        {loading ? (
-          <p className="text-center text-gray-500">Loading privacy policy...</p>
-        ) : error ? (
-          <p className="text-center text-red-500">{error}</p>
-        ) : content ? (
-          // The 'prose' class from Tailwind Typography helps style this HTML content
-          <div dangerouslySetInnerHTML={{ __html: content }} />
-        ) : (
-          <p className="text-center text-gray-500">No privacy policy available.</p>
+
+      {/* Content */}
+      <div className="bg-white rounded-lg mt-4 shadow-md flex flex-col h-[80vh]">
+        {/* Effective Date fixed at top */}
+        {effectiveDate && (
+          <div className="px-6 py-3  bg-white sticky top-0 z-10">
+            <p className="font-semibold text-gray-800">
+              Effective Date: {effectiveDate}
+            </p>
+          </div>
         )}
-      </div>
 
-      {/* Edit Button Container */}
-      {/* This container is now outside the scrollable area */}
-      <div className="flex justify-center w-full">
-        <button
-          className="w-full bg-brandYellow text-white py-3 rounded-md flex items-center justify-center gap-2 font-medium hover:bg-yellow-600 transition"
-          onClick={() => navigate("/privacy-policy/edit")}
+        {/* Scrollable text */}
+        <div
+          className="p-6 overflow-y-auto flex-1 text-justify break-words text-base"
+          style={{
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
         >
-          <FiEdit className="text-lg" />
-          Edit
-        </button>
+          <style>
+            {`
+              /* Chrome, Safari, Edge */
+              div::-webkit-scrollbar {
+                display: none;
+              }
+            `}
+          </style>
+
+          <PrivacyContent isLoading={isLoading} privacy={privacy} />
+        </div>
+
+        {/* Edit button fixed at bottom */}
+        <div className="p-4 flex justify-center">
+          <button
+            onClick={handleEdit}
+            className="px-10 py-2 rounded-lg font-semibold text-[#EC2D01] bg-yellow-400  disabled:cursor-not-allowed"
+          >
+            Edit
+          </button>
+        </div>
       </div>
     </div>
   );

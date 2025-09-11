@@ -55,16 +55,21 @@ export default function FaqView() {
   if (!faq) return null;
   
   return (
-    <div className="bg-gray-100 min-h-screen p-4">  
+    <div className="bg-gray-100 min-h-screen p-3">  
       {/* Header */}
-      <div className="flex items-center mb-2 bg-white p-5 rounded shadow">
-        <div className="flex items-center gap-2 mb-2">
-          <button onClick={() => navigate(-1)}>
-            <BsArrowLeftCircle size={30} className="text" />
-          </button>
-          <h2 className="text-xl font-semibold">View FAQ</h2>
+      <div className="flex items-center mb-4 bg-white px-4 py-3 rounded-md shadow">
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate(-1)}>
+              <BsArrowLeftCircle
+                size={20}
+                className="text-gray-700 md:text-black"
+              />
+            </button>
+            <h2 className="text-lg text-gray-800 font-medium">
+             View FAQ
+            </h2>
+          </div>
         </div>
-      </div>
 
       {/* FAQ Content */}
       <div className="bg-white rounded-md shadow mt-5 p-6">

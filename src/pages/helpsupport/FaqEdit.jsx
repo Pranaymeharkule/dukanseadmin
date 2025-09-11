@@ -82,19 +82,21 @@ export default function FaqEdit() {
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen p-4 md:p-6">
+    <div className="bg-gray-100 min-h-screen p-3">
       {/* Back */}
-      <div className="flex items-center mb-4 bg-white p-4 md:p-5 rounded shadow">
-        <div className="flex items-center gap-2">
-          <button onClick={() => navigate(-1)}>
-            <BsArrowLeftCircle
-              size={25}
-              className="text-gray-700 md:text-black"
-            />
-          </button>
-          <h2 className="text-lg md:text-xl font-semibold">Edit FAQ</h2>
+      <div className="flex items-center mb-4 bg-white px-4 py-3 rounded-md shadow">
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate(-1)}>
+              <BsArrowLeftCircle
+                size={20}
+                className="text-gray-700 md:text-black"
+              />
+            </button>
+            <h2 className="text-lg text-gray-800 font-medium">
+             Edit FAQ
+            </h2>
+          </div>
         </div>
-      </div>
 
       {/* Question */}
       <div className="bg-white p-4 md:p-6 rounded-md shadow">

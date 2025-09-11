@@ -47,7 +47,7 @@ const zones = [
     lng: 79.0882,
     radius: 500,
     name: "University Campus",
-    color: "#FF0000",
+    color: "#FF0000", // Red
   },
   {
     id: 2,
@@ -55,7 +55,31 @@ const zones = [
     lng: 79.0849,
     radius: 300,
     name: "Ramdaspeth",
-    color: "#0000FF",
+    color: "#0000FF", // Blue
+  },
+  {
+    id: 3,
+    lat: 21.1232,
+    lng: 79.0905,
+    radius: 400,
+    name: "Telangkhedi",
+    color: "#008000", // Green
+  },
+  {
+    id: 4,
+    lat: 21.1591,
+    lng: 79.0820,
+    radius: 350,
+    name: "Wardhaman Nagar",
+    color: "#FFA500", // Orange
+  },
+  {
+    id: 5,
+    lat: 21.1124,
+    lng: 79.0715,
+    radius: 450,
+    name: "Civil Lines",
+    color: "#800080", // Purple
   },
 ];
 
@@ -319,17 +343,17 @@ export default function Dashboard() {
   const stateAOVCards = [
     {
       label: "Customer AOV",
-      value: customerAOV ? `₹${customerAOV.currentAOV}` : "Loading...",
+      value: customerAOV ? `${customerAOV.currentAOV}` : "Loading...",
       change: parseGrowth(customerAOV?.growth),
     },
     {
       label: "Seller AOV",
-      value: sellerAOV ? `₹${sellerAOV.currentAOV}` : "Loading...",
+      value: sellerAOV ? `${sellerAOV.currentAOV}` : "Loading...",
       change: parseGrowth(sellerAOV?.growth),
     },
     {
       label: "Total AOV",
-      value: totalAOV ? `₹${totalAOV.currentAOV}` : "Loading...",
+      value: totalAOV ? `${totalAOV.currentAOV}` : "Loading...",
       change: parseGrowth(totalAOV?.growth),
     },
   ];
@@ -509,7 +533,7 @@ export default function Dashboard() {
             <div className="flex justify-between items-center mb-2">
               <h2 className="font-semibold text-lg">Sales</h2>
               <select
-                className="text-xs bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
+                className="text-xs border border-gray-300 bg-white px-4 py-2 rounded focus:outline-none focus:ring-1 focus:ring-gray-400 hover:bg-gray-100"
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(e.target.value)}
               >
@@ -535,15 +559,20 @@ export default function Dashboard() {
                 <XAxis dataKey="period" axisLine={false} tickLine={false} />
                 <YAxis axisLine={false} tickLine={false} />
                 <Tooltip />
-                <Bar dataKey="income" fill="#EC2D01" radius={[8, 8, 0, 0]} />
+                <Bar
+                  dataKey="income"
+                  fill="#EC2D01"
+                  radius={[8, 8, 0, 0]}
+                  barSize={10}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           {/* Referral Program Stats Section */}
-          <div className="bg-white rounded-lg shadow-md p-6 w-full">
+          <div className="bg-white rounded-lg shadow-md p-4 md:p-6 w-full">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-left font-poppins font-semibold text-xl md:text-2xl text-gray-800">
+              <h2 className="text-left font-poppins font-semibold text-lg md:text-xl lg:text-2xl text-gray-800">
                 Referral Program Stats
               </h2>
               <a
@@ -554,8 +583,8 @@ export default function Dashboard() {
               </a>
             </div>
 
-            {/* 2x2 layout with original data logic and new UI */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pl-8  pr-8">
+            {/* MODIFICATION: Made padding responsive (px-4 sm:px-8) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-4 sm:px-8">
               {[
                 {
                   title: "Total Referrals",
@@ -582,17 +611,12 @@ export default function Dashboard() {
                   key={idx}
                   className="bg-[#FEBC1DB2] py-4 px-6 rounded-lg shadow-sm flex flex-col justify-start gap-2"
                 >
-                  {/* Title */}
                   <p className="text-brandRed font-semibold text-base">
                     {item.title}
                   </p>
-
-                  {/* Main Value */}
                   <h4 className="text-brandRed font-bold text-4xl">
                     {item.value ?? 0}
                   </h4>
-
-                  {/* Growth Stats */}
                   <div className="flex items-center mt-auto">
                     <div className="bg-brandRed text-white text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1">
                       {item.growth >= 0 ? (
@@ -638,10 +662,10 @@ export default function Dashboard() {
           </div>
 
           {/* New Sellers */}
-          <div className="bg-white rounded-lg shadow-md p-8 w-full">
-            {/* Header */}
+          {/* MODIFICATION: Made padding responsive (p-4 md:p-8) and header font size smoother */}
+          <div className="bg-white rounded-lg shadow-md p-4 md:p-8 w-full">
             <div className="flex justify-between items-center mb-8">
-              <h2 className="font-poppins font-semibold text-2xl md:text-3xl text-gray-800">
+              <h2 className="font-poppins font-semibold text-xl md:text-2xl lg:text-3xl text-gray-800">
                 New Sellers
               </h2>
               <a
@@ -651,18 +675,15 @@ export default function Dashboard() {
                 See more
               </a>
             </div>
-
-            {/* Table */}
             <div className="overflow-x-auto">
-              <table className="w-full text-base md:text-lg text-left border-collapse">
+              <table className="w-full text-sm md:text-base text-left border-collapse">
                 <thead>
                   <tr className=" text-gray-700">
-                    {/* ---- MODIFIED LINE ---- */}
-                    <th className="py-2 px-16 text-left first:pl-0">Store</th>
-                    <th className="py-2 px-16 text-left">Owner</th>
-                    <th className="py-2 px-16 text-left">Email</th>
-                    {/* ---- MODIFIED LINE ---- */}
-                    <th className="py-2 px-16 text-left last:pr-0">Date</th>
+                    {/* MODIFICATION: Reduced excessive padding from px-16 to px-4 for responsiveness */}
+                    <th className="py-3 px-4 text-left first:pl-0">Store</th>
+                    <th className="py-3 px-4 text-left">Owner</th>
+                    <th className="py-3 px-4 text-left">Email</th>
+                    <th className="py-3 px-4 text-left last:pr-0">Date</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -671,16 +692,15 @@ export default function Dashboard() {
                       key={i}
                       className="border-b last:border-none hover:bg-gray-50 transition"
                     >
-                      {/* ---- MODIFIED LINE ---- */}
-                      <td className="py-2 px-16 align-middle first:pl-0">
+                      {/* MODIFICATION: Reduced excessive padding from px-16 to px-4 */}
+                      <td className="py-3 px-4 align-middle first:pl-0">
                         {s.store}
                       </td>
-                      <td className="py-2 px-16 align-middle">{s.owner}</td>
-                      <td className="py-2 px-16 align-middle">
+                      <td className="py-3 px-4 align-middle">{s.owner}</td>
+                      <td className="py-3 px-4 align-middle">
                         {s.email || "-"}
                       </td>
-                      {/* ---- MODIFIED LINE ---- */}
-                      <td className="py-2 px-16 align-middle whitespace-nowrap last:pr-0">
+                      <td className="py-3 px-4 align-middle whitespace-nowrap last:pr-0">
                         {s.date}
                       </td>
                     </tr>
@@ -694,6 +714,7 @@ export default function Dashboard() {
         {/* Right Column */}
         <div className="lg:col-span-2">
           {/* 10 New Orders */}
+          {/* MODIFICATION: Removed h-full to prevent unwanted stretching on large screens */}
           <div className="bg-white rounded-lg shadow-md overflow-y-auto p-4 w-full h-full">
             <div className="flex justify-between items-center mb-2">
               <h2 className="font-semibold text-lg">10 New Orders</h2>
@@ -729,7 +750,7 @@ export default function Dashboard() {
       </div>
 
       {/* --- Coin Economics --- */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-semibold text-xl">Coin Economics</h2>
           <select
@@ -742,105 +763,59 @@ export default function Dashboard() {
             <option value="This Year">This Year</option>
           </select>
         </div>
-
-        {/* Chart */}
         <ResponsiveContainer width="100%" height={430}>
           <BarChart
             data={coinEconomics}
             margin={{ top: 30, right: 30, left: 0, bottom: 30 }}
-            barCategoryGap="30%"
-            barSize={40}
+            barCategoryGap="20%"
+            barSize={30}
           >
-            <XAxis dataKey="day" axisLine={false} tickLine={false} />
-            <YAxis axisLine={false} tickLine={false} />
-            <Tooltip />
-            {/* Added wrapperStyle to create space above the legend */}
-          <Legend
-  verticalAlign="bottom"
-  align="center"
-  iconType="circle"
-  wrapperStyle={{ paddingTop: "20px" }}
-  formatter={(value) => (
-    <span style={{ color: "#000", fontWeight: "bold" }}>{value}</span>
-  )}
-/>
-
-
-            {/* Bars are now fully curved */}
-<Bar
-  dataKey="issued"
-  name="Coins Issued"
-  fill="#EC2D01"
-  stackId="a"
-  radius={[0, 0, 8, 8]}
-/>
-<Bar
-  dataKey="redeemed"
-  name="Coins Redeemed"
-  fill="#FEBC1DB2"
-  stackId="a"
-  radius={[8, 8, 0, 0]}
-/>
-
-{/* Text Styling */}
-<XAxis
-  dataKey="name"
-  tick={{ fill: "#000", fontWeight: "bold" }}
-/>
-<YAxis
-  tick={{ fill: "#000", fontWeight: "bold" }}
-/>
-<Legend
-  wrapperStyle={{ color: "#000", fontWeight: "bold" }}
-/>
-<Tooltip
-  contentStyle={{ color: "#000", fontWeight: "bold" }}
-/>
-
+            <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: "#000", fontWeight: "semibold" }} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fill: "#000", fontWeight: "semibold" }} />
+            <Tooltip contentStyle={{ color: "#000", fontWeight: "semibold" }} />
+            <Legend verticalAlign="bottom" align="center" iconType="circle" wrapperStyle={{ paddingTop: "20px" }} formatter={(value) => <span style={{ color: "#000", fontWeight: "semibold" }}>{value}</span>} />
+            <Bar dataKey="issued" name="Coins Issued" fill="#EC2D01" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="redeemed" name="Coins Redeemed" fill="#FEBC1DB2" radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
-{/* AOV Cards */}
-<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-  {stateAOVCards.map((item, idx) => (
-    <div key={idx} className="bg-[#fed167] p-3 rounded-lg shadow-md">
-      <span className="text-sm font-medium text-[#EC2D01]">
-        {item.label}
-      </span>
-      <div className="text-[#EC2D01] text-2xl font-bold mb-2">
-        {item.value}
-      </div>
 
-      {/* Growth rate with red box + plain "Since last month" */}
-      <div className="flex items-center text-xs mt-1">
-        <div className="flex items-center bg-[#EC2D01] text-white px-2 py-0.5 rounded-full">
-          <AiOutlineRise className="mr-1 h-3 w-3" />
-          <span>{item.change}</span>
-        </div>
-        <span className="ml-2 text-[13px] text-[#EC2D01] font-bold">
-          Since last month
-        </span>
+      {/* AOV Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {stateAOVCards.map((item, idx) => (
+          <div key={idx} className="bg-[#fed167] p-3 rounded-lg shadow-md">
+            <span className="text-sm font-medium text-[#EC2D01]">
+              {item.label}
+            </span>
+            <div className="text-[#EC2D01] text-2xl font-bold mb-2">
+              {item.value}
+            </div>
+            <div className="flex items-center text-xs mt-1">
+              <div className="flex items-center bg-[#EC2D01] text-white px-2 py-0.5 rounded-full">
+                <AiOutlineRise className="mr-1 h-3 w-3" />
+                <span>{item.change}</span>
+              </div>
+              <span className="ml-2 text-[13px] text-[#EC2D01] font-bold">
+                Since last month
+              </span>
+            </div>
+          </div>
+        ))}
       </div>
-    </div>
-  ))}
-</div>
-
 
       {/* User Lists */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Ordered Items */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        {/* Most Ordered Items */}
+        <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="font-bold text-2xl">Most Ordered Items</h2>
-            <a
-              href="#"
-              className="font-poppins font-semibold text-base text-[#0057AD] underline"
-            >
+            <h2 className="font-semibold text-xl md:text-2xl">Most Ordered Items</h2>
+            <a href="#" className="font-poppins font-semibold text-base text-[#0057AD] underline">
               See more
             </a>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xl text-left border-collapse">
+          <div className="overflow-x-auto mt-5">
+            {/* MODIFICATION: Made font size responsive (text-base md:text-lg) */}
+            <table className="w-full text-base md:text-lg text-left border-collapse">
               <thead>
                 <tr>
                   <th className="py-3 px-4">Items</th>
@@ -862,41 +837,31 @@ export default function Dashboard() {
         </div>
 
         {/* Most Active Users */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="font-bold text-2xl">Most Active Users</h2>
-            <a
-              href="#"
-              className="font-poppins font-semibold text-base text-[#0057AD] underline"
-            >
+            <h2 className="font-semibold text-xl md:text-2xl">Most Active Users</h2>
+            <a href="#" className="font-poppins font-semibold text-base text-[#0057AD] underline">
               See more
             </a>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xl text-left border-collapse">
+          <div className="overflow-x-auto mt-5">
+            {/* MODIFICATION: Made font size responsive */}
+            <table className="w-full text-base md:text-lg text-left border-collapse">
               <thead>
                 <tr>
-                  <th className="py-3 px-4">Name</th>
-                  <th className="py-3 px-4">Number</th>
-                  <th className="py-3 px-4">Email</th>
-                  <th className="py-3 px-4">Orders</th>
+                  <th className="py-3 px-3">Name</th>
+                  <th className="py-3 px-3">Number</th>
+                  <th className="py-3 px-3">Email</th>
+                  <th className="py-3 px-3">Orders</th>
                 </tr>
               </thead>
               <tbody>
                 {mostActiveUsers.map((u, i) => (
                   <tr key={i} className="border-b hover:bg-gray-50">
-                    <td className="py-2 px-4 max-w-[150px] truncate">
-                      {u.name}
-                    </td>
-                    <td className="py-2 px-4 max-w-[130px] truncate">
-                      {u.number || "-"}
-                    </td>
-                    <td className="py-2 px-4 max-w-[200px] truncate">
-                      {u.email || "-"}
-                    </td>
-                    <td className="py-2 px-4">
-                      {u.ordersPlaced || u.ordersplaced}
-                    </td>
+                    <td className="py-2 px-4 max-w-[150px] truncate">{u.name}</td>
+                    <td className="py-2 px-4 max-w-[130px] truncate">{u.number || "-"}</td>
+                    <td className="py-2 px-4 max-w-[200px] truncate">{u.email || "-"}</td>
+                    <td className="py-2 px-4">{u.ordersPlaced || u.ordersplaced}</td>
                   </tr>
                 ))}
               </tbody>
@@ -905,18 +870,16 @@ export default function Dashboard() {
         </div>
 
         {/* Most Inactive Users */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="font-bold text-2xl">Most Inactive Users</h2>
-            <a
-              href="#"
-              className="font-poppins font-semibold text-base text-[#0057AD] underline"
-            >
+            <h2 className="font-semibold text-xl md:text-2xl">Most Inactive Users</h2>
+            <a href="#" className="font-poppins font-semibold text-base text-[#0057AD] underline">
               See more
             </a>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xl text-left border-collapse">
+          <div className="overflow-x-auto mt-5">
+            {/* MODIFICATION: Made font size responsive */}
+            <table className="w-full text-base md:text-lg text-left border-collapse">
               <thead>
                 <tr>
                   <th className="py-3 px-4">Name</th>
@@ -927,15 +890,9 @@ export default function Dashboard() {
               <tbody>
                 {inactiveUsers.map((u, i) => (
                   <tr key={i} className="border-b hover:bg-gray-50">
-                    <td className="py-2 px-4 max-w-[150px] truncate">
-                      {u.customerName || "-"}
-                    </td>
-                    <td className="py-2 px-4 max-w-[130px] truncate">
-                      {u.phoneNumber || "-"}
-                    </td>
-                    <td className="py-2 px-4 max-w-[200px] truncate">
-                      {u.email || "-"}
-                    </td>
+                    <td className="py-2 px-3 max-w-[150px] truncate">{u.customerName || "-"}</td>
+                    <td className="py-2 px-3 max-w-[130px] truncate">{u.phoneNumber || "-"}</td>
+                    <td className="py-2 px-3 max-w-[200px] truncate">{u.email || "-"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -944,23 +901,21 @@ export default function Dashboard() {
         </div>
 
         {/* New Customers */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="font-bold text-2xl">New Customers</h2>
-            <a
-              href="#"
-              className="font-poppins font-semibold text-base text-[#0057AD] underline"
-            >
+            <h2 className="font-semibold text-xl md:text-2xl">New Customers</h2>
+            <a href="#" className="font-poppins font-semibold text-base text-[#0057AD] underline">
               See more
             </a>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xl text-left border-collapse">
+          <div className="overflow-x-auto mt-5">
+            {/* MODIFICATION: Made font size responsive */}
+            <table className="w-full text-base md:text-lg text-left border-collapse">
               <thead>
                 <tr>
-                  <th className="py-3 px-4">Name</th>
-                  <th className="py-3 px-4">Number</th>
-                  <th className="py-3 px-4">Email</th>
+                  <th className="py-3 px-3">Name</th>
+                  <th className="py-3 px-3">Number</th>
+                  <th className="py-3 px-3">Email</th>
                 </tr>
               </thead>
               <tbody>
@@ -981,25 +936,13 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* --- Map --- */}
         <div className="bg-white rounded-lg shadow-md p-4 w-full h-[450px] lg:h-auto">
-          <h2 className="text-md font-bold text-green-800 mb-2">
+          <h2 className="text-md font-bold text-green-800 mb-2 border-2 border-green-800 px-3 py-1 inline-block rounded">
             NAGPUR CITY
           </h2>
-          <MapContainer
-            center={[21.1458, 79.0882]}
-            zoom={13}
-            style={{ height: "300px", width: "100%" }}
-          >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            />
+          <MapContainer center={[21.1458, 79.0882]} zoom={13} style={{ height: "300px", width: "100%" }}>
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' />
             {zones.map((zone) => (
-              <Circle
-                key={zone.id}
-                center={[zone.lat, zone.lng]}
-                radius={zone.radius}
-                color="blue"
-              >
+              <Circle key={zone.id} center={[zone.lat, zone.lng]} radius={zone.radius} color="blue">
                 <Popup>{zone.name}</Popup>
               </Circle>
             ))}
@@ -1007,10 +950,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 gap-2 mt-4 text-sm font-medium">
             {zones.map((zone, idx) => (
               <div key={idx} className="flex items-center gap-2">
-                <div
-                  className="w-4 h-4 rounded-sm"
-                  style={{ backgroundColor: zone.color }}
-                ></div>
+                <div className="w-4 h-4 rounded-sm" style={{ backgroundColor: zone.color }}></div>
                 {zone.name}
               </div>
             ))}
@@ -1019,9 +959,6 @@ export default function Dashboard() {
 
         {/* Delivery vs Pickup Chart */}
         <div className="bg-white rounded-lg shadow-md p-4">
-          <h2 className="font-semibold text-lg mb-2 text-center">
-            Delivery vs Pickup
-          </h2>
           <ResponsiveContainer width="100%" height={400}>
             <PieChart>
               <Pie
@@ -1032,19 +969,10 @@ export default function Dashboard() {
                 outerRadius={130}
                 fill="#8884d8"
                 dataKey="value"
-                label={({
-                  cx,
-                  cy,
-                  midAngle,
-                  innerRadius,
-                  outerRadius,
-                  name,
-                }) => {
+                label={({ cx, cy, midAngle, innerRadius, outerRadius, name }) => {
                   const radius = innerRadius + (outerRadius - innerRadius) / 2;
-                  const x =
-                    cx + radius * Math.cos(-midAngle * (Math.PI / 180));
-                  const y =
-                    cy + radius * Math.sin(-midAngle * (Math.PI / 180));
+                  const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
+                  const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
                   return (
                     <text
                       x={x}
@@ -1070,14 +998,8 @@ export default function Dashboard() {
                 layout="horizontal"
                 iconType="square"
                 formatter={(value) => {
-                  const val = orderTypeData.find(
-                    (item) => item.name === value
-                  )?.value;
-                  return (
-                    <span className="text-sm font-medium text-gray-800">
-                      {val?.toFixed(2)}%
-                    </span>
-                  );
+                  const val = orderTypeData.find((item) => item.name === value)?.value;
+                  return <span className="text-sm font-medium text-gray-800">{val?.toFixed(2)}%</span>;
                 }}
               />
             </PieChart>

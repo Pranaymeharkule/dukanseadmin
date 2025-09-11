@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { FiEye } from "react-icons/fi";
-import { MdDelete } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { BsArrowLeftCircle } from "react-icons/bs";
+import { ReactComponent as ViewIcon } from "../../assets/view.svg";
 
 /* ---------- Helpers ---------- */
 const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
@@ -35,12 +35,36 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+/* ---------- Trash Icon ---------- */
+const TrashIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-5 w-5 text-red-500 hover:text-red-700"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+    />
+  </svg>
+);
+
 /* ---------- Main Component ---------- */
 export default function NewRegister() {
   const navigate = useNavigate();
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // ✅ Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+
+  const totalPages = Math.ceil(shops.length / rowsPerPage);
 
   const fetchShops = async () => {
     try {
@@ -67,18 +91,6 @@ export default function NewRegister() {
     fetchShops();
   }, []);
 
-  const handleDelete = async (shop) => {
-    if (!window.confirm("Delete this registration?")) return;
-    try {
-      await axios.delete(
-        `${API_BASE_URL}/shopApproval/deleteApprovedShop/${shop._id}`
-      );
-      setShops((prev) => prev.filter((s) => s._id !== shop._id));
-    } catch (err) {
-      console.error("Error deleting shop:", err.response?.data || err);
-    }
-  };
-
   if (loading) return <div className="p-4 text-center">Loading...</div>;
   if (error)
     return (
@@ -90,80 +102,127 @@ export default function NewRegister() {
   return (
     <div className="bg-gray-100 min-h-screen p-4 md:p-6">
       {/* Header */}
-      <div className="flex items-center mb-4 bg-white p-4 md:p-5 rounded shadow">
+      <div className="flex items-center mb-4 bg-white px-4 py-3 rounded-md shadow">
         <div className="flex items-center gap-2">
           <button onClick={() => navigate(-1)}>
             <BsArrowLeftCircle
-              size={25}
+              size={20}
               className="text-gray-700 md:text-black"
             />
           </button>
-          <h2 className="text-lg md:text-xl font-semibold">New Shop</h2>
+          <h2 className="text-lg text-gray-800 font-medium">New Shop</h2>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white p-4 md:p-6 rounded-md shadow">
-        <table className="w-full table-auto text-sm md:text-base">
-          <thead className="bg-[#FEBC1D] text-black">
-            <tr>
-              <th className="px-4 py-3 text-left border-b">Store</th>
-              <th className="px-4 py-3 text-left border-b">Owner</th>
-              <th className="px-4 py-3 text-left border-b">Number</th>
-              <th className="px-4 py-3 text-left border-b">Status</th>
-              <th className="px-4 py-3 text-left border-b">Date</th>
-              <th className="px-4 py-3 text-left border-b">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {shops.length === 0 ? (
-              <tr>
-                <td
-                  colSpan="6"
-                  className="text-center py-6 text-gray-500 border-b"
-                >
-                  No new shop registrations found.
-                </td>
+      {/* Table with new UI */}
+      <div class="bg-white rounded-md p-2 mt-4 shadow">
+      <div className="bg-white rounded-md shadow overflow-x-auto">
+        <div className="w-full bg-white rounded-lg min-h-[calc(100vh-200px)]">
+          <table className="w-full table-auto min-w-[700px]">
+            <thead className="bg-[#FEBC1D] text-black text-center">
+              <tr className="text-sm">
+                <th className="py-3 px-4 text-base text-left">Store</th>
+                <th className="py-3 px-4 text-base text-left">Owner</th>
+                <th className="py-3 px-4 text-base text-left">Number</th>
+                <th className="py-3 px-4 text-base text-left">Email</th>
+                <th className="py-3 px-4 text-base text-left">Status</th>
+                <th className="py-3 px-4 text-base text-left">Date</th>
+                <th className="py-3 px-4 text-base text-left">Action</th>
               </tr>
-            ) : (
-              shops.map((shop, index) => (
-                <tr
-                  key={shop._id}
-                  className={`text-sm ${
-                    index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                  }`}
-                >
-                  <td className="px-4 py-3 border-b">{shop.shopName}</td>
-                  <td className="px-4 py-3 border-b">{shop.ownerName}</td>
-                  <td className="px-4 py-3 border-b">{shop.phoneNumber}</td>
-
-                  {/* ✅ Status only displays, no API call */}
-                  <td className="px-4 py-3 border-b">
-                    <StatusBadge status={shop.shopStatus} />
-                  </td>
-
-                  <td className="px-4 py-3 border-b">
-                    {formatDate(shop.createdAt || shop.date)}
-                  </td>
-                  <td className="px-4 py-3 border-b">
-                    <div className="flex gap-3 items-center">
-                      <FiEye
-                        className="cursor-pointer text-lg text-gray-700 hover:text-black"
-                        onClick={() =>
-                          navigate(`/shop/registere/info/${shop._id}`)
-                        }
-                      />
-                      <button onClick={() => handleDelete(shop)}>
-                        <MdDelete className="cursor-pointer text-lg text-red-500 hover:text-red-700" />
-                      </button>
-                    </div>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {shops.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="text-center py-6 text-gray-500 border-b"
+                  >
+                    No new shop registrations found.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                shops
+                  .slice(
+                    (currentPage - 1) * rowsPerPage,
+                    currentPage * rowsPerPage
+                  )
+                  .map((shop) => (
+                    <tr
+                      key={shop._id}
+                      className="hover:bg-gray-50 transition-colors duration-150"
+                    >
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {shop.shopName}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {shop.ownerName}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {shop.phoneNumber}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {shop.email}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <StatusBadge status={shop.shopStatus} />
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {formatDate(shop.createdAt || shop.date)}
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center space-x-4">
+                        <ViewIcon
+                          className="w-5 h-5 cursor-pointer text-gray-700 hover:text-black"
+                          onClick={() =>
+                            navigate(`/shop/registere/info/${shop._id}`)
+                          }
+                        />
+                          {/* <button onClick={() => handleDelete(shop)}>
+                            <TrashIcon />
+                          </button> */}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      {/* ✅ Pagination */}
+      {shops.length > 0 && (
+        <div className="flex justify-center items-center mt-4 space-x-2 flex-wrap">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-2 py-1 text-red-500 hover:text-red-700 disabled:opacity-50"
+          >
+            &lt;
+          </button>
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={`page-${index + 1}`}
+              onClick={() => setCurrentPage(index + 1)}
+              className={`px-3 py-1 rounded font-medium ${
+                currentPage === index + 1
+                  ? "bg-[#FEBC1D] text-red-500 border-red-500"
+                  : "bg-white text-red-500 border border-red-500 hover:text-red-700 hover:border-red-700"
+              }`}
+            >
+              {index + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="px-2 py-1 text-red-500 hover:text-red-700 disabled:opacity-50"
+          >
+            &gt;
+          </button>
+        </div>
+      )}
     </div>
+  </div>
   );
 }

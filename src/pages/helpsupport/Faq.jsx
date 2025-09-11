@@ -39,8 +39,8 @@ const FaqTable = ({ data = [], onView, onEdit, onDelete }) => {
 
   return (
     <div>
-      <div className="bg-white rounded-md  shadow">
-        <div className="max-h-[490px] w-full">
+      <div className="bg-white rounded-md shadow p-3">
+        <div className="max-h-[990px] w-full">
           <table className="w-full table-auto text-sm md:text-base">
             <thead className="bg-brandYellow text-white text-left">
               <tr className="text-black">

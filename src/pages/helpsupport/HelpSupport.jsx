@@ -325,9 +325,9 @@ export default function HelpSupport() {
 
   return (
     <>
-      <div className="bg-gray-100 p-3">
+      <div className="bg-gray-100 p-3 min-h-screen">
         <div className="bg-white px-4 py-3 rounded-md shadow">
-          <h2 className="text-lg text-gray-800">Help & Support</h2>
+          <h2 className="text-lg text-gray-800 font-medium">Help & Support</h2>
         </div>
 
         {/* Navigation */}

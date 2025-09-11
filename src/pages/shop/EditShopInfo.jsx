@@ -47,11 +47,7 @@ function EditShopInfo() {
             address: incoming.shopAddress || "",
             optionsAvailable: incoming.optionsAvailable || "Pickup",
             shopTime: incoming.preferredPickupTimes || [],
-
-            // shop image
             image: incoming.image || "",
-
-            // ✅ Keep bank details (text only, no images now)
             bankName: res.data?.bankDetails?.bankName || "",
             IFSCCode: res.data?.bankDetails?.IFSCCode || "",
             accountNumber: res.data?.bankDetails?.accountNumber || "",
@@ -177,58 +173,77 @@ function EditShopInfo() {
   ];
 
   return (
-    <div className="bg-gray-100 min-h-screen p-4">
-      <div className="flex items-center gap-3 mb-4 bg-white p-4 md:p-5 rounded shadow">
+    <div className="min-h-screen w-full bg-gray-100 p-3">
+      {/* Header */}
+      <div className="bg-white px-4 py-3 rounded-md shadow flex items-center gap-3 sticky top-0 z-10">
         <BsArrowLeftCircle
           className="text-2xl cursor-pointer"
           onClick={() => navigate(-1)}
         />
-        <h2 className="text-xl font-semibold">Edit Seller Info</h2>
+        <h2 className="text-lg font-semibold text-gray-800">Edit Seller Info</h2>
       </div>
 
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {/* Main content */}
+      <div className="bg-white rounded-lg mt-4 shadow-md flex flex-col h-[80vh]">
+        <div
+          className="p-6 overflow-y-auto flex-1"
+          style={{
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
+        >
+          <style>
+            {`
+              /* Chrome, Safari, Edge */
+              div::-webkit-scrollbar {
+                display: none;
+              }
+            `}
+          </style>
 
-      <div className="bg-white rounded-md shadow-md p-6 overflow-y-auto max-h-[80vh]">
-        {/* Shop Image */}
-        <div className="text-left mb-6">
-          <label className="block font-semibold mb-2">Shop Image</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleImageChange(e, "image")}
-            className="block mb-2"
-          />
-          {shopData.image && (
-            <img
-              src={shopData.image}
-              alt="Shop"
-              className="w-32 h-32 rounded-full object-cover border"
+          {error && <p className="text-red-500 mb-4">{error}</p>}
+
+          {/* Shop Image */}
+          <div className="text-left mb-6">
+            <label className="block font-semibold mb-2">Shop Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageChange(e, "image")}
+              className="block mb-2"
             />
-          )}
-        </div>
-
-        {/* Shop Info */}
-        <div className="space-y-4 mb-6">
-          {inputFields.map((field) => (
-            <div key={field.name}>
-              <label className="block font-semibold mb-1">{field.label}</label>
-              <input
-                type="text"
-                name={field.name}
-                value={shopData[field.name] || ""}
-                onChange={handleChange}
-                className="w-full border rounded-md p-2"
+            {shopData.image && (
+              <img
+                src={shopData.image}
+                alt="Shop"
+                className="w-32 h-32 rounded-full object-cover border"
               />
-            </div>
-          ))}
+            )}
+          </div>
+
+          {/* Shop Info */}
+          <div className="space-y-4 mb-6">
+            {inputFields.map((field) => (
+              <div key={field.name}>
+                <label className="block font-semibold mb-1">{field.label}</label>
+                <input
+                  type="text"
+                  name={field.name}
+                  value={shopData[field.name] || ""}
+                  onChange={handleChange}
+                  className="w-full border rounded-md p-2"
+                />
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Save Button */}
-        <div className="flex justify-center">
+        {/* Save button sticky */}
+        <div className="p-4 flex justify-center bg-white sticky bottom-0 z-10 shadow-md">
           <button
             onClick={handleSave}
             disabled={loading}
-            className="bg-yellow-400 text-red-600 font-semibold px-8 py-2 rounded hover:bg-yellow-500"
+            className="px-10 py-2 rounded-lg font-semibold text-red-600 bg-yellow-400 hover:bg-yellow-500 disabled:cursor-not-allowed"
           >
             {loading ? "Saving..." : "Save"}
           </button>
