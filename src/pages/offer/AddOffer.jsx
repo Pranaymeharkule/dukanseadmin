@@ -29,6 +29,7 @@ export default function AddOffer() {
   // Messages
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -50,7 +51,7 @@ export default function AddOffer() {
       offerTerms,
       // Note: bannerImage (File object) cannot be serialized, so it's excluded
     };
-    
+
     try {
       sessionStorage.setItem("addOfferFormState", JSON.stringify(formState));
     } catch (e) {
@@ -96,7 +97,7 @@ export default function AddOffer() {
         const [offerForRes, customerRes, productRes] = await Promise.all([
           axios.get(`${API_BASE_URL}/offer/getAllOfferFor?t=${Date.now()}`),
           axios.get(`${API_BASE_URL}/offer/getAllCustomerType?t=${Date.now()}`),
-          axios.get(`${API_BASE_URL}/offer/getAllProducts?t=${Date.now()}`),
+          axios.get(`${API_BASE_URL}/product/getAllProducts?page=1&limit=1000&sortOrder=desc&t=${Date.now()}`),
         ]);
 
         const offerForList = Array.isArray(offerForRes.data?.offerForOptions)
@@ -107,31 +108,30 @@ export default function AddOffer() {
           customerRes.data?.customerTypeOptions
         )
           ? customerRes.data.customerTypeOptions.map((item) =>
-              String(item).trim()
-            )
+            String(item).trim()
+          )
           : [];
 
         const seen = new Set();
         const productList = Array.isArray(productRes.data?.products)
           ? productRes.data.products
-              .filter((p) => p._id && p.productName)
-              .map((p) => ({
-                _id: String(p._id).trim(),
-                productName: String(p.productName).trim(),
-              }))
-              .filter((p) => {
-                const lower = p.productName.toLowerCase();
-                if (seen.has(lower)) return false;
-                seen.add(lower);
-                return true;
-              })
+            .filter((p) => p._id && p.productName)
+            .map((p) => ({
+              _id: String(p._id).trim(),
+              productName: String(p.productName).trim(),
+            }))
+            .filter((p) => {
+              const lower = p.productName.toLowerCase();
+              if (seen.has(lower)) return false;
+              seen.add(lower);
+              return true;
+            })
           : [];
 
         setOfferForOptions(offerForList);
         setCustomerTypeOptions(customerTypeList);
         setProductOptions(productList);
         setError("");
-
       } catch (err) {
         console.error("Failed to fetch dropdown data", err);
         if (retryCount < 3) {
@@ -164,7 +164,7 @@ export default function AddOffer() {
       setOfferTerms(data.offerTerms || "From 9 to 3 only");
       // Clear the saved state since we're using location.state
       clearFormState();
-    } 
+    }
     // Priority 2: Check sessionStorage for saved form state
     else {
       loadFormState();
@@ -174,13 +174,29 @@ export default function AddOffer() {
   // Auto-save form state whenever any field changes
   useEffect(() => {
     // Only save if we have some meaningful data
-    if (offerFor || customerType || discountRate || discountAmount || 
-        offerStartDate || offerExpireDate || offerText || 
-        (products.length > 0 && products.some(p => p.productId))) {
+    if (
+      offerFor ||
+      customerType ||
+      discountRate ||
+      discountAmount ||
+      offerStartDate ||
+      offerExpireDate ||
+      offerText ||
+      (products.length > 0 && products.some((p) => p.productId))
+    ) {
       saveFormState();
     }
-  }, [offerFor, customerType, discountRate, discountAmount, offerStartDate, 
-      offerExpireDate, products, offerText, offerTerms]);
+  }, [
+    offerFor,
+    customerType,
+    discountRate,
+    discountAmount,
+    offerStartDate,
+    offerExpireDate,
+    products,
+    offerText,
+    offerTerms,
+  ]);
 
   const handleProductChange = (index, value) => {
     const updatedProducts = [...products];
@@ -207,6 +223,7 @@ export default function AddOffer() {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setLoading(true);
 
     if (
       !offerFor ||
@@ -216,85 +233,141 @@ export default function AddOffer() {
       !offerExpireDate
     ) {
       setError("⚠️ Please fill all required fields.");
+      setLoading(false);
       return;
     }
 
     if (discountRate && (discountRate < 0 || discountRate > 100)) {
       setError("⚠️ Discount rate must be between 0 and 100.");
+      setLoading(false);
       return;
     }
 
-    const validProducts = products
-      .filter((p) => p.productId)
-      .map((p) => {
-        const prod = productOptions.find((po) => po._id === p.productId);
-        return prod ? prod.productName : null;
-      })
-      .filter((name) => name !== null);
+    // Get valid product IDs
+    const validProductIds = products
+      .map((p) => p.productId)
+      .filter((id) => productOptions.some((po) => po._id === id));
 
-    if (!validProducts.length) {
-      setError("⚠️ Please select at least one product.");
+    if (validProductIds.length === 0) {
+      setError("⚠️ Please select at least one valid product.");
+      setLoading(false);
+      return;
+    }
+
+    // Convert product IDs to product names for the API
+    const validProductNames = validProductIds
+      .map((id) => {
+        const product = productOptions.find((po) => po._id === id);
+        return product ? product.productName : null;
+      })
+      .filter(Boolean); // Remove any null values
+
+    if (validProductNames.length === 0) {
+      setError("⚠️ Unable to find product names for selected products.");
+      setLoading(false);
       return;
     }
 
     try {
+      // Create FormData for the API request
       const formData = new FormData();
+
+      // Add basic fields
       formData.append("offerFor", offerFor.trim());
       formData.append("customerType", customerType.trim());
-      formData.append("products", JSON.stringify(validProducts));
-      if (discountRate) formData.append("discountRate", discountRate);
-      else if (discountAmount)
-        formData.append("discountAmount", discountAmount);
       formData.append("offerStartDate", formatDate(offerStartDate));
       formData.append("offerExpireDate", formatDate(offerExpireDate));
       formData.append("offerText", offerText.trim());
       formData.append("offerTerms", offerTerms.trim());
-      if (bannerImage) formData.append("bannerImage", bannerImage);
+
+      // Add discount (either rate or amount)
+      if (discountRate) {
+        formData.append("discountRate", discountRate);
+      } else if (discountAmount) {
+        formData.append("discountAmount", discountAmount);
+      }
+
+      // Add products as array with single quotes (custom format for API)
+      const productsString = `['${validProductNames.join("', '")}']`;
+      formData.append("products", productsString);
+
+      // Add banner image if exists
+      if (bannerImage) {
+        formData.append("bannerImage", bannerImage);
+      }
+
+      console.log("FormData entries:");
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
 
       const response = await axios.post(
         `${API_BASE_URL}/offer/createOffer`,
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        }
       );
 
-      const newOfferId = response.data?.offer?._id;
-      setSuccess("Offer added successfully!");
-      setError("");
+      console.log("API Response:", response.data);
 
-      // Clear saved form state after successful submission
-      clearFormState();
+      // Handle successful response
+      if (response.data.success) {
+        const offerId = response.data.offer?._id;
 
-      // Reset form
-      setOfferFor("");
-      setCustomerType("");
-      setDiscountRate("");
-      setDiscountAmount("");
-      setOfferStartDate("");
-      setOfferExpireDate("");
-      setProducts([{ productId: "" }]);
-      setOfferText("");
-      setOfferTerms("From 9 to 3 only");
-      setBannerImage(null);
+        setSuccess(response.data.message || "Offer added successfully!");
+        setError("");
+        clearFormState();
+        resetForm();
 
-      // Navigate to ViewOffer page
-      if (newOfferId) {
-        navigate(`/offer/view/${newOfferId}`);
+        // Navigate to the created offer's view page if ID is available
+        if (offerId) {
+          setTimeout(() => {
+            navigate(`/offer/view/${offerId}`);
+          }, 1500);
+        } else {
+          setTimeout(() => {
+            navigate("/offer");
+          }, 1500);
+        }
       } else {
-        navigate("/offer");
+        setError("❌ Failed to create offer. Please try again.");
       }
+
     } catch (err) {
-      console.error("Error details:", err.response?.data || err.message);
+      console.error("Full error object:", err);
+      console.error("Error response:", err.response);
+      console.error("Error data:", err.response?.data);
+
       setError(
         err.response?.data?.message ||
-          "❌ Failed to add offer. Please try again."
+        "❌ Failed to add offer. Please try again."
       );
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Helper function to reset form
+  const resetForm = () => {
+    setOfferFor("");
+    setCustomerType("");
+    setDiscountRate("");
+    setDiscountAmount("");
+    setOfferStartDate("");
+    setOfferExpireDate("");
+    setProducts([{ productId: "" }]);
+    setOfferText("");
+    setOfferTerms("From 9 to 3 only");
+    setBannerImage(null);
   };
 
   const handleTermsNavigation = () => {
     // Save current form state before navigation
     saveFormState();
-    
+
     // Navigate to Add Terms page with current state
     navigate("/offer/add-terms", {
       state: {
@@ -316,28 +389,29 @@ export default function AddOffer() {
     clearFormState();
     navigate(-1);
   };
-
   return (
-    <div className="bg-gray-100 min-h-screen p-4">
-      {/* Header */}
-      <div className="flex items-center gap-2 bg-white p-4 rounded shadow mb-6">
-        <button
-          onClick={handleBackNavigation}
-          type="button"
-          title="Go Back"
-          className="w-8 h-8 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
-        </button>
-        <h2 className="text-2xl font-semibold text-gray-800">Add Offer</h2>
+    <div className="bg-gray-100 min-h-screen p-4 flex flex-col">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-20 bg-gray-100 pb-4">
+        <div className="flex items-center gap-2 bg-white p-4 rounded shadow">
+          <button
+            onClick={handleBackNavigation}
+            type="button"
+            title="Go Back"
+            className="w-8 h-8 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
+          </button>
+          <h2 className="text-lg font-medium text-gray-800">Add Offer</h2>
+        </div>
       </div>
 
-      {/* Form Card */}
+      {/* Form */}
       <form
+        id="offer-form"
         onSubmit={handleSubmit}
-        className="mx-auto bg-white p-6 rounded shadow"
+        className="bg-white p-6 rounded shadow mt-2 pb-10"
       >
-        {/* Error & Success */}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
@@ -349,9 +423,9 @@ export default function AddOffer() {
           </div>
         )}
 
-        {/* Select User Type */}
+        {/* User Type */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
+          <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
             Select User Type
           </label>
           <select
@@ -359,6 +433,7 @@ export default function AddOffer() {
             onChange={(e) => setOfferFor(e.target.value)}
             className="w-full border border-gray-300 p-2 rounded"
             required
+            disabled={loading}
           >
             <option value="">-- Select --</option>
             {offerForOptions.map((item, i) => (
@@ -369,9 +444,9 @@ export default function AddOffer() {
           </select>
         </div>
 
-        {/* Select Customer */}
+        {/* Customer Type */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
+          <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
             Select Customer
           </label>
           <select
@@ -379,6 +454,7 @@ export default function AddOffer() {
             onChange={(e) => setCustomerType(e.target.value)}
             className="w-full border border-gray-300 p-2 rounded"
             required
+            disabled={loading}
           >
             <option value="">-- Select --</option>
             {customerTypeOptions.map((item, i) => (
@@ -389,9 +465,9 @@ export default function AddOffer() {
           </select>
         </div>
 
-        {/* Select Products */}
+        {/* Products */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
+          <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
             Select Product
           </label>
           {products.map((product, index) => (
@@ -401,6 +477,7 @@ export default function AddOffer() {
                 onChange={(e) => handleProductChange(index, e.target.value)}
                 className="w-full border border-gray-300 p-2 rounded"
                 required
+                disabled={loading}
               >
                 <option value="">-- Select --</option>
                 {productOptions.map((p) => (
@@ -414,6 +491,7 @@ export default function AddOffer() {
                   type="button"
                   onClick={() => removeProductDropdown(index)}
                   className="w-10 h-10 flex items-center justify-center text-red-500 border border-red-300 rounded hover:bg-red-50"
+                  disabled={loading}
                 >
                   ✕
                 </button>
@@ -424,6 +502,7 @@ export default function AddOffer() {
             type="button"
             onClick={addProductDropdown}
             className="text-red-600 text-sm font-medium hover:text-orange-600"
+            disabled={loading}
           >
             + Add More Product
           </button>
@@ -442,6 +521,7 @@ export default function AddOffer() {
             className="w-full border border-gray-300 p-2 rounded"
             min="0"
             max="100"
+            disabled={loading}
           />
           <span className="text-center text-gray-500 font-semibold">OR</span>
           <input
@@ -454,13 +534,14 @@ export default function AddOffer() {
             placeholder="Enter Discount (₹)"
             className="w-full border border-gray-300 p-2 rounded"
             min="0"
+            disabled={loading}
           />
         </div>
 
         {/* Dates */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="mb-4">
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
               Offer Start Date
             </label>
             <input
@@ -469,39 +550,42 @@ export default function AddOffer() {
               onChange={(e) => setOfferStartDate(e.target.value)}
               className="w-full border border-gray-300 p-2 rounded"
               required
-            />
-          </div>
-          <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Offer Expire Date
-            </label>
-            <input
-              type="date"
-              value={offerExpireDate}
-              onChange={(e) => setOfferExpireDate(e.target.value)}
-              className="w-full border border-gray-300 p-2 rounded"
-              required
+              disabled={loading}
             />
           </div>
         </div>
+        <div>
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+            Offer Expire Date
+          </label>
+          <input
+            type="date"
+            value={offerExpireDate}
+            onChange={(e) => setOfferExpireDate(e.target.value)}
+            className="w-full border border-gray-300 p-2 rounded"
+            required
+            disabled={loading}
+          />
+        </div>
 
         {/* Offer Text */}
-        <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
+        <div className="mb-4 p-2">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
             Offer Text
           </label>
           <textarea
-            value={offerText}
+            value={offerText || ""}
             onChange={(e) => setOfferText(e.target.value)}
             rows="3"
             className="w-full border border-gray-300 p-2 rounded"
             placeholder="Enter Offer Text"
+            disabled={loading}
           />
         </div>
 
         {/* Banner */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
             Banner Image
           </label>
           <input
@@ -509,30 +593,42 @@ export default function AddOffer() {
             accept="image/*"
             onChange={handleFileChange}
             className="w-full border border-gray-300 p-2 rounded"
+            disabled={loading}
           />
+          {bannerImage && (
+            <div className="mt-2 text-sm text-gray-600">
+              Selected: {bannerImage.name}
+            </div>
+          )}
         </div>
 
-        {/* Add Terms */}
+        {/* Terms */}
         <div className="mb-4 text-right">
           <button
             type="button"
             onClick={handleTermsNavigation}
-            className="text-red-600 cursor-pointer inline-block border-2 border-red-600 px-4 py-2 rounded-md hover:bg-red-50 transition-colors duration-200 font-bold"
+            className="font-poppins text-red-600 cursor-pointer inline-block border-2 border-red-600 px-4 py-2 rounded-md hover:bg-red-50 transition-colors duration-200 font-bold"
+            disabled={loading}
           >
             + Add Terms & Conditions
           </button>
         </div>
-
-        {/* Submit */}
-        <div className="flex justify-center mt-10">
-          <button
-            type="submit"
-            className="bg-yellow-500 text-red-600 px-10 py-4 rounded-lg text-lg font-bold hover:bg-yellow-600 shadow-md"
-          >
-            Add Offer
-          </button>
-        </div>
       </form>
+
+      {/* Sticky Submit */}
+      <div className="sticky bottom-0 left-0 right-0 bg-white border-t shadow-md z-30 p-4 flex justify-center">
+        <button
+          type="submit"
+          form="offer-form"
+          className={`font-poppins px-10 py-4 rounded-lg text-lg font-bold shadow-md transition-colors ${loading
+            ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+            : "bg-brandYellow text-red-600 hover:bg-yellow-600"
+            }`}
+          disabled={loading}
+        >
+          {loading ? "Adding Offer..." : "Add Offer"}
+        </button>
+      </div>
     </div>
   );
 }

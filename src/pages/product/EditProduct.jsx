@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { BsArrowLeftCircle } from "react-icons/bs";
 import { GrUpload } from "react-icons/gr";
 import SuccessOverlay from "../../components/overlay/SuccessOverlay";
 import {
@@ -8,17 +8,19 @@ import {
   useGetProductByIdQuery,
 } from "../../redux/apis/productApi";
 
-const EditProduct = () => {
+export default function EditProduct() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [updateProductById] = useUpdateProductByIdMutation();
-
-  const [attaFile, setAttaFile] = useState(null);
-  const [backFile, setBackFile] = useState(null);
-  const [attaPreview, setAttaPreview] = useState(null);
-  const [backImgPreview, setBackImgPreview] = useState(null);
   const { data, isLoading, isError } = useGetProductByIdQuery(id);
 
+  // Files
+  const [frontFile, setFrontFile] = useState(null);
+  const [backFile, setBackFile] = useState(null);
+  const [frontPreview, setFrontPreview] = useState(null);
+  const [backPreview, setBackPreview] = useState(null);
+
+  // Form Data
   const [formData, setFormData] = useState({
     name: "",
     price: "",
@@ -30,6 +32,10 @@ const EditProduct = () => {
     nutrient: "",
     description: "",
   });
+
+  // Messages
+  const [error, setError] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     if (data?.product) {
@@ -45,35 +51,33 @@ const EditProduct = () => {
         nutrient: product.productDetails?.nutrientContent || "",
         description: product.productDetails?.productDescription || "",
       });
-      setAttaPreview(product.productPhotoFront || null);
-      setBackImgPreview(product.productPhotoBack || null);
+      setFrontPreview(product.productPhotoFront || null);
+      setBackPreview(product.productPhotoBack || null);
     }
   }, [data]);
-
-  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAttaChange = (e) => {
+  const handleFileChange = (e, type) => {
     const file = e.target.files[0];
     if (file) {
-      setAttaFile(file);
-      setAttaPreview(URL.createObjectURL(file));
+      if (type === "front") {
+        setFrontFile(file);
+        setFrontPreview(URL.createObjectURL(file));
+      } else {
+        setBackFile(file);
+        setBackPreview(URL.createObjectURL(file));
+      }
     }
   };
 
-  const handleBackImgChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setBackFile(file);
-      setBackImgPreview(URL.createObjectURL(file));
-    }
-  };
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  const handleSave = async () => {
     const form = new FormData();
     form.append("productName", formData.name);
     form.append("price", formData.price);
@@ -84,210 +88,243 @@ const EditProduct = () => {
     form.append("shelfLife", formData.shelfLife);
     form.append("nutrientContent", formData.nutrient);
     form.append("productDescription", formData.description);
-    if (attaFile) form.append("productPhotoFront", attaFile);
+    if (frontFile) form.append("productPhotoFront", frontFile);
     if (backFile) form.append("productPhotoBack", backFile);
 
     try {
-      // Add cache-busting header & timestamp to prevent 304
-      await updateProductById({
-        id,
-        data: form,
-        extra: {
-          headers: {
-            "Cache-Control": "no-cache",
-          },
-          params: {
-            t: Date.now(),
-          },
-        },
-      }).unwrap();
-
+      await updateProductById({ id, data: form }).unwrap();
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
         navigate(`/product/details/${id}`);
-      }, 2500);
+      }, 1500);
     } catch (err) {
       console.error("Update failed", err);
+      setError("❌ Failed to update product. Please try again.");
     }
   };
 
+  const handleBackNavigation = () => {
+    navigate(-1);
+  };
+
   return (
-    <div className="p-5 bg-gray-100 min-h-screen flex flex-col">
-      {/* Header Card */}
-      <div className="flex items-center gap-3 bg-white px-4 py-3 rounded-md shadow mb-4 sticky top-0 z-10">
-        <BsArrowLeftCircle
-          className="text-2xl cursor-pointer"
-          onClick={() => navigate(-1)}
-        />
-        <h2 className="text-xl font-semibold text-gray-800">Edit Product Details</h2>
+    <div className="bg-gray-100 min-h-screen p-4 flex flex-col">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-20 bg-gray-100 pb-4">
+        <div className="flex items-center gap-2 bg-white p-4 rounded shadow">
+          <button
+            onClick={handleBackNavigation}
+            type="button"
+            className="w-8 h-8 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
+          </button>
+          <h2 className="text-lg font-medium text-gray-800">Edit Product</h2>
+        </div>
       </div>
 
-      {/* Product Card */}
-      <div className="bg-white rounded-md shadow flex-1 flex flex-col min-h-0 px-6 py-6 overflow-x-auto scrollbar-hidden">
-        <div className="max-h-[430px] min-w-[800px]">
-          <div className="flex gap-6 mb-6">
-            {/* Front Image */}
-            <div className="w-52 h-[290px] bg-white rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 shadow">
+      {/* Form */}
+      <form
+        onSubmit={handleSave}
+        className="bg-white p-6 rounded shadow mt-2 pb-10"
+      >
+        {/* Messages */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+
+        {/* Upload Images */}
+        <div className="flex gap-6 mb-6">
+          {/* Front Image */}
+          <div className="w-52 h-[290px] bg-white rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 shadow">
+            {frontPreview ? (
               <img
-                src={attaPreview}
-                alt=""
+                src={frontPreview}
+                alt="Front Preview"
                 className="w-full h-48 object-contain"
               />
-              <label className="w-full">
-                <div className="bg-brandYellow text-brandRed font-semibold rounded-md py-2 text-center cursor-pointer hover:bg-yellow-500">
-                  <span className="flex items-center justify-center gap-1">
-                    <GrUpload className="text-lg" />
-                    Upload
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAttaChange}
-                    className="hidden"
-                  />
-                </div>
-              </label>
-            </div>
-
-            {/* Back Image */}
-            <div className="w-52 h-[290px] bg-white rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 shadow">
-              <img
-                src={backImgPreview}
-                alt=""
-                className="w-full h-48 object-contain"
-              />
-              <label className="w-full">
-                <div className="bg-brandYellow text-brandRed font-semibold rounded-md py-2 text-center cursor-pointer hover:bg-yellow-500">
-                  <span className="flex items-center justify-center gap-1">
-                    <GrUpload className="text-lg" />
-                    Upload
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleBackImgChange}
-                    className="hidden"
-                  />
-                </div>
-              </label>
-            </div>
-          </div>
-
-          {/* Form Inputs */}
-          <div className="space-y-3 text-sm text-gray-800">
-            <div>
-              <label className="font-bold">Name of Product</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Brand</label>
-              <input
-                type="text"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Type</label>
-              <input
-                type="text"
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Net Weight</label>
-              <input
-                type="text"
-                name="weight"
-                value={formData.weight}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Price (₹)</label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Pack Of</label>
-              <input
-                type="text"
-                name="packOf"
-                value={formData.packOf}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Maximum Shelf Life</label>
-              <input
-                type="text"
-                name="shelfLife"
-                value={formData.shelfLife}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Nutrient Content</label>
-              <input
-                type="text"
-                name="nutrient"
-                value={formData.nutrient}
-                onChange={handleChange}
-                className="w-full mt-1 p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="font-bold">Product Description</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={4}
-                className="w-full mt-1 p-2 border rounded"
-              ></textarea>
-            </div>
-          </div>
-          <div className="bg-white rounded-md px-4 py-3 sticky flex justify-center">
-            <button
-              className="w-[200px] h-[50px] bg-brandYellow rounded-[10px] px-[10px] py-[10px] 
-               flex items-center justify-center gap-2 hover:opacity-90 transition"
-              onClick={handleSave}
-            >
-              <span
-                className="font-[Poppins] text-[#EC2D01] font-semibold text-[20px] leading-[100%] tracking-normal 
-                 text-center align-middle"
-              >
-                Save
-              </span>
-            </button>
-            {showSuccess && (
-              <SuccessOverlay message="Your Information has been saved successfully !" />
+            ) : (
+              <div className="w-full h-48 flex items-center justify-center text-gray-400 border">
+                No Front Image
+              </div>
             )}
+            <label className="w-full">
+              <div className="bg-brandYellow text-brandRed font-semibold rounded-md py-2 text-center cursor-pointer hover:bg-yellow-500">
+                <span className="flex items-center justify-center gap-1">
+                  <GrUpload className="text-lg" /> Upload
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, "front")}
+                  className="hidden"
+                />
+              </div>
+            </label>
+          </div>
+
+          {/* Back Image */}
+          <div className="w-52 h-[290px] bg-white rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 shadow">
+            {backPreview ? (
+              <img
+                src={backPreview}
+                alt="Back Preview"
+                className="w-full h-48 object-contain"
+              />
+            ) : (
+              <div className="w-full h-48 flex items-center justify-center text-gray-400 border">
+                No Back Image
+              </div>
+            )}
+            <label className="w-full">
+              <div className="bg-brandYellow text-brandRed font-semibold rounded-md py-2 text-center cursor-pointer hover:bg-yellow-500">
+                <span className="flex items-center justify-center gap-1">
+                  <GrUpload className="text-lg" /> Upload
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e, "back")}
+                  className="hidden"
+                />
+              </div>
+            </label>
           </div>
         </div>
+
+        {/* Form Inputs */}
+        <div className="space-y-4 text-sm text-gray-800">
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Name of Product
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full mt-1 p-2 border rounded"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Brand
+            </label>
+            <input
+              type="text"
+              name="brand"
+              value={formData.brand}
+              onChange={handleChange}
+              className="w-full mt-1 p-2 border rounded"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Type
+            </label>
+            <input
+              type="text"
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              className="w-full mt-1 p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Net Weight
+            </label>
+            <input
+              type="text"
+              name="weight"
+              value={formData.weight}
+              onChange={handleChange}
+              className="w-full mt-1 p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Price (₹)
+            </label>
+            <input
+              type="number"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              className="w-full mt-1 p-2 border rounded"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Pack Of
+            </label>
+            <input
+              type="text"
+              name="packOf"
+              value={formData.packOf}
+              onChange={handleChange}
+              className="w-full mt-1 p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Maximum Shelf Life
+            </label>
+            <input
+              type="text"
+              name="shelfLife"
+              value={formData.shelfLife}
+              onChange={handleChange}
+              className="w-full mt-1 p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Nutrient Content
+            </label>
+            <input
+              type="text"
+              name="nutrient"
+              value={formData.nutrient}
+              onChange={handleChange}
+              className="w-full mt-1 p-2 border rounded"
+            />
+          </div>
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Product Description
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={4}
+              className="w-full mt-1 p-2 border rounded"
+            ></textarea>
+          </div>
+        </div>
+      </form>
+
+      {/* Sticky Submit */}
+      <div className="sticky bottom-0 left-0 right-0 bg-white border-t shadow-md z-30 p-4 flex justify-center">
+        <button
+          type="submit"
+          form="edit-product-form"
+          onClick={handleSave}
+          className="font-poppins px-10 py-4 rounded-lg text-lg font-bold shadow-md transition-colors bg-brandYellow text-red-600 hover:bg-yellow-600"
+        >
+          Save
+        </button>
+        {showSuccess && (
+          <SuccessOverlay message="Product updated successfully!" />
+        )}
       </div>
     </div>
   );
-};
-
-export default EditProduct;
+}

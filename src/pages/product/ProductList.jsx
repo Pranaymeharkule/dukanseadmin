@@ -167,17 +167,47 @@ const ProductList = () => {
     <div className="p-4 bg-gray-100 h-screen flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between bg-white px-4 py-3 rounded-md shadow mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Product List</h2>
+        <h2 className="text-lg text-gray-800 font-poppins font-medium">Product List</h2>
 
         {/* Separated Filters + Add Button */}
         <div className="flex items-center gap-1">
           {/* Left Side - Sort Dropdown */}
           <div className="relative">
             <button
-              className="flex items-center gap-2 text-gray-700 px-2 py-2 rounded-md "
+              className="flex items-center gap-2 text-gray-700 px-2 py-2 rounded-md"
               onClick={() => setShowSortDropdown(!showSortDropdown)}
             >
-              <img src={sorting_arrow} alt="Sort" className="w-4 h-4" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlnsXlink="http://www.w3.org/1999/xlink"
+                width="16"
+                height="16"
+                viewBox="0 0 30 30"
+                fill="none"
+                className="w-4 h-4"
+              >
+                <rect width="30" height="30" fill="url(#pattern0_4522_13470)" />
+                <defs>
+                  <pattern
+                    id="pattern0_4522_13470"
+                    patternContentUnits="objectBoundingBox"
+                    width="1"
+                    height="1"
+                  >
+                    <use
+                      xlinkHref="#image0_4522_13470"
+                      transform="scale(0.0104167)"
+                    />
+                  </pattern>
+                  <image
+                    id="image0_4522_13470"
+                    width="96"
+                    height="96"
+                    preserveAspectRatio="none"
+                    xlinkHref="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAACXBIWXMAAAsTAAALEwEAmpwYAAABs0lEQVR4nO2cuW5DQRDD9q9dJmX+WkGA9D7eIY2WBLbXkIbdeS0AAAAAAIBr+V5r/SDZJ1//jwhG+UQIkE+EAPkK+Tp6tq9avgIiVAZ4R77MEeoCfCJfxghVAY7IlylCTYAz5MsQoSLAmfJ1c4TxAa6QrxsjjA5wpXyZfhPGcId8EcEvX0TwyxcR/PK1e4QE+do1QpJ87RYhUb52i3CEZxLdpO+rP1Dh++oPVPi++gMVvq/+QIXvqz9Q4fvqD1T4vvoDFb7vMPUHpkMAMwQwQwAzBDBDADMEMEMAM+kBFL6v/kCF76s/UOH76g9U+L76AxW+r/5Ahe+rP1Dh++oPVPi+ekQALwQwQwAzBDBDADMEMEMAM/UB0g9U+L76AxW+r/5Ahe+rP1Dh++oPVPi++gMVvq/+QIXvqz9Q4fviebwg0fW+1iY8AmRvKz8xwnbykyJsKz8hwvbynRGQb4yAfGOEePnPDpgcIV5+QoCrIoyQnxLg7Ahj5CcFOCvCKPlpAY5GGCc/McCnEUbKTw3wboSx8pMDvBphtPwJPJCfGYFPvjEC8o3/k/33AAAAAAAA1lX8Av/fmrZrQyxPAAAAAElFTkSuQmCC"
+                  />
+                </defs>
+              </svg>
             </button>
 
             {showSortDropdown && (
@@ -185,11 +215,10 @@ const ProductList = () => {
                 {sortOptions.map((option) => (
                   <button
                     key={option.value}
-                    className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition ${
-                      sortOrder === option.value
-                        ? "bg-brandYellow text-yellow-700 font-medium"
-                        : "text-gray-700"
-                    }`}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition ${sortOrder === option.value
+                      ? "bg-brandYellow text-yellow-700 font-medium"
+                      : "text-gray-700"
+                      }`}
                     onClick={() => handleSortSelect(option.value)}
                   >
                     {option.label}
@@ -213,11 +242,10 @@ const ProductList = () => {
                 {filterOptions.map((option) => (
                   <button
                     key={option.value}
-                    className={`w-full text-left py-2 text-sm hover:bg-gray-100 transition ${
-                      selectedFilter === option.value
-                        ? "bg-yellow-50 text-yellow-700 font-medium"
-                        : "text-gray-700"
-                    }`}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition ${selectedFilter === option.value
+                      ? "bg-yellow-50 text-yellow-700 font-medium"
+                      : "text-gray-700"
+                      }`}
                     onClick={() => handleFilterSelect(option.value)}
                   >
                     {option.label}
@@ -226,10 +254,9 @@ const ProductList = () => {
               </div>
             )}
           </div>
-
           {/* Add Product Button */}
           <button
-            className="flex items-center gap-2 bg-brandYellow text-red-600 font-semibold px-4 py-2 rounded-md shadow hover:bg-yellow-500 transition"
+            className="flex items-center gap-2 bg-brandYellow font-poppins text-brandRed font-semibold px-4 py-2 rounded-md shadow hover:bg-yellow-500 transition"
             onClick={() => navigate("/product/product-add")}
           >
             <FaPlusCircle />
@@ -250,18 +277,18 @@ const ProductList = () => {
       )}
 
       {/* Product Table Card */}
-      <div className="bg-white rounded-md shadow flex-1 flex flex-col min-h-0 px-6 py-6">
+      <div className="bg-white rounded-md shadow flex-1 flex flex-col min-h-0 px-4 py-3">
         <div className="bg-white rounded-md shadow flex flex-col min-h-[500px]">
           {/* Table Wrapper */}
           <div className="overflow-x-auto flex-1 flex flex-col">
             <table className="w-full table-auto">
-              <thead className="bg-brandYellow text-white text-left sticky top-0">
-                <tr className="font-[Poppins] font-semibold text-[20px] leading-[100%] tracking-normal text-black">
-                  <th className="py-2 px-4 text-base text-left">Product</th>
-                  <th className="py-2 px-4 text-base text-center">Name</th>
-                  <th className="py-2 px-4 text-base text-center">MRP</th>
-                  <th className="py-2 px-4 text-base text-center">Quantity</th>
-                  <th className="py-2 px-4 text-base text-right">Action</th>
+              <thead className="bg-brandYellow text-white text-center">
+                <tr className="text-black text-sm">
+                  <th className="py-3 px-4 text-base font-poppins text-left">Product</th>
+                  <th className="py-3 px-4 text-base font-poppins text-center">Name</th>
+                  <th className="py-3 px-4 text-base font-poppins text-center">MRP</th>
+                  <th className="py-3 px-4 text-base font-poppins text-center">Quantity</th>
+                  <th className="py-3 px-4 text-base font-poppins text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="text-sm text-gray-700 min-h-[400px] ">
@@ -286,24 +313,41 @@ const ProductList = () => {
                         </div>
                       </td>
 
-                      <td className="py-2 px-4 font-[Poppins] font-medium text-[20px] leading-[100%] tracking-normal text-center max-w-[160px] whitespace-normal break-words">
+                      <td className="px-4 py-4 whitespace-nowrap font-poppins text-center text-sm text-gray-600 break-words">
                         {item.productName || "N/A"}
                       </td>
-                      <td className="py-2 px-4 text-[20px] font-medium leading-[100%] text-center font-poppins">
+                      <td className="px-4 py-4 whitespace-nowrap font-poppins text-center text-sm text-gray-600">
                         ₹{item.price || 0}
                       </td>
-                      <td className="py-2 px-4 text-[20px] font-medium leading-[100%] text-center font-poppins">
+                      <td className="px-4 py-4 whitespace-nowrap font-poppins text-center text-sm text-gray-600">
                         {item.unitsAvailable || 0}
                       </td>
                       <td className="py-2 px-4">
-                        <div className="flex justify-end items-center gap-3">
-                          <FiEye
-                            className="text-gray-600 text-lg cursor-pointer hover:text-gray-800"
+                        <div className="flex justify-end items-center justify-end gap-3">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            className="text-gray-600 cursor-pointer hover:text-gray-800"
                             onClick={() =>
                               navigate(`/product/details/${item._id}`)
                             }
                             title="View Product"
-                          />
+                          >
+                            <path
+                              d="M12.5 16C14.1569 16 15.5 14.6569 15.5 13C15.5 11.3431 14.1569 10 12.5 10C10.8431 10 9.5 11.3431 9.5 13C9.5 14.6569 10.8431 16 12.5 16Z"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            />
+                            <path
+                              d="M21.5 14C21.5 14 20.5 6 12.5 6C4.5 6 3.5 14 3.5 14"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            />
+                          </svg>
+
                           <button
                             onClick={() => handleDeleteProduct(item._id)}
                             title="Delete Product"
@@ -332,9 +376,8 @@ const ProductList = () => {
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className={`text-red-500 hover:text-red-700 transition-all p-1 ${
-                    currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`text-red-500 hover:text-red-700 transition-all p-1 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                 >
                   &#8592;
                 </button>
@@ -346,11 +389,10 @@ const ProductList = () => {
                       key={pageNum}
                       onClick={() => handlePageChange(pageNum)}
                       disabled={currentPage === pageNum}
-                      className={`px-3 py-1 rounded-md font-bold transition-all text-sm ${
-                        currentPage === pageNum
-                          ? "bg-[#FEBC1D] text-red-500"
-                          : "text-red-500 hover:text-red-700"
-                      }`}
+                      className={`px-3 py-1 rounded-md font-bold transition-all text-sm ${currentPage === pageNum
+                        ? "bg-[#FEBC1D] text-red-500"
+                        : "text-red-500 hover:text-red-700"
+                        }`}
                     >
                       {pageNum}
                     </button>
@@ -361,11 +403,10 @@ const ProductList = () => {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className={`text-red-500 hover:text-red-700 transition-all p-1 ${
-                    currentPage === totalPages
-                      ? "opacity-50 cursor-not-allowed"
-                      : ""
-                  }`}
+                  className={`text-red-500 hover:text-red-700 transition-all p-1 ${currentPage === totalPages
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                    }`}
                 >
                   &#8594;
                 </button>

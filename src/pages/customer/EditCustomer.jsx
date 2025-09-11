@@ -146,7 +146,7 @@ const EditCustomer = () => {
           className="text-2xl cursor-pointer"
           onClick={() => navigate(-1)}
         />
-        <h2 className="text-xl font-semibold text-gray-800">
+        <h2 className="text-lg font-poppins font-medium text-gray-800">
           Edit Customer Info
         </h2>
       </div>
@@ -157,7 +157,7 @@ const EditCustomer = () => {
         <div className="flex-1 px-6 py-6 overflow-y-auto min-w-[700px]">
           {/* Image Upload */}
           <div className="mb-4">
-            <label className="font-poppins font-semibold text-[20px] align-middle text-[#262626]">
+            <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
               Image (Optional)
             </label>
             <div className="flex items-center space-x-6">
@@ -183,7 +183,7 @@ const EditCustomer = () => {
               <img
                 src={formData.image}
                 alt="Profile"
-                className="w-[160px] h-[160px] object-cover rounded-full border mt-3"
+                className="w-[140px] h-[140px] object-cover rounded-full border mt-3"
               />
             ) : (
               <div className="w-24 h-24 flex items-center justify-center bg-gray-100 rounded-full border text-xs text-gray-500 mt-3">
@@ -195,7 +195,7 @@ const EditCustomer = () => {
           {/* Inputs */}
           <div className="space-y-3 text-sm text-gray-800">
             <div>
-              <label className="font-poppins font-semibold text-[20px] text-[#262626]">
+              <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
                 Full Name
               </label>
               <input
@@ -207,7 +207,7 @@ const EditCustomer = () => {
               />
             </div>
             <div>
-              <label className="font-poppins font-semibold text-[20px] text-[#262626]">
+              <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
                 Gender
               </label>
               <select
@@ -224,7 +224,7 @@ const EditCustomer = () => {
             </div>
 
             <div>
-              <label className="font-poppins font-semibold text-[20px] text-[#262626]">
+              <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
                 Date Of Birth
               </label>
               <input
@@ -236,7 +236,7 @@ const EditCustomer = () => {
               />
             </div>
             <div>
-              <label className="font-poppins font-semibold text-[20px] text-[#262626]">
+              <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
                 Phone Number
               </label>
               <input
@@ -248,7 +248,7 @@ const EditCustomer = () => {
               />
             </div>
             <div>
-              <label className="font-poppins font-semibold text-[20px] text-[#262626]">
+              <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
                 Email
               </label>
               <input
@@ -262,7 +262,7 @@ const EditCustomer = () => {
 
             {/* Addresses */}
             <div>
-              <label className="font-poppins font-semibold text-[20px] text-[#262626]">
+              <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
                 Address
               </label>
               {formData.addresses.map((addr, i) => (

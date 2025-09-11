@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const AccountIcon = () => (
   <svg
@@ -23,47 +24,106 @@ const AccountIcon = () => (
 );
 
 const RiskMonitoring = () => {
-  const riskData = [
-    {
-      id: 1,
-      accountId: "Rajesh Mittal",
-      riskLevel: "High",
-      suspiciousActivity: "Unusual referral spike",
-      action: "Review Required",
-      recentReferrals: 45,
-    },
-    {
-      id: 2,
-      accountId: "Rajesh Mittal",
-      riskLevel: "High",
-      suspiciousActivity: "Unusual referral spike",
-      action: "Review Required",
-      recentReferrals: 45,
-    },
-    {
-      id: 3,
-      accountId: "Rajesh Mittal",
-      riskLevel: "High",
-      suspiciousActivity: "Unusual referral spike",
-      action: "Review Required",
-      recentReferrals: 45,
-    },
-    {
-      id: 4,
-      accountId: "Rajesh Mittal",
-      riskLevel: "High",
-      suspiciousActivity: "Unusual referral spike",
-      action: "Review Required",
-      recentReferrals: 45,
-    },
-  ];
+  const [riskData, setRiskData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [paginationData, setPaginationData] = useState(null);
+  const [totalFraudCustomers, setTotalFraudCustomers] = useState(0);
+
+  const fetchRiskData = async (pageNum = 1) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(
+        `https://dukanse-be-f5w4.onrender.com/api/referralDashboard/riskMonitoring?page=${pageNum}&limit=10`
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setRiskData(data.riskData || []);
+        setTotalFraudCustomers(data.totalFarudCustomers || 0);
+        setPaginationData({
+          totalPages: data.totalPages || 1,
+          currentPage: data.currentPage || 1,
+          previous: data.previous,
+          next: data.next
+        });
+      } else {
+        throw new Error(data.message || 'Failed to fetch risk data');
+      }
+    } catch (err) {
+      console.error('Error fetching risk data:', err);
+      setError(err.message);
+      setRiskData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRiskData(page);
+  }, [page]);
+
+  const getRiskLevelColor = (riskLevel) => {
+    switch (riskLevel?.toLowerCase()) {
+      case 'high':
+        return 'text-red-600';
+      case 'medium':
+        return 'text-yellow-600';
+      case 'low':
+        return 'text-green-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-2 sm:p-4 md:p-6 bg-gray-100 min-h-screen flex flex-col">
+        <div className="bg-white rounded-lg shadow-sm mb-3 sm:mb-4 md:mb-6">
+          <div className="p-3 sm:p-4 md:p-6">
+            <h1 className="text-lg text-gray-800 font-poppins font-medium">
+              Risk Monitoring
+            </h1>
+          </div>
+        </div>
+        <div className="flex-1 bg-white rounded-lg shadow-sm flex items-center justify-center">
+          <div className="text-gray-500">Loading risk data...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-2 sm:p-4 md:p-6 bg-gray-100 min-h-screen flex flex-col">
+        <div className="bg-white rounded-lg shadow-sm mb-3 sm:mb-4 md:mb-6">
+          <div className="p-3 sm:p-4 md:p-6">
+            <h1 className="text-lg text-gray-800 font-poppins font-medium">
+              Risk Monitoring
+            </h1>
+          </div>
+        </div>
+        <div className="flex-1 bg-white rounded-lg shadow-sm flex items-center justify-center">
+          <div className="text-red-500">Error: {error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-2 sm:p-4 md:p-6 bg-gray-100 min-h-screen flex flex-col">
       {/* Header Card */}
       <div className="bg-white rounded-lg shadow-sm mb-3 sm:mb-4 md:mb-6">
         <div className="p-3 sm:p-4 md:p-6">
-          <h1 className="text-lg text-gray-800 font-medium">
+          <h1 className="text-lg text-gray-800 font-poppins font-medium">
             Risk Monitoring
           </h1>
         </div>
@@ -72,60 +132,119 @@ const RiskMonitoring = () => {
       {/* Table wrapper fills remaining space */}
       <div className="flex-1 bg-white rounded-lg shadow-sm flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto overflow-x-auto">
-          <table className="w-full min-w-[600px] sm:min-w-[700px]">
-            <thead className="bg-brandYellow text-white text-center">
-              <tr className="text-black text-sm">
-                <th className="py-3 px-4 text-base text-left">
-                  Account ID
-                </th>
-                <th className="py-3 px-4 text-base text-left">
-                  Suspicious Activity
-                </th>
-                <th className="py-3 px-4 text-base text-left">
-                  Action
-                </th>
-                <th className="py-3 px-4 text-base text-left">
-                  Recent Referrals
-                </th>
-                <th className="py-3 px-4 text-base text-left">
-                  Risk Level
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {riskData.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <AccountIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-                      </div>
-                      <div className="ml-1 sm:ml-2 md:ml-3">
-                        <div className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {item.accountId}
+          {riskData.length === 0 ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-gray-500">No risk data available</div>
+            </div>
+          ) : (
+            <table className="w-full min-w-[600px] sm:min-w-[700px]">
+              <thead className="bg-white text-white text-center">
+                <tr className="text-black text-sm">
+                  <th className="py-3 px-4 text-base font-poppins text-left">
+                    Account Name
+                  </th>
+                  <th className="py-3 px-4 text-base font-poppins text-left">
+                    Suspicious Activity
+                  </th>
+                  <th className="py-3 px-4 text-base font-poppins text-left">
+                    Risk Level
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {riskData.map((item, index) => (
+                  <tr key={`${item.customerName}-${index}`} className="hover:bg-gray-50">
+                    <td className="px-4 py-1 whitespace-nowrap font-poppins text-sm text-gray-600">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          {item.profileImage ? (
+                            <img
+                              src={item.profileImage}
+                              alt={item.customerName}
+                              className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover border"
+                              onError={(e) => {
+                                e.currentTarget.onerror = null; // prevent looping
+                                e.currentTarget.src = ""; // fallback to blank -> AccountIcon will render
+                              }}
+                            />
+                          ) : (
+                            <AccountIcon className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
+                          )}
+                        </div>
+                        <div className="ml-2 md:ml-3">
+                          <div className="font-poppins text-sm text-gray-600">
+                            {item.customerName}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {item.suspiciousActivity}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {item.action}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {item.recentReferrals}
-                  </td>
-                  <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-1 sm:py-2 md:py-3 whitespace-nowrap text-left">
-                    <span className="font-poppins font-medium text-[9px] sm:text-[10px] md:text-[12px] leading-none tracking-wide text-[#EC2D01]">
-                      {item.riskLevel}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap font-poppins text-sm text-gray-600">
+                      {item.activity}
+                    </td>
+                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-1 sm:py-2 md:py-3 font-poppins whitespace-nowrap text-left">
+                      <span className={`font-poppins font-medium text-[9px] sm:text-[10px] md:text-[12px] leading-none tracking-wide ${getRiskLevelColor(item.riskLevel)}`}>
+                        {item.riskLevel}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
+
+        {/* Pagination */}
+        {paginationData && paginationData.totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-6 p-4">
+            {/* Previous Button */}
+            <button
+              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              disabled={page === 1}
+              className={`p-2 text-red-500 transition rounded-full ${page === 1
+                  ? "opacity-40 cursor-not-allowed"
+                  : "hover:text-red-700"
+                }`}
+            >
+              <FaChevronLeft className="text-lg" />
+            </button>
+
+            {/* Page Numbers (always at least 3) */}
+            {Array.from(
+              { length: Math.max(3, paginationData?.totalPages || 1) },
+              (_, i) => i + 1
+            ).map((pageNum) => (
+              <button
+                key={pageNum}
+                onClick={() => setPage(pageNum)}
+                className={`px-3 py-1 rounded-md text-base font-bold ${pageNum === page
+                    ? "bg-yellow-300 text-red-600"
+                    : "text-red-500 hover:text-red-700"
+                  }`}
+              >
+                {pageNum}
+              </button>
+            ))}
+
+            {/* Next Button */}
+            <button
+              onClick={() =>
+                setPage((prev) =>
+                  Math.min(
+                    Math.max(3, paginationData?.totalPages || 1),
+                    prev + 1
+                  )
+                )
+              }
+              disabled={page === Math.max(3, paginationData?.totalPages || 1)}
+              className={`p-2 text-red-500 transition rounded-full ${page === Math.max(3, paginationData?.totalPages || 1)
+                  ? "opacity-40 cursor-not-allowed"
+                  : "hover:text-red-700"
+                }`}
+            >
+              <FaChevronRight className="text-lg" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

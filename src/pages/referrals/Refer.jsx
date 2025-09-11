@@ -27,6 +27,31 @@ const Refer = () => {
   const [loading, setLoading] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  // Helper function to get status badge styles dynamically
+  const getStatusBadge = (status) => {
+    // MODIFICATION: If status is not present, return null to show an empty space.
+    if (!status) {
+      return null;
+    }
+
+    let statusClasses = "bg-gray-100 text-gray-700"; // Default style
+    if (status === "Active") {
+      statusClasses = "bg-green-100 text-green-700";
+    } else if (status === "Pending") {
+      statusClasses = "bg-yellow-100 text-yellow-700";
+    } else if (status === "Expired") {
+      statusClasses = "bg-red-100 text-red-700";
+    }
+
+    return (
+      <span
+        className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusClasses}`}
+      >
+        {status}
+      </span>
+    );
+  };
+
   const filterOptions = [
     { value: "week", label: "This Week" },
     { value: "month", label: "This Month" },
@@ -61,7 +86,6 @@ const Refer = () => {
         endpoints.map((url) => fetch(url).then((res) => res.json()))
       );
 
-      // ✅ Stats
       setStats({
         totalReferrals: totalReferralsRes?.totalReferrals ?? 0,
         activeReferrals: activeReferralsRes?.activeReferrals ?? 0,
@@ -69,7 +93,6 @@ const Refer = () => {
         coinsClaimed: coinsClaimedRes?.coinsClaimed ?? 0,
       });
 
-      // ✅ Customer referrals (array expected)
       if (Array.isArray(customerRes)) {
         setCustomerReferrals(customerRes);
       } else if (Array.isArray(customerRes?.topCustomers)) {
@@ -78,7 +101,6 @@ const Refer = () => {
         setCustomerReferrals([]);
       }
 
-      // ✅ Seller referrals (array expected)
       if (Array.isArray(sellerRes)) {
         setSellerReferrals(sellerRes);
       } else if (Array.isArray(sellerRes?.topSellers)) {
@@ -87,7 +109,6 @@ const Refer = () => {
         setSellerReferrals([]);
       }
 
-      // ✅ Coin Economics
       if (
         activityRes?.activityOverview &&
         typeof activityRes.activityOverview === "object"
@@ -103,7 +124,6 @@ const Refer = () => {
         setCoinActivityData([]);
       }
 
-      // ✅ Risk Monitoring
       setGullakManagement(
         Array.isArray(managementRes?.transactions)
           ? managementRes.transactions
@@ -145,253 +165,213 @@ const Refer = () => {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {[
-          { title: "Total Referrals", value: stats.totalReferrals, change: "12%" },
-          { title: "Active Referrals", value: stats.activeReferrals, change: "8%" },
-          { title: "Total Gullak Coins", value: stats.totalGullakCoins, change: "15%" },
-          { title: "Coins Claimed", value: stats.coinsClaimed, change: "25%" },
-        ].map((item, idx) => (
-          <div key={idx} className="bg-white p-4 rounded shadow">
-            <h4 className="text-sm font-medium text-gray-600">{item.title}</h4>
-            <p className="text-2xl font-bold">{item.value}</p>
-            <p className="text-green-500 text-xs flex items-center gap-1">
-              <FaArrowUp className="text-xs" />
-              {item.change} from last month
-            </p>
-          </div>
-        ))}
-      </div>
+     {/* MODIFICATION: Increased gap to gap-6 for better spacing */}
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+  {[
+    { title: "Total Referrals", value: stats.totalReferrals, change: "12%" },
+    { title: "Active Referrals", value: stats.activeReferrals, change: "8%" },
+    { title: "Total Gullak Coins", value: stats.totalGullakCoins, change: "15%" },
+    { title: "Coins Claimed", value: stats.coinsClaimed, change: "25%" },
+  ].map((item, idx) => (
+    // MODIFICATION: Changed padding to px-4 py-6 to increase height
+    <div key={idx} className="bg-white px-4 py-6 rounded-lg shadow">
+  <h4 className="text-md font-semibold">{item.title}</h4>
+  <p className="text-2xl font-bold mt-1">{item.value}</p>
+  <p className="text-base flex items-center gap-1 mt-2">
+    <span className="text-green-500 text-lg">↝</span>
+    <span className="text-green-500">{item.change}</span>
+    <span className="text-gray-500">from last month</span>
+  </p>
+</div>
+
+  ))}
+</div>
+
 
       {/* Referrals Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         {/* Customer Referrals */}
-        <div className="bg-white p-4 rounded shadow overflow-x-auto">
+        <div className="bg-white p-5 rounded-lg shadow overflow-x-auto">
           <div className="flex justify-between items-center mb-2">
             <h4 className="font-semibold">Top Customer Referrals</h4>
-            <a href="#" className="text-blue-500 text-sm">
+            <a href="#" className="text-blue-500 text-sm underline">
               See all
             </a>
           </div>
-          <table className="w-full text-sm min-w-[400px]">
+          <table className="w-full text-sm min-w-[450px] mt-7">
             <thead>
-              <tr className="text-left text-gray-600">
+              <tr className="text-left ">
                 <th>Customer</th>
-                <th>Coins</th>
+                <th className="mr-10">Coins</th>
                 <th>Referrals</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {customerReferrals.map((ref, i) => (
-                <tr key={i} className="border-t">
-                  <td className="py-2 flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-[#FEBC1D] flex items-center justify-center">
-                      <FaUser className="text-[#EC2D01] text-sm" />
-                    </div>
-                    {/* ✅ Safe fallback */}
-                    {ref.customerName || ref.name}
-                  </td>
-                  <td>{ref.coins}</td>
-                  <td>{ref.referrals}</td>
-                </tr>
-              ))}
-              {customerReferrals.length === 0 && (
-                <tr>
-                  <td colSpan={3} className="text-center py-3 text-gray-500">
-                    No customer referral data available
-                  </td>
-                </tr>
-              )}
-            </tbody>
+  {customerReferrals.map((ref, i) => (
+    <tr key={i} className={i !== 0 ? "border-t" : ""}>
+      <td className="py-4 flex items-center gap-2">
+        <div className="w-7 h-7 rounded-full bg-[#FEBC1D] flex items-center justify-center shrink-0">
+          <FaUser className="text-[#EC2D01] text-sm" />
+        </div>
+        {ref.customerName || ref.name}
+      </td>
+      <td>{ref.coins}</td>
+      <td>{ref.referrals}</td>
+      <td>{getStatusBadge(ref.status)}</td>
+    </tr>
+  ))}
+  {customerReferrals.length === 0 && (
+    <tr>
+      <td colSpan={4} className="text-center py-4 text-gray-500">
+        No customer referral data available
+      </td>
+    </tr>
+  )}
+</tbody>
+
           </table>
         </div>
 
         {/* Seller Referrals */}
-        <div className="bg-white p-4 rounded shadow overflow-x-auto">
-          <div className="flex justify-between items-center mb-2">
-            <h4 className="font-semibold">Top Seller Referrals</h4>
-            <a href="#" className="text-blue-500 text-sm">
+        <div className="bg-white p-5 rounded-lg shadow overflow-x-auto">
+          <div className="flex justify-between items-center mb-2 ">
+            <h4 className="font-semibold text-base">Top Seller Referrals</h4>
+            <a href="#" className="text-blue-500 text-sm underline">
               See all
             </a>
           </div>
-          <table className="w-full text-sm min-w-[400px]">
+          <table className="w-full text-sm min-w-[450px] mt-7">
             <thead>
-              <tr className="text-left text-gray-600">
+              <tr className="text-left mt-7 ">
                 <th>Seller</th>
-                <th>Coins</th>
+                <th className="mr-10">Coins</th>
                 <th>Referrals</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {sellerReferrals.map((ref, i) => (
-                <tr key={i} className="border-t">
-                  <td className="py-2 flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-[#EC2D01] flex items-center justify-center">
-                      <FaUser className="text-white text-sm" />
-                    </div>
-                    {/* ✅ Fixed seller name */}
-                    {ref.store || ref.sellerName || ref.shopName}
-                  </td>
-                  <td>{ref.coins}</td>
-                  <td>{ref.referrals}</td>
-                </tr>
-              ))}
-              {sellerReferrals.length === 0 && (
-                <tr>
-                  <td colSpan={3} className="text-center py-3 text-gray-500">
-                    No seller referral data available
-                  </td>
-                </tr>
-              )}
-            </tbody>
+  {sellerReferrals.map((ref, i) => (
+    <tr key={i} className={i !== 0 ? "border-t" : ""}>
+      <td className="py-4 flex items-center gap-2">
+        <div className="w-7 h-7 rounded-full bg-[#EC2D01] flex items-center justify-center shrink-0">
+          <FaUser className="text-white text-sm" />
+        </div>
+        {ref.store || ref.sellerName || ref.shopName}
+      </td>
+      <td>{ref.coins}</td>
+      <td>{ref.referrals}</td>
+      <td>{getStatusBadge(ref.status)}</td>
+    </tr>
+  ))}
+  {sellerReferrals.length === 0 && (
+    <tr>
+      <td colSpan={4} className="text-center py-4 text-gray-500">
+        No seller referral data available
+      </td>
+    </tr>
+  )}
+</tbody>
+
           </table>
         </div>
       </div>
 
-      {/* Coin Economics graph */}
-      <div className="bg-white rounded shadow-md p-4 w-full mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="font-semibold text-lg p-2">Coin Economics</h2>
-
-          {/* Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center justify-between w-32 px-3 py-2 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <span className="text-gray-700">{selectedOption?.label}</span>
-              <FaChevronDown
-                className={`text-gray-400 text-xs transition-transform duration-200 ${
-                  isDropdownOpen ? "rotate-180" : ""
+    <div className="bg-white rounded shadow-md p-4 w-full mb-6">
+  {/* Header with Title and Dropdown Filter */}
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="font-semibold p-2 text-2xl">Coin Economics</h2>
+    <div className="relative">
+      <button
+        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        className="flex items-center justify-between w-32 px-3 py-2 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      >
+        <span className="text-gray-700">{selectedOption?.label}</span>
+        <FaChevronDown
+          className={`text-gray-400 text-xs transition-transform duration-200 ${
+            isDropdownOpen ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+      {isDropdownOpen && (
+        <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-300 rounded-md shadow-lg z-10">
+          <div className="py-1">
+            {filterOptions.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => handleFilterChange(option.value)}
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 focus:outline-none focus:bg-gray-100 ${
+                  filter === option.value
+                    ? "bg-blue-50 text-blue-600 font-medium"
+                    : "text-gray-700"
                 }`}
-              />
-            </button>
-
-            {isDropdownOpen && (
-              <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-300 rounded-md shadow-lg z-10">
-                <div className="py-1">
-                  {filterOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => handleFilterChange(option.value)}
-                      className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 focus:outline-none focus:bg-gray-100 ${
-                        filter === option.value
-                          ? "bg-blue-50 text-blue-600 font-medium"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
         </div>
+      )}
+    </div>
+  </div>
 
-        <ResponsiveContainer width="100%" height={450}>
-          <BarChart data={transformedCoinData} barCategoryGap={20} barGap={8}>
-            <XAxis
-              dataKey="day"
-              tick={{ fontSize: 14, fontWeight: 500, fill: "#000000" }}
-            />
-            <YAxis
-              domain={[0, "auto"]}
-              tickCount={7}
-              interval={0}
-              tick={{ fontSize: 14, fill: "#000000", fontWeight: 550 }}
-            />
-            <Tooltip />
-            <Legend
-              iconType="circle"
-              wrapperStyle={{
-                fontSize: "14px",
-                fontWeight: 550,
-                paddingTop: "10px",
-                color: "#000000",
-              }}
-              formatter={(value) => (
-                <span style={{ color: "#000000" }}>{value}</span>
-              )}
-            />
-            <Bar
-              dataKey="issued"
-              name="Coins Issued"
-              fill="#EC2D01"
-              radius={[6, 6, 0, 0]}
-              barSize={36}
-            />
-            <Bar
-              dataKey="redeemed"
-              name="Coins Redeemed"
-              fill="#FEBC1D"
-              radius={[6, 6, 0, 0]}
-              barSize={36}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Risk Monitoring */}
-      <div className="bg-white p-4 rounded shadow">
-        <h4 className="font-semibold mb-3">Risk Monitoring</h4>
-        <div className="overflow-x-auto max-h-[400px]">
-          <table className="w-full text-sm min-w-[800px] border-collapse">
-            <thead className="sticky top-0 bg-gray-100 z-10">
-              <tr className="text-left text-gray-700 border-b">
-                <th className="py-2 px-3">Transaction ID</th>
-                <th className="py-2 px-3">Type</th>
-                <th className="py-2 px-3">Description</th>
-                <th className="py-2 px-3">Amount</th>
-                <th className="py-2 px-3">Status</th>
-                <th className="py-2 px-3">Issued On</th>
-                <th className="py-2 px-3">Expiry Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {gullakManagement.map((item, i) => (
-                <tr
-                  key={i}
-                  className="border-b hover:bg-gray-50 transition-colors"
-                >
-                  <td className="py-2 px-3 font-mono text-xs">
-                    {item.transactionId}
-                  </td>
-                  <td className="py-2 px-3">{item.type}</td>
-                  <td className="py-2 px-3">{item.description}</td>
-                  <td className="py-2 px-3">{item.amount}</td>
-                  <td className="py-2 px-3">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        item.status === "active"
-                          ? "bg-green-100 text-green-700"
-                          : item.status === "redeemed"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="py-2 px-3">
-                    {new Date(item.issueDate).toLocaleDateString("en-GB")}
-                  </td>
-                  <td className="py-2 px-3">
-                    {new Date(item.expiryDate).toLocaleDateString("en-GB")}
-                  </td>
-                </tr>
-              ))}
-              {gullakManagement.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="text-center py-4 text-gray-500">
-                    No risk monitoring data available
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+  {/* Chart Container */}
+  <ResponsiveContainer width="100%" height={450}>
+    <BarChart
+      data={transformedCoinData}
+      barSize={40} // Sets a consistent size for all bars
+      barGap={12}
+      // The margin ensures that labels are not cut off
+      margin={{
+        top: 20,
+        right: 30,
+        left: 20,
+        bottom: 5,
+      }}
+    >
+      <XAxis
+        dataKey="day"
+        type="category"
+        tick={{ fontSize: 14, fontWeight: 500, fill: "#000000" }}
+        axisLine={false}
+        tickLine={false}
+      />
+      <YAxis
+        domain={[0, "auto"]}
+        tickCount={7}
+        interval={0}
+        tick={{ fontSize: 14, fill: "#000000", fontWeight: 550 }}
+        axisLine={false}
+        tickLine={false}
+      />
+      <Tooltip cursor={{fill: 'rgba(236, 236, 236, 0.5)'}} />
+      <Legend
+        iconType="circle"
+        wrapperStyle={{
+          fontSize: "14px",
+          fontWeight: 550,
+          paddingTop: "10px",
+          color: "#000000",
+        }}
+        formatter={(value) => (
+          <span style={{ color: "#000000" }}>{value}</span>
+        )}
+      />
+      <Bar
+        dataKey="issued"
+        name="Coins Issued"
+        fill="#EC2D01"
+        radius={[6, 6, 0, 0]}
+      />
+      <Bar
+        dataKey="redeemed"
+        name="Coins Redeemed"
+        fill="#FEBC1D"
+        radius={[6, 6, 0, 0]}
+      />
+    </BarChart>
+  </ResponsiveContainer>
+</div>
     </div>
   );
 };

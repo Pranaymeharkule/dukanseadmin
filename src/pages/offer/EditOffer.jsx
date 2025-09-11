@@ -179,7 +179,7 @@ export default function EditOffer() {
 
       } catch (err) {
         console.error("Failed to fetch data:", err);
-        
+
         let errorMessage = "Failed to load data. ";
         if (err.code === 'ECONNABORTED') {
           errorMessage += "Request timeout. Please check your connection and try again.";
@@ -192,7 +192,7 @@ export default function EditOffer() {
         } else {
           errorMessage += "Please try again.";
         }
-        
+
         setError(errorMessage);
       } finally {
         setLoading(false);
@@ -300,7 +300,7 @@ export default function EditOffer() {
       }, 1500);
     } catch (err) {
       console.error("Error updating offer:", err);
-      
+
       let errorMessage = "Failed to update offer. ";
       if (err.code === 'ECONNABORTED') {
         errorMessage += "Request timeout. Please try again.";
@@ -309,7 +309,7 @@ export default function EditOffer() {
       } else {
         errorMessage += "Please try again.";
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -363,11 +363,11 @@ export default function EditOffer() {
         >
           <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
         </button>
-        <h2 className="text-2xl font-semibold text-gray-800">Edit Offer</h2>
+        <h2 className="text-lg font-medium text-gray-800">Edit Offer</h2>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="mx-auto bg-white p-6 rounded shadow">
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow mt-2 pb-10">
         {/* Error */}
         {error && (
           <div className="bg-red-100 text-red-700 p-4 rounded mb-4 border border-red-200">
@@ -384,7 +384,7 @@ export default function EditOffer() {
 
         {/* Select User Type */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
             Select User Type <span className="text-red-500">*</span>
           </label>
           <select
@@ -404,7 +404,7 @@ export default function EditOffer() {
 
         {/* Select Customer */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
             Select Customer <span className="text-red-500">*</span>
           </label>
           <select
@@ -424,7 +424,7 @@ export default function EditOffer() {
 
         {/* Select Products */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
             Select Product <span className="text-red-500">*</span>
           </label>
           {products.map((product, index) => (
@@ -468,7 +468,7 @@ export default function EditOffer() {
 
         {/* Discount */}
         <div className="mb-4">
-          <label className="block mb-2 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-2 text-sm font-medium text-gray-700">
             Discount <span className="text-red-500">*</span>
           </label>
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
@@ -500,38 +500,36 @@ export default function EditOffer() {
         </div>
 
         {/* Dates */}
-        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mb-4">
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Offer Start Date <span className="text-red-500">*</span>
+            <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+              Offer Start Date
             </label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="border border-gray-300 p-2 rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Offer End Date <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={expireDate}
-              onChange={(e) => setExpireDate(e.target.value)}
-              min={startDate}
-              className="border border-gray-300 p-2 rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full border border-gray-300 p-2 rounded"
               required
             />
           </div>
         </div>
+        <div>
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+            Offer Expire Date
+          </label>
+          <input
+            type="date"
+            value={expireDate}
+            onChange={(e) => setExpireDate(e.target.value)}
+            className="w-full border border-gray-300 p-2 rounded"
+            required
+          />
+        </div>
 
         {/* Offer Text */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
             Offer Text
           </label>
           <textarea
@@ -545,7 +543,7 @@ export default function EditOffer() {
 
         {/* Banner */}
         <div className="mb-6">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
             Banner Image
           </label>
           {existingBanner && !bannerImage && (
@@ -574,7 +572,7 @@ export default function EditOffer() {
         <div className="mb-4 text-right">
           <Link
             to={`/offer/edit-terms/${offerId}`}
-            className="text-sm text-red-600 border border-red-600 px-4 py-2 rounded hover:bg-red-50 transition"
+            className="font-poppins text-sm text-red-600 border border-red-600 px-4 py-2 rounded hover:bg-red-50 transition"
           >
             Edit Terms & Conditions
           </Link>
@@ -585,7 +583,7 @@ export default function EditOffer() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="bg-yellow-400 text-red-600 font-bold px-8 py-2 rounded-md hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="font-poppins bg-brandYellow text-red-600 font-bold px-8 py-2 rounded-md hover:bg-brandYellow disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             {isSubmitting ? (
               <>
@@ -593,7 +591,7 @@ export default function EditOffer() {
                 Saving...
               </>
             ) : (
-              "Save Changes"
+              "Save"
             )}
           </button>
         </div>

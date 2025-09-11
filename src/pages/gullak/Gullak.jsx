@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FaArrowDown, FaArrowUp } from "react-icons/fa";
+import {
+  FaArrowDown,
+  FaArrowUp,
+  FaFilter,
+  FaDownload,
+} from "react-icons/fa";
 import {
   BarChart,
   Bar,
@@ -18,6 +23,40 @@ import {
   fetchCoinActivityDropdown,
 } from "../../api/gullakApi";
 
+import { IoMdTrendingUp, IoMdTrendingDown } from "react-icons/io";
+
+// ✅ Utility: Export filtered table data as CSV
+const handleExport = (data) => {
+  if (!data || data.length === 0) return;
+
+  // Create CSV header
+  const headers = ["Coin ID", "Type", "Amount", "Issue Date", "Expiry Date", "Status"];
+  const rows = data.map((item) => [
+    item.coinId,
+    item.type,
+    item.amount,
+    formatDate(item.issueDate),
+    formatDate(item.expiryDate),
+    item.status,
+  ]);
+
+  // Combine header + rows
+  const csvContent =
+    [headers, ...rows].map((e) => e.join(",")).join("\n");
+
+  // Create a blob and download
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", "gullak_table.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
+
 // ✅ Utility: Fix Invalid Date issue
 const formatDate = (dateStr) => {
   if (!dateStr) return "--";
@@ -34,13 +73,33 @@ const formatDate = (dateStr) => {
 
 // ✅ Utility: Dynamic change % UI
 const getChangeUI = (percent) => {
-  if (!percent) return { icon: null, text: "", color: "" };
-  const value = parseFloat(percent);
-  if (isNaN(value)) return { icon: null, text: percent, color: "text-gray-500" };
+  if (!percent) return { icon: null, percentText: "", suffix: "", color: "" };
 
-  return value >= 0
-    ? { icon: <FaArrowUp className="mr-1" />, text: `Change: ${percent}`, color: "text-green-500" }
-    : { icon: <FaArrowDown className="mr-1" />, text: `Change: ${percent}`, color: "text-red-500" };
+  const value = parseFloat(percent);
+  if (isNaN(value)) {
+    return {
+      icon: null,
+      percentText: percent,
+      suffix: "from last month",
+      color: "text-gray-500",
+    };
+  }
+
+  if (value >= 0) {
+    return {
+      icon: <IoMdTrendingUp className="text-green-500 mr-1" />,
+      percentText: `${percent}`,
+      suffix: "from last month",
+      color: "text-green-500",
+    };
+  }
+
+  return {
+    icon: <IoMdTrendingDown className="text-red-500 mr-1 " />,
+    percentText: `${percent}`,
+    suffix: "from last month",
+    color: "text-red-500",
+  };
 };
 
 const Gullak = () => {
@@ -58,8 +117,24 @@ const Gullak = () => {
   const [coinActivityDropdown, setCoinActivityDropdown] = useState([]);
   const [filter, setFilter] = useState("");
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // ✅ State for table search
+  const [tableSearchTerm, setTableSearchTerm] = useState("");
+
+  // ✅ Derived filtered data
+  const filteredTableData = gullakTableData.filter((item) => {
+    const searchTerm = tableSearchTerm.toLowerCase();
+    return (
+      item.coinId.toLowerCase().includes(searchTerm) ||
+      item.type.toLowerCase().includes(searchTerm) ||
+      item.amount.toString().includes(searchTerm) ||
+      formatDate(item.issueDate).toLowerCase().includes(searchTerm) ||
+      formatDate(item.expiryDate).toLowerCase().includes(searchTerm) ||
+      item.status.toLowerCase().includes(searchTerm)
+    );
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,7 +152,7 @@ const Gullak = () => {
           fetchTotalActiveCoins(),
           fetchBreakageRate(),
           fetchCoinsExpiringSoon(),
-          fetchCoinActivityOverview(filter || "week"), // default filter only in API call
+          fetchCoinActivityOverview(filter || "week"),
           fetchGullakManagement(),
           fetchCoinActivityDropdown(),
         ]);
@@ -154,23 +229,25 @@ const Gullak = () => {
         ].map((card, idx) => (
           <div
             key={idx}
-            className="bg-white p-5 rounded-xl shadow flex flex-col justify-between"
+            className="bg-white p-5 rounded-xl shadow flex flex-col justify-between min-h-[130px]"
           >
-            <h4 className="text-gray-500 text-sm">{card.label}</h4>
+            <h4 className="text-base font-semibold">{card.label}</h4>
             <p className="text-2xl font-bold">{card.value}</p>
-            <p className={`text-sm mt-1 flex items-center ${card.color}`}>
+
+            <p className="flex items-center gap-1 text-base mt-1">
               {card.icon}
-              {card.text}
+              <span className={card.color}>{card.percentText}</span>
+              <span className="text-gray-500">{card.suffix}</span>
             </p>
           </div>
         ))}
       </div>
 
-      {/* Filter Dropdown for Coin Activity Overview */}
+      {/* Coin Activity Overview */}
       {coinActivityDropdown.length > 0 && (
         <div className="mt-6 bg-white rounded-xl shadow-md p-5 w-full overflow-x-auto">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
-            <h2 className="font-semibold text-lg">Coin Economics</h2>
+            <h2 className="font-semibold text-xl">Coin Activity Overview</h2>
             <select
               className="border rounded px-3 py-1 text-sm"
               value={filter}
@@ -190,11 +267,15 @@ const Gullak = () => {
                 <XAxis
                   dataKey="day"
                   tick={{ fontSize: 14, fontWeight: 500, fill: "#000000" }}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 <YAxis
                   domain={[0, "auto"]}
                   tickCount={6}
                   tick={{ fontSize: 14, fill: "#000000", fontWeight: 550 }}
+                  axisLine={false}
+                  tickLine={false}
                 />
                 <Tooltip />
                 <Legend
@@ -240,20 +321,42 @@ const Gullak = () => {
       {gullakTableData.length > 0 && (
         <div className="mt-6 bg-white p-5 rounded-xl shadow">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
-            <h2 className="font-semibold text-lg">Gullak Management</h2>
-            <div className="space-x-2">
-              <button className="border border-red-500 text-red-500 px-3 py-1 rounded-md text-sm">
-                Filter
-              </button>
-              <button className="bg-red-500 text-white px-3 py-1 rounded-md text-sm">
-                Export
-              </button>
-            </div>
+            <h2 className="font-semibold text-xl">Gullak Management</h2>
+           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-4">
+{/* Filter Input */}
+<div className="flex flex-col w-full sm:w-24">
+  <div className="relative w-full">
+    <FaFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-red-500" />
+    {/* Text inside input */}
+    <span className="absolute left-10 top-1/2 -translate-y-1/2 text-red-600 text-sm pointer-events-none">
+      Filter
+    </span>
+    <input
+      type="text"
+      value={tableSearchTerm}
+      onChange={(e) => setTableSearchTerm(e.target.value)}
+      className="w-full border border-red-500 text-red-600 px-10 py-2 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-red-500 bg-white"
+    />
+  </div>
+</div>
+
+
+
+  {/* Export Button */}
+  <button
+    className="border border-red-500 text-red-500 bg-white px-4 py-2 rounded-md text-sm flex items-center justify-center hover:bg-red-50"
+    onClick={() => handleExport(filteredTableData)} // call export function
+  >
+    <FaDownload className="mr-2" />
+    Export
+  </button>
+</div>
+
           </div>
 
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm text-left">
-              <thead className="bg-gray-100 text-sm">
+              <thead className="text-base">
                 <tr>
                   <th className="p-3">Coin ID</th>
                   <th className="p-3">Type</th>
@@ -264,7 +367,7 @@ const Gullak = () => {
                 </tr>
               </thead>
               <tbody>
-                {gullakTableData.map((item, index) => (
+                {filteredTableData.map((item, index) => (
                   <tr key={index} className="border-t">
                     <td className="p-3">{item.coinId}</td>
                     <td className="p-3">{item.type}</td>
@@ -273,12 +376,10 @@ const Gullak = () => {
                     <td className="p-3">{formatDate(item.expiryDate)}</td>
                     <td className="p-3">
                       <span
-                        className={`text-xs font-medium px-2 py-1 rounded ${
+                        className={`text-xs font-medium capitalize ${
                           item.status === "active"
-                            ? "bg-green-100 text-green-600"
-                            : item.status === "redeemed"
-                            ? "bg-blue-100 text-blue-600"
-                            : "bg-red-100 text-red-600"
+                            ? "text-green-600"
+                            : "text-red-600"
                         }`}
                       >
                         {item.status}

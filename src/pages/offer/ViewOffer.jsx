@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import axios from "axios";
+  import React, { useState, useEffect } from "react";
+  import { useNavigate, useParams, Link } from "react-router-dom";
+  import { ArrowLeft } from "lucide-react";
+  import axios from "axios";
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
@@ -11,7 +11,6 @@ export default function ViewOffer() {
 
   const [offer, setOffer] = useState(null);
   const [error, setError] = useState("");
-  const [terms, setTerms] = useState(null); // 🔹 state for T&C
 
   const parseDate = (dateStr) => {
     if (!dateStr) return "N/A";
@@ -24,7 +23,6 @@ export default function ViewOffer() {
       return;
     }
 
-    // fetch offer details
     const fetchOffer = async () => {
       try {
         const res = await axios.get(
@@ -52,32 +50,7 @@ export default function ViewOffer() {
       }
     };
 
-    // fetch global terms & conditions
-    const fetchTerms = async () => {
-      try {
-        const res = await axios.get(
-          `${API_BASE_URL}/settings/getOfferTermsAndCondition`,
-          {
-            headers: {
-              "Cache-Control": "no-cache",
-              Pragma: "no-cache",
-              Expires: "0",
-            },
-          }
-        );
-
-        console.log("GET terms response:", res.data);
-
-        if (res.data?.offerTermsAndCondition) {
-          setTerms(res.data.offerTermsAndCondition);
-        }
-      } catch (err) {
-        console.error("Error fetching terms & conditions:", err);
-      }
-    };
-
     fetchOffer();
-    fetchTerms();
   }, [offerId]);
 
   if (error) return <div className="p-4 text-center text-red-500">{error}</div>;
@@ -109,7 +82,7 @@ export default function ViewOffer() {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
+        {/* Header - Fixed */}
         <div
           className="flex items-center px-6 py-6 mb-6 bg-white rounded-lg shadow-sm sticky top-6 z-10"
           style={{ height: "88px" }}
@@ -136,7 +109,10 @@ export default function ViewOffer() {
         </div>
 
         {/* Body */}
-        <div className="bg-white rounded-lg flex flex-col" style={{ height: "auto" }}>
+        <div
+          className="bg-white rounded-lg flex flex-col"
+          style={{ height: "auto" }}
+        >
           <div
             className="overflow-y-auto p-6 flex-1 hide-scrollbar"
             style={{ maxHeight: "500px" }}
@@ -158,7 +134,7 @@ export default function ViewOffer() {
               <InfoRow label="Offer Text:" value={offer.offerText} />
             )}
 
-            {/* Banner */}
+            {/* Banner Section */}
             {offer.bannerImage && (
               <div className="flex gap-2 mb-6" style={{ height: "179.67px" }}>
                 <div
@@ -207,39 +183,25 @@ export default function ViewOffer() {
 
             {/* Terms & Conditions */}
             <div className="text-right mb-6">
-              {terms?.description ? (
-                  <Link
-                    className="font-medium hover:underline"
-                    style={{
-                      fontFamily: "Poppins",
-                      fontSize: "20px",
-                      lineHeight: "30px",
-                      color: "#EC2D01",
-                    }}
-                    to={`/offer/view-terms/${offer._id}`}
-                    state={{ terms }}
-                  >
-                    See Terms & Conditions
-                  </Link>
-              ) : (
-                <span
-                  style={{
-                    fontFamily: "Poppins",
-                    fontSize: "16px",
-                    lineHeight: "24px",
-                    color: "#888",
-                  }}
-                >
-                  Loading terms...
-                </span>
-              )}
+              <Link
+                className="font-medium hover:underline"
+                style={{
+                  fontFamily: "Poppins",
+                  fontSize: "20px",
+                  lineHeight: "30px",
+                  color: "#EC2D01",
+                }}
+                to={`/offer/see-terms/${offerId}`}
+              >
+                See Terms & Conditions
+              </Link>
             </div>
           </div>
 
-          {/* Edit Button */}
+          {/* Edit Button - Fixed at bottom */}
           <div className="flex justify-center p-6 bg-white border-t sticky bottom-0">
             <button
-              onClick={() => navigate(`/offer/edit/${offerId}`)}
+              onClick={() => navigate(`/offer/edit-offer/${offerId}`)}
               className="rounded-xl font-semibold"
               style={{
                 background: "#FEBC1D",

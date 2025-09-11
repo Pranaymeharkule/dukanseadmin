@@ -261,21 +261,19 @@ const Customer = () => {
             {/* View type buttons */}
             <div className="flex items-center gap-2">
               <button
-                className={`px-4 py-2 rounded-full text-sm ${
-                  viewType === "all"
+                className={`px-4 py-2 rounded-full text-sm ${viewType === "all"
                     ? "bg-brandYellow text-red-700 font-bold shadow-lg"
                     : "border border-red-600 font-bold text-red-600 "
-                }`}
+                  }`}
                 onClick={() => setViewType("all")}
               >
                 All Customer
               </button>
               <button
-                className={`px-4 py-2 rounded-full text-sm ${
-                  viewType === "new"
+                className={`px-4 py-2 rounded-full text-sm ${viewType === "new"
                     ? "bg-brandYellow text-red-700 font-bold shadow-lg"
                     : "border border-red-600 font-bold text-red-600"
-                }`}
+                  }`}
                 onClick={() => setViewType("new")}
               >
                 New Customer
@@ -285,16 +283,46 @@ const Customer = () => {
             {/* Right actions */}
             <div className="relative flex items-center gap-2">
               <button
-                className="p-2 border rounded-md hover:bg-gray-50"
+                className="p-2"
                 onClick={() => setFilterVisible(!filterVisible)}
               >
                 <FaFilter />
               </button>
               <button
-                className="p-2 border rounded-md hover:bg-gray-50"
+                className="p-2"
                 onClick={() => setSortVisible(!sortVisible)}
               >
-                <FaSortAmountDown />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 30 30"
+                  fill="none"
+                  className="w-4 h-4"
+                >
+                  <rect width="30" height="30" fill="url(#pattern0_4522_13470)" />
+                  <defs>
+                    <pattern
+                      id="pattern0_4522_13470"
+                      patternContentUnits="objectBoundingBox"
+                      width="1"
+                      height="1"
+                    >
+                      <use
+                        xlinkHref="#image0_4522_13470"
+                        transform="scale(0.0104167)"
+                      />
+                    </pattern>
+                    <image
+                      id="image0_4522_13470"
+                      width="96"
+                      height="96"
+                      preserveAspectRatio="none"
+                      xlinkHref="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAACXBIWXMAAAsTAAALEwEAmpwYAAABs0lEQVR4nO2cuW5DQRDD9q9dJmX+WkGA9D7eIY2WBLbXkIbdeS0AAAAAAIBr+V5r/SDZJ1//jwhG+UQIkE+EAPkK+Tp6tq9avgIiVAZ4R77MEeoCfCJfxghVAY7IlylCTYAz5MsQoSLAmfJ1c4TxAa6QrxsjjA5wpXyZfhPGcId8EcEvX0TwyxcR/PK1e4QE+do1QpJ87RYhUb52i3CEZxLdpO+rP1Dh++oPVPi++gMVvq/+QIXvqz9Q4fvqD1T4vvoDFb7vMPUHpkMAMwQwQwAzBDBDADMEMEMAM+kBFL6v/kCF76s/UOH76g9U+L76AxW+r/5Ahe+rP1Dh++oPVPi+ekQALwQwQwAzBDBDADMEMEMAM/UB0g9U+L76AxW+r/5Ahe+rP1Dh++oPVPi++gMVvq/+QIXvqz9Q4fviebwg0fW+1iY8AmRvKz8xwnbykyJsKz8hwvbynRGQb4yAfGOEePnPDpgcIV5+QoCrIoyQnxLg7Ahj5CcFOCvCKPlpAY5GGCc/McCnEUbKTw3wboSx8pMDvBphtPwJPJCfGYFPvjEC8o3/k/33AAAAAAAA1lX8Av/fmrZrQyxPAAAAAElFTkSuQmCC"
+                    />
+                  </defs>
+                </svg>
               </button>
               <button
                 className="flex items-center gap-2 border border-red-500 text-red-500 font-semibold px-3 py-1 rounded-md text-sm hover:bg-red-50"
@@ -437,13 +465,12 @@ const Customer = () => {
                         <td className="p-1 text-center">{cust.coinsExpired}</td>
                         <td className="p-1 capitalize">
                           <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              cust.status === "active"
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${cust.status === "active"
                                 ? "bg-green-100 text-green-800"
                                 : cust.status === "fraud"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-gray-100 text-gray-800"
-                            }`}
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
                           >
                             {cust.status}
                           </span>
@@ -459,7 +486,25 @@ const Customer = () => {
                                 navigate(`/customer/profile/${cust._id}`);
                               }}
                             >
-                              <FaEye />
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                className="inline-block"
+                              >
+                                <path
+                                  d="M12.5 16C14.1569 16 15.5 14.6569 15.5 13C15.5 11.3431 14.1569 10 12.5 10C10.8431 10 9.5 11.3431 9.5 13C9.5 14.6569 10.8431 16 12.5 16Z"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                />
+                                <path
+                                  d="M21.5 14C21.5 14 20.5 6 12.5 6C4.5 6 3.5 14 3.5 14"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                />
+                              </svg>
                             </button>
                             <button
                               title="WhatsApp"
@@ -485,7 +530,18 @@ const Customer = () => {
                                 });
                               }}
                             >
-                              <FaTrash />
+                              <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M7 21C6.45 21 5.97933 20.8043 5.588 20.413C5.19667 20.0217 5.00067 19.5507 5 19V6H4V4H9V3H15V4H20V6H19V19C19 19.55 18.8043 20.021 18.413 20.413C18.0217 20.805 17.5507 21.0007 17 21H7ZM17 6H7V19H17V6ZM9 17H11V8H9V17ZM13 17H15V8H13V17Z"
+                                  fill="#EC2D01"
+                                />
+                              </svg>
                             </button>
                             {/* Delete Confirmation Modal */}
                             {deleteModal.open && (
@@ -547,7 +603,7 @@ const Customer = () => {
                         colSpan="10"
                         className="text-center p-8 text-gray-500"
                       >
-                        Loading
+                        No customers found
                       </td>
                     </tr>
                     {/* Fill remaining rows to keep table height same */}
@@ -568,11 +624,10 @@ const Customer = () => {
             <button
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               disabled={page === 1}
-              className={`p-2 text-red-500 transition rounded-full ${
-                page === 1
+              className={`p-2 text-red-500 transition rounded-full ${page === 1
                   ? "opacity-40 cursor-not-allowed"
                   : "hover:text-red-700"
-              }`}
+                }`}
             >
               <FaChevronLeft className="text-lg" />
             </button>
@@ -585,11 +640,10 @@ const Customer = () => {
               <button
                 key={pageNum}
                 onClick={() => setPage(pageNum)}
-                className={`px-3 py-1 rounded-md text-base font-bold ${
-                  pageNum === page
+                className={`px-3 py-1 rounded-md text-base font-bold ${pageNum === page
                     ? "bg-brandYellow text-red-600"
                     : "text-red-500 hover:text-red-700"
-                }`}
+                  }`}
               >
                 {pageNum}
               </button>
@@ -606,11 +660,10 @@ const Customer = () => {
                 )
               }
               disabled={page === Math.max(3, paginationData?.totalPages || 1)}
-              className={`p-2 text-red-500 transition rounded-full ${
-                page === Math.max(3, paginationData?.totalPages || 1)
+              className={`p-2 text-red-500 transition rounded-full ${page === Math.max(3, paginationData?.totalPages || 1)
                   ? "opacity-40 cursor-not-allowed"
                   : "hover:text-red-700"
-              }`}
+                }`}
             >
               <FaChevronRight className="text-lg" />
             </button>
