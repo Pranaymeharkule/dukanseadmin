@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  FaUser,
-
-  FaShieldAlt,
-  FaRegBell,
- 
-  FaBox,
- 
-} from "react-icons/fa";
+import { FaUser, FaShieldAlt, FaRegBell, FaBox } from "react-icons/fa";
 import { FiMenu } from "react-icons/fi";
 import {
   MdDashboard,
@@ -20,13 +12,12 @@ import { IoMdSettings } from "react-icons/io";
 import { BsTagFill } from "react-icons/bs";
 import { IoLogOut } from "react-icons/io5";
 import { useNavigate, useLocation } from "react-router-dom";
-
+import { MdWarning } from "react-icons/md";
 import { FaShop } from "react-icons/fa6";
 import { HiOutlineShoppingCart } from "react-icons/hi";
 import { LuUserPlus } from "react-icons/lu";
 import { GiReceiveMoney } from "react-icons/gi";
 import logo from "../../assets/logo2.png";
-
 
 const menuItems = [
   { label: "Dashboard", icon: <MdDashboard />, path: "/dashboard" },
@@ -35,30 +26,33 @@ const menuItems = [
   { label: "Products", icon: <FaBox />, path: "/product" },
   { label: "Orders", icon: <HiOutlineShoppingCart />, path: "/order" },
   { label: "Referrals", icon: <LuUserPlus />, path: "/refer" },
-{ label: "Gullak", icon: <GiReceiveMoney />, path: "/Gullak" },
+  { label: "Gullak", icon: <GiReceiveMoney />, path: "/gullak" },
   { label: "Payment", icon: <MdPayment />, path: "/payment" },
   { label: "Offer", icon: <BsTagFill />, path: "/offer" },
-   {
+  {
     label: "Send Notification",
     icon: <FaRegBell />,
     path: "/send-notification",
   },
-  
+  {
+    label: "Risk Monitoring",
+    icon: <MdWarning  />,
+    path: "/monitoring",
+  },
+
   {
     label: "Help & Support",
     icon: <MdOutlineHeadsetMic />,
     path: "/helpSupport",
   },
- 
+
   { label: "Privacy Policy", icon: <FaShieldAlt />, path: "/privacy-policy" },
   {
     label: "Terms & Conditions",
     icon: <IoMdSettings />,
     path: "/terms-condition",
   },
-  
-  
- 
+
   // { label: "Logout", icon: <IoLogOut />, path: "/logout" },
 ];
 
@@ -84,7 +78,7 @@ export default function Sidebar({ isOpen, onClose }) {
       >
         {/* Logo */}
         <div className="bg-brandYellow  h-16 px-4 flex items-center justify-between">
-           <img src={logo} alt="DukaanSe Logo" className="w-40 h-18"></img>
+          <img src={logo} alt="DukaanSe Logo" className="w-40 h-18"></img>
 
           <button className="text-white text-2xl md:hidden" onClick={onClose}>
             <FiMenu />
