@@ -4,12 +4,18 @@ import {
   FaSortAmountDown,
   FaFilter,
   FaRegCalendarAlt,
-  FaEye as FaEyeIcon,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
+import CalendarSvg from "../../assets/Vector (2).svg"; // ✅ your custom calendar icon
+
+// ✅ Import custom eye icon
+import { ReactComponent as ViewIcon } from "../../assets/view.svg";
 
 const OrderList = () => {
   const navigate = useNavigate();
@@ -38,6 +44,35 @@ const OrderList = () => {
   const [shopSearch, setShopSearch] = useState("");
 
   const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
+  const CustomInput = React.forwardRef(
+    ({ value, onClick, placeholder }, ref) => (
+      <div className="relative w-full">
+        <input
+          type="text"
+          value={value ? format(new Date(value), "d MMM yyyy") : ""}
+          placeholder={placeholder}  // ✅ add placeholder support
+          readOnly
+          onClick={onClick}
+          ref={ref}
+          className="rounded-md py-2.5 px-3 w-full border border-gray-300 cursor-pointer text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        />
+        <div
+          className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
+          onClick={onClick}
+        >
+          <img src={CalendarSvg} alt="calendar" className="w-5 h-5" />
+        </div>
+      </div>
+    )
+  );
+  {/* From Date */}
+  <DatePicker
+    selected={fromDate ? new Date(fromDate) : null}
+    onChange={(date) => setFromDate(date ? date.toISOString().split("T")[0] : "")}
+    customInput={<CustomInput />}
+    calendarClassName="custom-calendar"
+  />
+
 
   const exportToExcel = () => {
     if (orders.length === 0) return;
@@ -71,7 +106,7 @@ const OrderList = () => {
 
       const params = {
         page,
-        limit: 10,
+        limit: 5,
         sortOrder,
         sortBy,
         t: new Date().getTime(),
@@ -96,7 +131,6 @@ const OrderList = () => {
       if (res.data.success) {
         let filteredOrders = res.data.AllOrders || [];
 
-        // Collect unique shop names for dropdown
         const uniqueShops = [
           ...new Set(
             filteredOrders.map((o) => o.shopId?.shopName).filter(Boolean)
@@ -104,21 +138,18 @@ const OrderList = () => {
         ];
         setShops(uniqueShops);
 
-        // 🔹 Shop filter (dropdown)
         if (selectedShop) {
           filteredOrders = filteredOrders.filter(
             (order) => order.shopId?.shopName === selectedShop
           );
         }
 
-        // 🔹 Shop filter (extra state)
         if (shopFilter) {
           filteredOrders = filteredOrders.filter(
             (order) => order.shopId?.shopName === shopFilter
           );
         }
 
-        // 🔹 Search shop name
         if (searchTerm.trim()) {
           filteredOrders = filteredOrders.filter((order) =>
             order.shopId?.shopName
@@ -127,14 +158,12 @@ const OrderList = () => {
           );
         }
 
-        // 🔹 Order ID filter
         if (orderId.trim()) {
           filteredOrders = filteredOrders.filter((order) =>
             order.orderNumber.toLowerCase().includes(orderId.toLowerCase())
           );
         }
 
-        // 🔹 Strict Date range filter (client-side check)
         if (fromDate) {
           const from = new Date(fromDate + "T00:00:00");
           filteredOrders = filteredOrders.filter(
@@ -148,28 +177,24 @@ const OrderList = () => {
           );
         }
 
-        // 🔹 Status filter
         if (viewType !== "all") {
           filteredOrders = filteredOrders.filter(
             (order) => order.orderStatus === viewType.toUpperCase()
           );
         }
 
-        // 🔹 Delivery type filter
         if (deliveryTypeFilter !== "all") {
           filteredOrders = filteredOrders.filter(
             (order) => order.deliveryType === deliveryTypeFilter
           );
         }
 
-        // 🔹 Payment filter
         if (paymentFilter !== "all") {
           filteredOrders = filteredOrders.filter(
             (order) => order.paymentStatus === paymentFilter
           );
         }
 
-        // 🔹 Gullak filter
         if (gullakFilter === "high") {
           filteredOrders = filteredOrders.filter((o) => o.gullakUsed >= 10);
         } else if (gullakFilter === "low") {
@@ -180,7 +205,6 @@ const OrderList = () => {
           filteredOrders = filteredOrders.filter((o) => o.gullakUsed === 0);
         }
 
-        // 🔹 Map to table format
         const mappedOrders = filteredOrders.map((order, index) => ({
           Sr: index + 1 + (page - 1) * 10,
           id: order.orderNumber,
@@ -282,7 +306,7 @@ const OrderList = () => {
   };
 
   const handleDeliveryTypeFilter = (type) => {
-    setDeliveryTypeFilter(type); // SELF_PICKUP or HOME_DELIVERY
+    setDeliveryTypeFilter(type);
     setViewType("all");
     setFilterVisible(false);
     setPage(1);
@@ -304,13 +328,25 @@ const OrderList = () => {
     setPage(1);
     setError("");
   };
+  
+  
+  {/* To Date */}
+  <DatePicker
+    selected={toDate ? new Date(toDate) : null}
+    onChange={(date) => setToDate(date ? date.toISOString().split("T")[0] : "")}
+    customInput={<CustomInput />}
+    calendarClassName="custom-calendar"
+  />
+  
+
+
 
   return (
-    <div className="p-0.5 bg-gray-100 rounded-md overflow-hidden">
-      {/* Filter Buttons & Sort */}
+    <div className="bg-gray-100 min-h-screen p-3">
+      {/* Filters */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4 bg-white p-4">
-        <div className="flex flex-wrap gap-2 mb-4">
-          {["all", "DELIVERED", "DECLINED", "PENDING"].map((type) => (
+        <div className="flex flex-wrap gap-2 font-semibold">
+          {["all", "DELIVERED", "CANCELLED", "IN PROGRESS"].map((type) => (
             <button
               key={type}
               className={`px-4 py-2 rounded-full text-sm capitalize transition-colors ${
@@ -322,10 +358,10 @@ const OrderList = () => {
             >
               {type === "all"
                 ? "All"
-                : type === "DECLINED"
-                ? "Declined"
-                : type === "PENDING"
-                ? "Pending"
+                : type === "CANCELLED"
+                ? "Cancelled"
+                : type === "IN PROGRESS"
+                ? "In Progress"
                 : type.charAt(0) + type.slice(1).toLowerCase()}
             </button>
           ))}
@@ -357,13 +393,13 @@ const OrderList = () => {
               {/* Delivery Type Filter */}
               <div className="flex flex-col gap-2 text-sm text-gray-800">
                 <button
-                  className="text-left hover:underline"
+                  className="text-left"
                   onClick={() => handleDeliveryTypeFilter("SELF_PICKUP")}
                 >
                   Pickup
                 </button>
                 <button
-                  className="text-left hover:underline"
+                  className="text-left "
                   onClick={() => handleDeliveryTypeFilter("HOME_DELIVERY")}
                 >
                   Delivery
@@ -374,23 +410,25 @@ const OrderList = () => {
         </div>
       </div>
 
-      <div className="bg-white p-4 rounded-md border">
+      <div className="bg-white p-3 rounded-md border ">
         {/* Select Shop */}
-        <div className="mb-4">
-          <label className="block text-sm font-semibold mb-1">
-            Select Shop
-          </label>
-          <div className="relative">
+       
+        <div className=" p-3">
+        <label className="block text-[16px] font-semibold mb-2 ">
+                  Select Shop
+              </label>
+
+          <div className="relative ">
             <input
               type="text"
               placeholder="Search for shop"
               value={shopSearch} // ✅ use shopSearch
               onChange={(e) => setShopSearch(e.target.value)}
-              className="w-full rounded-md py-2 pl-10 pr-10 text-sm border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full rounded-md py-3 pl-10 pr-10 text-sm border border-gray-300 bg-white text-black placeholder-black  focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
-            <FiSearch className="absolute left-3 top-3 text-gray-400" />
+            <FiSearch className="absolute left-3 top-3 text-black-400" />
             <FiChevronDown
-              className="absolute right-3 top-3 text-gray-400 cursor-pointer"
+              className="absolute right-3 top-3 text-black-400 cursor-pointer"
               onClick={() => setShowDropdown(!showDropdown)}
             />
 
@@ -420,213 +458,131 @@ const OrderList = () => {
         </div>
 
         {/* Order ID + Date Range + Search Button - Updated layout */}
-        <div className="p-4">
-          <div className="flex items-center gap-4 flex-wrap bg-gray-50 rounded-lg p-4 border border-gray-200">
-            {/* Order ID with side label */}
-            <div className="flex items-center gap-3">
-              <label className="text-sm font-bold text-gray-700 whitespace-nowrap f">
-                Order ID
-              </label>
-              <input
-                type="text"
-                placeholder="Enter"
-                value={orderId}
-                onChange={(e) => setOrderId(e.target.value)}
-                className="rounded-md py-2.5 px-3 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white w-32"
-              />
-            </div>
+       {/* Order ID + Date Range + Search Button - Updated layout */}
+<div className="p-3">
+  <div className="flex items-center gap-4 flex-wrap rounded-lg p-4 border border-gray-200">
+    {/* Order ID with side label */}
+    <div className="flex items-center gap-3">
+      <label className="text-sm font-bold text-gray-700 whitespace-nowrap">
+        Order ID
+      </label>
+      <input
+        type="text"
+        placeholder="Enter"
+        value={orderId}
+        onChange={(e) => setOrderId(e.target.value)}
+        className="rounded-md py-2.5 px-3 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      />
+    </div>
 
-            {/* From Date */}
-            <div className="relative">
-              <input
-                type="date"
-                placeholder="From date"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                className="rounded-md py-2.5 px-3 pr-10 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white w-40"
-                max={toDate || undefined}
-              />
-              <FaRegCalendarAlt className="absolute right-3 top-3 text-gray-400 pointer-events-none" />
-            </div>
+    {/* From Date (new DatePicker) */}
+    <div className="flex items-center gap-3">
+  <DatePicker
+    selected={fromDate ? new Date(fromDate) : null}
+    onChange={(date) =>
+      setFromDate(date ? date.toISOString().split("T")[0] : "")
+    }
+    customInput={<CustomInput />}
+    calendarClassName="custom-calendar"
+    maxDate={toDate ? new Date(toDate) : null}
+    placeholderText="From Date"
+  />
+</div>
 
-            {/* To Date */}
-            <div className="relative">
-              <input
-                type="date"
-                placeholder="To date"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                className="rounded-md py-2.5 px-3 pr-10 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white w-40"
-                min={fromDate || undefined}
-              />
-              <FaRegCalendarAlt className="absolute right-3 top-3 text-gray-400 pointer-events-none" />
-            </div>
+{/* To Date (new DatePicker) */}
+<div className="flex items-center gap-3">
+  <DatePicker
+    selected={toDate ? new Date(toDate) : null}
+    onChange={(date) =>
+      setToDate(date ? date.toISOString().split("T")[0] : "")
+    }
+    customInput={<CustomInput />}
+    calendarClassName="custom-calendar"
+    minDate={fromDate ? new Date(fromDate) : null}
+    placeholderText="To Date"
+  />
+</div>
 
-            {/* Search Button */}
-            <button
-              onClick={handleSearch}
-              className="bg-brandYellow hover:bg-yellow-500 text-black px-6 py-2.5 text-sm rounded-md font-medium shadow-sm transition-all duration-200 whitespace-nowrap"
-            >
-              Search
-            </button>
-          </div>
-        </div>
-      </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-4 mx-2">
-          <p className="text-sm">{error}</p>
-          {(searchTerm ||
-            fromDate ||
-            toDate ||
-            viewType !== "all" ||
-            deliveryTypeFilter !== "all" ||
-            paymentFilter !== "all" ||
-            gullakFilter !== "all" ||
-            orderId) && (
-            <button
-              onClick={clearFilters}
-              className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
-            >
-              Clear all filters and show all orders
-            </button>
-          )}
-        </div>
-      )}
+    {/* Search Button */}
+    <button
+      onClick={handleSearch}
+      className="bg-brandYellow hover:bg-yellow-500 text-black px-6 py-2.5 text-sm rounded-md font-medium shadow-sm transition-all duration-200 whitespace-nowrap"
+    >
+      Search
+    </button>
+  </div>
+</div>
+
 
       {/* Orders Table */}
-      <div className="bg-white p-2 mt-4">
+      <div className="bg-white p-3">
         <div className="overflow-x-auto scrollbar-hidden">
-          <div className="overflow-y-auto max-h-[400px] scrollbar-hidden">
-            <table className="min-w-[1200px] table-auto">
-              <thead className="bg-brandYellow text-black text-sm text-center">
+          {/* ✅ removed overflow-y-auto */}
+          <table className="min-w-[1200px] table-auto">
+            <thead className="bg-brandYellow text-black text-sm text-center">
+              <tr>
+                <th className="p-3">Sr. No.</th>
+                <th className="p-3">Order Id</th>
+                <th className="p-3">Date & Time</th>
+                <th className="p-3">Mode</th>
+                <th className="p-3">Payment</th>
+                <th className="p-3">Coin Used</th>
+                <th className="p-3">Shop Name</th>
+                <th className="p-3">Delivery Type</th>
+                <th className="p-3">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
                 <tr>
-                  <th className="p-3">Sr. No.</th>
-                  <th className="p-3">Order Id</th>
-                  <th className="p-3">Date & Time</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Payment</th>
-                  <th className="p-3">Coin Used</th>
-                  <th className="p-3">Shop Name</th>
-                  <th className="p-3">Delivery Type</th>
-                  <th className="p-3">Action</th>
+                  <td colSpan={9} className="text-center py-4">
+                    Loading...
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={9} className="text-center py-4">
-                      Loading...
+              ) : orders.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="text-center py-10">
+                    <p className="text-lg text-gray-500">No orders found</p>
+                  </td>
+                </tr>
+              ) : (
+                orders.map((cust, index) => (
+                  <tr
+                    key={index}
+                    className="border-b hover:bg-gray-100 cursor-pointer h-16 text-center text-sm"
+                    onClick={() => navigate(`/order/details/${cust.orderId}`)}
+                  >
+                    <td className="p-3">{cust.Sr}</td>
+                    <td className="p-3">{cust.id}</td>
+                    <td className="p-3">{cust.date}</td>
+                    <td className="p-3">{cust.mode}</td>
+                    <td className="p-3">{cust.payment}</td>
+                    <td className="p-3">{cust.coin}</td>
+                    <td className="p-3">{cust.shopName}</td>
+                    <td className="p-3">{cust.deliveryType}</td>
+                    <td className="p-3 text-center align-middle">
+                      <button
+                        title="View"
+                        className="text-gray-700 hover:text-black"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/order/details/${cust.orderId}`);
+                        }}
+                      >
+                        {/* ✅ Replaced with custom SVG */}
+                        <ViewIcon className="w-5 h-5" />
+                      </button>
                     </td>
                   </tr>
-                ) : orders.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="text-center py-10">
-                      <div className="text-gray-500">
-                        <svg
-                          className="mx-auto h-12 w-12 text-gray-400 mb-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                        <p className="text-lg">No orders found</p>
-                        {searchTerm ||
-                        fromDate ||
-                        toDate ||
-                        viewType !== "all" ||
-                        deliveryTypeFilter !== "all" ||
-                        paymentFilter !== "all" ||
-                        gullakFilter !== "all" ? (
-                          <p className="text-sm mt-2">
-                            Try adjusting your search criteria
-                          </p>
-                        ) : (
-                          <p className="text-sm mt-2">
-                            No order records available
-                          </p>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  orders.map((cust, index) => (
-                    <tr
-                      key={index}
-                      className="border-b hover:bg-gray-100 cursor-pointer h-16 text-center text-sm"
-                      onClick={() => navigate(`/order/details/${cust.orderId}`)}
-                    >
-                      <td className="p-3">{cust.Sr}</td>
-                      <td className="p-3">{cust.id}</td>
-                      <td className="p-3">{cust.date}</td>
-                      <td
-                        className={`p-3 font-semibold ${
-                          cust.mode === "DELIVERED"
-                            ? "text-green-600"
-                            : cust.mode === "CANCELLED"
-                            ? "text-red-500"
-                            : "text-yellow-500"
-                        }`}
-                      >
-                        {cust.mode}
-                      </td>
-                      <td
-                        className={`p-3 font-semibold ${
-                          cust.payment === "Success" ||
-                          cust.payment === "Successful"
-                            ? "text-green-600"
-                            : cust.payment === "Failed" ||
-                              cust.payment === "Refunded"
-                            ? "text-red-500"
-                            : "text-yellow-500"
-                        }`}
-                      >
-                        {cust.payment}
-                      </td>
-                      <td className="p-3">{cust.coin}</td>
-                      <td className="p-3">{cust.shopName}</td>
-                      <td className="p-3">
-                        <span
-                          className={`px-2 py-1 rounded text-xs ${
-                            cust.deliveryType === "SELF_PICKUP"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-green-100 text-green-800"
-                          }`}
-                        >
-                          {cust.deliveryType === "SELF_PICKUP"
-                            ? "Pickup"
-                            : "Delivery"}
-                        </span>
-                      </td>
-                      <td className="p-3 text-center align-middle">
-                        <button
-                          title="View"
-                          className="text-gray-700 hover:text-black"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/order/details/${cust.orderId}`);
-                          }}
-                        >
-                          <FaEyeIcon />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Pagination - Only show if there are orders */}
+      {/* Pagination */}
       {orders.length > 0 && (
         <div className="bg-white px-2 py-2 sticky bottom-0 z-8 flex justify-center gap-6 mt-2">
           <button
@@ -641,8 +597,8 @@ const OrderList = () => {
               key={i}
               className={`px-3 py-1 rounded font-bold ${
                 page === i + 1
-                  ? "bg-yellow-400 text-red-600" // ✅ Active button bold red
-                  : "text-red-600 hover:text-black" // ✅ Inactive buttons bold red
+                  ? "bg-yellow-400 text-red-600"
+                  : "text-red-600 hover:text-black"
               }`}
               onClick={() => setPage(i + 1)}
             >
@@ -658,6 +614,44 @@ const OrderList = () => {
           </button>
         </div>
       )}
+    </div>
+    <style jsx>{`
+  .custom-calendar {
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+  }
+  .react-datepicker__header {
+    background: #fff;
+    border-bottom: none;
+  }
+  .react-datepicker__current-month {
+    font-weight: bold;
+    font-size: 16px;
+  }
+  .react-datepicker__day--selected,
+  .react-datepicker__day--keyboard-selected {
+    background-color: #ec2d01 !important;
+    color: #fff !important;
+    border-radius: 50%;
+  }
+  .react-datepicker__day--today {
+    background-color: rgba(236, 45, 1, 0.15);
+    border-radius: 50%;
+  }
+  .react-datepicker__day:hover {
+    background-color: rgba(236, 45, 1, 0.2);
+    border-radius: 50%;
+  }
+  .react-datepicker__navigation-icon::before {
+    border-color: #ec2d01;
+  }
+  .react-datepicker__navigation {
+    top: 12px;
+  }
+`}</style>
+
     </div>
   );
 };

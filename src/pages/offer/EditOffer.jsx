@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { ChevronLeft, Plus, ArrowLeft } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { BsArrowLeftCircle } from "react-icons/bs";
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
@@ -354,16 +355,11 @@ export default function EditOffer() {
       )}
 
       {/* Header */}
-      <div className="flex items-center gap-2 bg-white p-4 rounded shadow mb-6">
-        <button
-          onClick={() => navigate(-1)}
-          type="button"
-          title="Go Back"
-          className="w-8 h-8 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
-        >
-          <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
+      <div className="flex items-center mb-4 bg-white px-4 py-3 rounded-md shadow">
+        <button onClick={() => navigate(-1)} title="Go Back">
+          <BsArrowLeftCircle size={20} className="text-gray-700 md:text-black" />
         </button>
-        <h2 className="text-lg font-medium text-gray-800">Edit Offer</h2>
+        <h2 className="ml-2 text-lg text-gray-800 font-medium">Edit Offer</h2>
       </div>
 
       {/* Form */}
@@ -384,7 +380,7 @@ export default function EditOffer() {
 
         {/* Select User Type */}
         <div className="mb-4">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
             Select User Type <span className="text-red-500">*</span>
           </label>
           <select
@@ -404,7 +400,7 @@ export default function EditOffer() {
 
         {/* Select Customer */}
         <div className="mb-4">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
             Select Customer <span className="text-red-500">*</span>
           </label>
           <select
@@ -424,7 +420,7 @@ export default function EditOffer() {
 
         {/* Select Products */}
         <div className="mb-4">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
             Select Product <span className="text-red-500">*</span>
           </label>
           {products.map((product, index) => (
@@ -468,7 +464,7 @@ export default function EditOffer() {
 
         {/* Discount */}
         <div className="mb-4">
-          <label className="font-poppins block mb-2 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-2 text-sm font-medium text-gray-600">
             Discount <span className="text-red-500">*</span>
           </label>
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
@@ -502,7 +498,7 @@ export default function EditOffer() {
         {/* Dates */}
         <div className="mb-4">
           <div>
-            <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+            <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
               Offer Start Date
             </label>
             <input
@@ -515,7 +511,7 @@ export default function EditOffer() {
           </div>
         </div>
         <div>
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
             Offer Expire Date
           </label>
           <input
@@ -529,7 +525,7 @@ export default function EditOffer() {
 
         {/* Offer Text */}
         <div className="mb-4">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
             Offer Text
           </label>
           <textarea
@@ -543,7 +539,7 @@ export default function EditOffer() {
 
         {/* Banner */}
         <div className="mb-6">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
             Banner Image
           </label>
           {existingBanner && !bannerImage && (
@@ -556,7 +552,6 @@ export default function EditOffer() {
                   e.target.style.display = 'none';
                 }}
               />
-              <p className="text-xs text-gray-500 mt-1">Current Banner</p>
             </div>
           )}
           <input
@@ -583,7 +578,7 @@ export default function EditOffer() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="font-poppins bg-brandYellow text-red-600 font-bold px-8 py-2 rounded-md hover:bg-brandYellow disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="bg-[#FEBC1D] text-red-600 font-semibold px-6 py-2 rounded-md hover:bg-yellow-500"
           >
             {isSubmitting ? (
               <>

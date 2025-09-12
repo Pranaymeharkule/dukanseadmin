@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { BsArrowLeftCircle } from "react-icons/bs";
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
@@ -43,7 +43,6 @@ export default function AddNotificationForm() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch user types
     axios
       .get(`${API_BASE_URL}/notification/getUserType?_=${Date.now()}`, {
         headers: { "Cache-Control": "no-cache" },
@@ -53,7 +52,6 @@ export default function AddNotificationForm() {
       })
       .catch((err) => console.error("Error fetching user types:", err));
 
-    // Fetch customer types
     axios
       .get(`${API_BASE_URL}/offer/getAllCustomerType?_=${Date.now()}`, {
         headers: { "Cache-Control": "no-cache" },
@@ -69,19 +67,17 @@ export default function AddNotificationForm() {
     if (showSuccess) {
       const timer = setTimeout(() => {
         setShowSuccess(false);
-      }, 1200);
+        navigate("/send-notification", { replace: true });
+      }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [showSuccess]);
+  }, [showSuccess, navigate]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleSubmit = () => {
     if (!title.trim() || !message.trim()) {
       alert("Please fill out both the title and message fields.");
       return;
     }
-
     setIsSubmitting(true);
 
     const payload = {
@@ -92,70 +88,51 @@ export default function AddNotificationForm() {
       suppressSystemNotification: true,
     };
 
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/notification/sendNotification`,
-        payload
-      );
-
-      if (response.data.success) {
-        // Show success overlay
+    axios
+      .post(`${API_BASE_URL}/notification/sendNotification`, payload)
+      .then((response) => {
+        console.log("Notification sent successfully:", response.data);
         setShowSuccess(true);
-
-        // Clear form
         setTitle("");
         setMessage("");
         setSelectedUserType("");
         setSelectedCustomerType("");
-
-        // Pass new notification to AllNotification to prevent duplicate
-        const newNotification = response.data.notification;
-        navigate("/send-notification", {
-          state: { newNotification },
-          replace: true,
-        });
-      } else {
-        alert(response.data.message || "Failed to send notification.");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error sending notification. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+      })
+      .catch((err) => {
+        console.error("Error sending notification:", err);
+        alert("Failed to send notification. Please try again.");
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen p-4">
+    <div className="bg-gray-100 p-4 min-h-screen flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-2 bg-white p-4 rounded shadow mb-6">
+      <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-white p-4 rounded shadow mb-6">
         <button
           onClick={() => navigate("/send-notification")}
           type="button"
           title="Go Back"
-          className="w-8 h-8 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
+          className="flex items-center justify-center w-8 h-8 sm:w-auto sm:h-auto"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
+          <BsArrowLeftCircle size={20} className="text-gray-700 md:text-black" />
         </button>
-        <h2 className="text-2xl font-semibold text-gray-800">
+        <h2 className="text-lg text-gray-800 font-poppins font-medium flex-1 min-w-0">
           Send New Notification
         </h2>
       </div>
 
+
       {/* Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="mx-auto bg-white p-6 rounded shadow space-y-4"
-      >
+      <div className="flex-1 min-h-full bg-white p-4 sm:p-6 rounded shadow space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-600 mb-1">
             Select User Type
           </label>
           <select
             className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
             value={selectedUserType}
             onChange={(e) => setSelectedUserType(e.target.value)}
-            required
           >
             <option value="">Select User Type</option>
             {userTypes.map((type, idx) => (
@@ -167,7 +144,7 @@ export default function AddNotificationForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-600 mb-1">
             Select Customer Type
           </label>
           <select
@@ -186,7 +163,7 @@ export default function AddNotificationForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-600 mb-1">
             Notification Title
           </label>
           <input
@@ -199,7 +176,7 @@ export default function AddNotificationForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-600 mb-1">
             Notification Message
           </label>
           <textarea
@@ -213,18 +190,17 @@ export default function AddNotificationForm() {
 
         <div className="flex justify-center pt-2">
           <button
-            type="submit"
+            onClick={handleSubmit}
             disabled={isSubmitting}
-            className={`w-full sm:w-auto bg-[#FEBC1D] text-red-600 font-bold py-2 px-6 rounded-lg shadow-sm text-base transition-colors ${
-              isSubmitting
+            className={`w-full sm:w-auto bg-[#FEBC1D] text-red-600 font-bold py-2 px-6 rounded-lg shadow-sm text-base transition-colors ${isSubmitting
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:bg-yellow-500 active:bg-yellow-600"
-            }`}
+              }`}
           >
             {isSubmitting ? "Sending..." : "Send Notification"}
           </button>
         </div>
-      </form>
+      </div>
 
       {showSuccess && <SuccessOverlay />}
     </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import { BsArrowLeftCircle } from "react-icons/bs";
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
@@ -392,17 +393,16 @@ export default function AddOffer() {
   return (
     <div className="bg-gray-100 min-h-screen p-4 flex flex-col">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-20 bg-gray-100 pb-4">
-        <div className="flex items-center gap-2 bg-white p-4 rounded shadow">
+      <div className="stickyflex items-center mb-4 bg-white px-4 py-3 rounded-md shadow">
+        <div className="flex items-center gap-2">
           <button
             onClick={handleBackNavigation}
             type="button"
             title="Go Back"
-            className="w-8 h-8 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
           >
-            <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
+            <BsArrowLeftCircle size={20} className="text-gray-700 md:text-black" />
           </button>
-          <h2 className="text-lg font-medium text-gray-800">Add Offer</h2>
+          <h2 className="text-lg text-gray-800 font-medium">Add Offer</h2>
         </div>
       </div>
 
@@ -425,7 +425,7 @@ export default function AddOffer() {
 
         {/* User Type */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
+          <label className="block mb-1 text-sm font-medium text-gray-00 font-poppins">
             Select User Type
           </label>
           <select
@@ -446,7 +446,7 @@ export default function AddOffer() {
 
         {/* Customer Type */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
+          <label className="block mb-1 text-sm font-medium text-gray-600 font-poppins">
             Select Customer
           </label>
           <select
@@ -467,7 +467,7 @@ export default function AddOffer() {
 
         {/* Products */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
+          <label className="block mb-1 text-sm font-medium text-gray-600 font-poppins">
             Select Product
           </label>
           {products.map((product, index) => (
@@ -541,7 +541,7 @@ export default function AddOffer() {
         {/* Dates */}
         <div className="mb-4">
           <div>
-            <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+            <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
               Offer Start Date
             </label>
             <input
@@ -555,7 +555,7 @@ export default function AddOffer() {
           </div>
         </div>
         <div>
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
             Offer Expire Date
           </label>
           <input
@@ -570,7 +570,7 @@ export default function AddOffer() {
 
         {/* Offer Text */}
         <div className="mb-4 p-2">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
             Offer Text
           </label>
           <textarea
@@ -585,7 +585,7 @@ export default function AddOffer() {
 
         {/* Banner */}
         <div className="mb-4">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-700">
+          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
             Banner Image
           </label>
           <input
@@ -620,7 +620,7 @@ export default function AddOffer() {
         <button
           type="submit"
           form="offer-form"
-          className={`font-poppins px-10 py-4 rounded-lg text-lg font-bold shadow-md transition-colors ${loading
+          className={`font-poppins px-6 py-2   rounded-lg text-lg font-bold shadow-md transition-colors ${loading
             ? "bg-gray-400 text-gray-600 cursor-not-allowed"
             : "bg-brandYellow text-red-600 hover:bg-yellow-600"
             }`}

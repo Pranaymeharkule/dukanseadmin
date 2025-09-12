@@ -3,8 +3,8 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const AccountIcon = () => (
   <svg
-    width="30"
-    height="30"
+    width="24"
+    height="24"
     viewBox="0 0 30 30"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -29,7 +29,6 @@ const RiskMonitoring = () => {
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [paginationData, setPaginationData] = useState(null);
-  const [totalFraudCustomers, setTotalFraudCustomers] = useState(0);
 
   const fetchRiskData = async (pageNum = 1) => {
     try {
@@ -40,15 +39,11 @@ const RiskMonitoring = () => {
         `https://dukanse-be-f5w4.onrender.com/api/referralDashboard/riskMonitoring?page=${pageNum}&limit=10`
       );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       const data = await response.json();
-
       if (data.success) {
         setRiskData(data.riskData || []);
-        setTotalFraudCustomers(data.totalFarudCustomers || 0);
         setPaginationData({
           totalPages: data.totalPages || 1,
           currentPage: data.currentPage || 1,
@@ -56,10 +51,9 @@ const RiskMonitoring = () => {
           next: data.next
         });
       } else {
-        throw new Error(data.message || 'Failed to fetch risk data');
+        throw new Error(data.message || "Failed to fetch risk data");
       }
     } catch (err) {
-      console.error('Error fetching risk data:', err);
       setError(err.message);
       setRiskData([]);
     } finally {
@@ -73,118 +67,75 @@ const RiskMonitoring = () => {
 
   const getRiskLevelColor = (riskLevel) => {
     switch (riskLevel?.toLowerCase()) {
-      case 'high':
-        return 'text-red-600';
-      case 'medium':
-        return 'text-yellow-600';
-      case 'low':
-        return 'text-green-600';
+      case "high":
+        return "text-red-600";
+      case "medium":
+        return "text-yellow-600";
+      case "low":
+        return "text-green-600";
       default:
-        return 'text-gray-600';
+        return "text-gray-600";
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-2 sm:p-4 md:p-6 bg-gray-100 min-h-screen flex flex-col">
-        <div className="bg-white rounded-lg shadow-sm mb-3 sm:mb-4 md:mb-6">
-          <div className="p-3 sm:p-4 md:p-6">
-            <h1 className="text-lg text-gray-800 font-poppins font-medium">
-              Risk Monitoring
-            </h1>
-          </div>
-        </div>
-        <div className="flex-1 bg-white rounded-lg shadow-sm flex items-center justify-center">
-          <div className="text-gray-500">Loading risk data...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-2 sm:p-4 md:p-6 bg-gray-100 min-h-screen flex flex-col">
-        <div className="bg-white rounded-lg shadow-sm mb-3 sm:mb-4 md:mb-6">
-          <div className="p-3 sm:p-4 md:p-6">
-            <h1 className="text-lg text-gray-800 font-poppins font-medium">
-              Risk Monitoring
-            </h1>
-          </div>
-        </div>
-        <div className="flex-1 bg-white rounded-lg shadow-sm flex items-center justify-center">
-          <div className="text-red-500">Error: {error}</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-2 sm:p-4 md:p-6 bg-gray-100 min-h-screen flex flex-col">
-      {/* Header Card */}
-      <div className="bg-white rounded-lg shadow-sm mb-3 sm:mb-4 md:mb-6">
-        <div className="p-3 sm:p-4 md:p-6">
-          <h1 className="text-lg text-gray-800 font-poppins font-medium">
-            Risk Monitoring
-          </h1>
-        </div>
+    <div className="p-4 bg-gray-100 min-h-screen flex flex-col">
+      {/* Header */}
+      <div className="flex items-center mb-4 bg-white px-4 py-3 rounded-md shadow">
+        <h2 className="text-lg text-gray-800 font-medium">Risk Monitoring</h2>
       </div>
 
-      {/* Table wrapper fills remaining space */}
-      <div className="flex-1 bg-white rounded-lg shadow-sm flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto overflow-x-auto">
-          {riskData.length === 0 ? (
-            <div className="flex items-center justify-center h-64">
+      {/* Table */}
+      <div className="flex-1 bg-white rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="text-gray-500">Loading risk data...</div>
+            </div>
+          ) : error ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="text-red-500">Error: {error}</div>
+            </div>
+          ) : riskData.length === 0 ? (
+            <div className="flex justify-center items-center h-64">
               <div className="text-gray-500">No risk data available</div>
             </div>
           ) : (
-            <table className="w-full min-w-[600px] sm:min-w-[700px]">
-              <thead className="bg-white text-white text-center">
-                <tr className="text-black text-sm">
-                  <th className="py-3 px-4 text-base font-poppins text-left">
-                    Account Name
-                  </th>
-                  <th className="py-3 px-4 text-base font-poppins text-left">
-                    Suspicious Activity
-                  </th>
-                  <th className="py-3 px-4 text-base font-poppins text-left">
-                    Risk Level
-                  </th>
+            <table className="w-full min-w-[600px] md:min-w-full table-auto border-collapse">
+              <thead className="bg-white">
+                <tr className="text-gray-800 text-sm border-b border-gray-100">
+                  <th className="py-3 px-4 text-left font-semibold">Account Name</th>
+                  <th className="py-3 px-4 text-left font-semibold">Suspicious Activity</th>
+                  <th className="py-3 px-4 text-left font-semibold">Risk Level</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody>
                 {riskData.map((item, index) => (
-                  <tr key={`${item.customerName}-${index}`} className="hover:bg-gray-50">
-                    <td className="px-4 py-1 whitespace-nowrap font-poppins text-sm text-gray-600">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                          {item.profileImage ? (
-                            <img
-                              src={item.profileImage}
-                              alt={item.customerName}
-                              className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover border"
-                              onError={(e) => {
-                                e.currentTarget.onerror = null; // prevent looping
-                                e.currentTarget.src = ""; // fallback to blank -> AccountIcon will render
-                              }}
-                            />
-                          ) : (
-                            <AccountIcon className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12" />
-                          )}
-                        </div>
-                        <div className="ml-2 md:ml-3">
-                          <div className="font-poppins text-sm text-gray-600">
-                            {item.customerName}
-                          </div>
-                        </div>
+                  <tr key={index} className="hover:bg-gray-50 border-b border-gray-100">
+                    <td className="px-4 py-3 text-sm text-gray-700">
+                      <div className="flex items-center gap-2">
+                        {item.profileImage ? (
+                          <img
+                            src={item.profileImage}
+                            alt={item.customerName}
+                            className="w-6 h-6 rounded-full object-cover border"
+                            onError={(e) => {
+                              e.currentTarget.src = "";
+                            }}
+                          />
+                        ) : (
+                          <AccountIcon />
+                        )}
+                        <span className="truncate max-w-[150px] sm:max-w-xs md:max-w-full">
+                          {item.customerName}
+                        </span>
                       </div>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap font-poppins text-sm text-gray-600">
+                    <td className="px-4 py-3 text-sm text-gray-700 truncate max-w-[200px] sm:max-w-xs md:max-w-full">
                       {item.activity}
                     </td>
-                    <td className="px-2 sm:px-3 md:px-4 lg:px-6 py-1 sm:py-2 md:py-3 font-poppins whitespace-nowrap text-left">
-                      <span className={`font-poppins font-medium text-[9px] sm:text-[10px] md:text-[12px] leading-none tracking-wide ${getRiskLevelColor(item.riskLevel)}`}>
-                        {item.riskLevel}
-                      </span>
+                    <td className={`px-4 py-3 text-sm font-medium ${getRiskLevelColor(item.riskLevel)}`}>
+                      {item.riskLevel}
                     </td>
                   </tr>
                 ))}
@@ -195,53 +146,23 @@ const RiskMonitoring = () => {
 
         {/* Pagination */}
         {paginationData && paginationData.totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-6 p-4">
-            {/* Previous Button */}
+          <div className="flex justify-center items-center gap-2 py-4">
             <button
-              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              onClick={() => setPage(Math.max(1, page - 1))}
               disabled={page === 1}
-              className={`p-2 text-red-500 transition rounded-full ${page === 1
-                  ? "opacity-40 cursor-not-allowed"
-                  : "hover:text-red-700"
-                }`}
+              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
             >
-              <FaChevronLeft className="text-lg" />
+              <FaChevronLeft />
             </button>
-
-            {/* Page Numbers (always at least 3) */}
-            {Array.from(
-              { length: Math.max(3, paginationData?.totalPages || 1) },
-              (_, i) => i + 1
-            ).map((pageNum) => (
-              <button
-                key={pageNum}
-                onClick={() => setPage(pageNum)}
-                className={`px-3 py-1 rounded-md text-base font-bold ${pageNum === page
-                    ? "bg-yellow-300 text-red-600"
-                    : "text-red-500 hover:text-red-700"
-                  }`}
-              >
-                {pageNum}
-              </button>
-            ))}
-
-            {/* Next Button */}
+            <span className="text-sm">
+              {page} / {paginationData.totalPages}
+            </span>
             <button
-              onClick={() =>
-                setPage((prev) =>
-                  Math.min(
-                    Math.max(3, paginationData?.totalPages || 1),
-                    prev + 1
-                  )
-                )
-              }
-              disabled={page === Math.max(3, paginationData?.totalPages || 1)}
-              className={`p-2 text-red-500 transition rounded-full ${page === Math.max(3, paginationData?.totalPages || 1)
-                  ? "opacity-40 cursor-not-allowed"
-                  : "hover:text-red-700"
-                }`}
+              onClick={() => setPage(Math.min(paginationData.totalPages, page + 1))}
+              disabled={page === paginationData.totalPages}
+              className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
             >
-              <FaChevronRight className="text-lg" />
+              <FaChevronRight />
             </button>
           </div>
         )}

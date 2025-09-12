@@ -14,6 +14,8 @@
   import ViewOrder from "../pages/customer/ViewOrder";
   import EditCustomer from "../pages/customer/EditCustomer";
   import Shop from "../pages/shop/Shop";
+  import Redeem from "../pages/Redeem/redeem";
+  import RedeemDetails from "../pages/Redeem/RedeemDetails";
   import ViewShop from "../pages/shop/ViewShop";
   import EditShopInfo from "../pages/shop/EditShopInfo";
   import ViewRegisterShop from "../pages/shop/ViewRegisterShop";
@@ -508,6 +510,24 @@
         element={
           <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
             <RiskMonitoring />
+          </Layout>
+        }
+      />
+
+   <Route
+        path="/redeem"
+        element={
+          <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
+            <Redeem />
+          </Layout>
+        }
+      />
+
+<Route
+        path="/redeemdetails/:redeemId"
+        element={
+          <Layout activeTab={activeTab} setActiveTab={setActiveTab}>
+            <RedeemDetails/>
           </Layout>
         }
       />

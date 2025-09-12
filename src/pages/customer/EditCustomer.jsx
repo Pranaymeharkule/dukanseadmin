@@ -36,7 +36,6 @@ const EditCustomer = () => {
         if (data.success && data.customerDetails?.profile) {
           const profile = data.customerDetails.profile;
 
-          // normalize gender value
           const normalizedGender =
             profile.gender?.toLowerCase() === "male"
               ? "Male"
@@ -141,61 +140,61 @@ const EditCustomer = () => {
   return (
     <div className="p-5 bg-gray-100 min-h-screen flex flex-col">
       {/* Sticky Header */}
-      <div className="flex items-center gap-3 bg-white px-5 py-3 rounded-md shadow mb-4 sticky top-0 z-20">
-        <BsArrowLeftCircle
-          className="text-2xl cursor-pointer"
-          onClick={() => navigate(-1)}
-        />
-        <h2 className="text-lg font-poppins font-medium text-gray-800">
-          Edit Customer Info
-        </h2>
+      <div className="sticky bg-white top-0 z-50">
+        <div className="max-w-7xl bg-white px-4 py-4 rounded-lg sticky top-4 z-10 flex items-center gap-3 shadow-sm">
+          <BsArrowLeftCircle
+            className="text-2xl cursor-pointer text-gray-700 hover:text-gray-900"
+            onClick={() => navigate(-1)}
+          />
+          <h2 className="text-lg text-gray-800 font-poppins font-medium">
+            Edit Customer Info
+          </h2>
+        </div>
       </div>
 
       {/* Form Card */}
-      <div className="bg-white rounded-md shadow flex-1 flex flex-col min-h-0">
+      <div className="bg-white rounded-md shadow flex-1 flex flex-col min-h-0 mt-4">
         {/* Scrollable Content */}
-        <div className="flex-1 px-6 py-6 overflow-y-auto min-w-[700px]">
+        <div className="flex-1 px-4 md:px-6 py-6 overflow-y-auto min-w-[320px] md:min-w-[700px]">
           {/* Image Upload */}
           <div className="mb-4">
-            <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
+            <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
               Image (Optional)
             </label>
-            <div className="flex items-center space-x-6">
-              <div
-                className="w-full h-[65px] flex items-center gap-2 p-4 border border-[#EEEEEE] bg-white opacity-100 
-                 font-poppins font-normal text-[16px] leading-[100%] align-middle"
-              >
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-6">
+              <div className="w-full sm:w-auto h-[65px] flex items-center gap-2 p-4 border border-[#EEEEEE] bg-white font-poppins font-normal text-[16px]">
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className="block w-full text-[16px] font-poppins font-normal leading-[100%] align-middle text-[#EEEEEE]"
+                  className="block w-full sm:w-auto text-[16px] font-poppins font-normal text-[#EEEEEE]"
                 />
                 {uploading && (
-                  <p className="text-[16px] text-gray-500 mt-1 font-poppins font-normal leading-[100%] align-middle">
+                  <p className="text-[16px] text-gray-500 mt-1 font-poppins font-normal">
                     Uploading...
                   </p>
                 )}
               </div>
+
+              {/* Image Preview */}
+              {preview ? (
+                <img
+                  src={preview}
+                  alt="Profile"
+                  className="w-[140px] h-[140px] object-cover rounded-full border mt-3 sm:mt-0"
+                />
+              ) : (
+                <div className="w-24 h-24 flex items-center justify-center bg-gray-100 rounded-full border text-xs text-gray-500 mt-3 sm:mt-0">
+                  No Image
+                </div>
+              )}
             </div>
-            {/* Image Preview */}
-            {formData.image ? (
-              <img
-                src={formData.image}
-                alt="Profile"
-                className="w-[140px] h-[140px] object-cover rounded-full border mt-3"
-              />
-            ) : (
-              <div className="w-24 h-24 flex items-center justify-center bg-gray-100 rounded-full border text-xs text-gray-500 mt-3">
-                No Image
-              </div>
-            )}
           </div>
 
           {/* Inputs */}
           <div className="space-y-3 text-sm text-gray-800">
             <div>
-              <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
+              <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
                 Full Name
               </label>
               <input
@@ -203,20 +202,23 @@ const EditCustomer = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full h-[40px] flex gap-2 p-4 border border-[#EEEEEE] opacity-100"
+                className="w-full h-[40px] flex gap-2 p-4 border border-[#EEEEEE]"
               />
             </div>
+
             <div>
-              <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
+              <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
                 Gender
               </label>
               <select
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
-                className="w-full h-[40px] flex gap-2 p-4 border border-[#EEEEEE] opacity-100"
+                className="w-full px-3 py-2 border border-[#EEEEEE] rounded-md text-gray-700"
               >
-                <option value="">Select gender</option>
+                <option value="" className="text-gray-400">
+                  Select gender
+                </option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
@@ -224,7 +226,7 @@ const EditCustomer = () => {
             </div>
 
             <div>
-              <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
+              <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
                 Date Of Birth
               </label>
               <input
@@ -232,11 +234,12 @@ const EditCustomer = () => {
                 name="dob"
                 value={formData.dob}
                 onChange={handleChange}
-                className="w-full h-[40px] flex gap-2 p-4 border border-[#EEEEEE] opacity-100"
+                className="w-full h-[40px] flex gap-2 p-4 border border-[#EEEEEE]"
               />
             </div>
+
             <div>
-              <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
+              <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
                 Phone Number
               </label>
               <input
@@ -244,11 +247,12 @@ const EditCustomer = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                className="w-full h-[40px] flex gap-2 p-4 border border-[#EEEEEE] opacity-100"
+                className="w-full h-[40px] flex gap-2 p-4 border border-[#EEEEEE]"
               />
             </div>
+
             <div>
-              <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
+              <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
                 Email
               </label>
               <input
@@ -256,13 +260,13 @@ const EditCustomer = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full h-[40px] flex gap-2 p-4 border border-[#EEEEEE] opacity-100"
+                className="w-full h-[40px] flex gap-2 p-4 border border-[#EEEEEE]"
               />
             </div>
 
             {/* Addresses */}
             <div>
-              <label className="font-poppins font-medium text-[16px] align-middle text-[#262626]">
+              <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
                 Address
               </label>
               {formData.addresses.map((addr, i) => (
@@ -271,7 +275,7 @@ const EditCustomer = () => {
                   value={addr}
                   onChange={(e) => handleAddressChange(i, e.target.value)}
                   rows={3}
-                  className="w-full flex gap-2 p-4 border border-[#EEEEEE] opacity-100 mb-2"
+                  className="w-full flex gap-2 p-4 border border-[#EEEEEE] mb-2"
                 />
               ))}
               <button
@@ -285,19 +289,20 @@ const EditCustomer = () => {
           </div>
         </div>
 
-        {/* Sticky Save Button inside card */}
-        <div className="bg-white px-4 py-3 sticky bottom-0 z-10 border-t flex justify-center">
-          <button
-            className="w-[200px] h-[50px] bg-brandYellow rounded-[10px] px-[10px] py-[10px] flex items-center justify-center gap-2 hover:opacity-90 transition"
-            onClick={handleSave}
-          >
-            <span className="font-[Poppins] text-[#EC2D01] font-semibold text-[20px] leading-[100%] tracking-normal text-center align-middle">
+        {/* Sticky Save Button */}
+        <div className="sticky bottom-0 z-50 bg-white py-4 border-t">
+          <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-4 px-4">
+            <button
+              onClick={handleSave}
+              className="bg-[#FEBC1D] text-red-600 font-semibold px-6 py-2 rounded-md hover:bg-yellow-500"
+              style={{ fontFamily: "Poppins, sans-serif" }}
+            >
               Save
-            </span>
-          </button>
-          {showSuccess && (
-            <SuccessOverlay message="Customer info updated successfully!" />
-          )}
+            </button>
+            {showSuccess && (
+              <SuccessOverlay message="Customer info updated successfully!" />
+            )}
+          </div>
         </div>
       </div>
     </div>

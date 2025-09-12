@@ -1,7 +1,7 @@
-  import React, { useState, useEffect } from "react";
-  import { useNavigate, useParams, Link } from "react-router-dom";
-  import { ArrowLeft } from "lucide-react";
-  import axios from "axios";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { BsArrowLeftCircle } from "react-icons/bs";
+import axios from "axios";
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
@@ -36,8 +36,6 @@ export default function ViewOffer() {
           }
         );
 
-        console.log("GET offer response:", res.data);
-
         const data = res.data.offer;
         if (!data) {
           setError("Offer not found.");
@@ -65,158 +63,69 @@ export default function ViewOffer() {
       ? offer.discountRate
       : `${offer.discountRate} %`
     : offer.discountAmount
-    ? `₹${offer.discountAmount}`
-    : "N/A";
+      ? `₹${offer.discountAmount}`
+      : "N/A";
 
   return (
-    <div style={{ background: "#F2F3F5" }} className="min-h-screen p-6">
-      <style jsx>{`
-        .hide-scrollbar {
-          -ms-overflow-style: none; /* Internet Explorer 10+ */
-          scrollbar-width: none; /* Firefox */
-        }
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none; /* Safari and Chrome */
-        }
-      `}</style>
-
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto">
-        {/* Header - Fixed */}
-        <div
-          className="flex items-center px-6 py-6 mb-6 bg-white rounded-lg shadow-sm sticky top-6 z-10"
-          style={{ height: "88px" }}
-        >
-          <button
-            onClick={() => navigate(-1)}
-            type="button"
-            title="Go Back"
-            className="mr-4 w-10 h-10 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
+    <div className="bg-gray-100 min-h-screen p-4 md:p-6">
+      {/* Header */}
+      <div className="flex items-center mb-4 bg-white px-4 py-3 rounded-md shadow">
+        <div className="flex items-center gap-2">
+          <button onClick={() => navigate(-1)}>
+            <BsArrowLeftCircle size={20} className="text-gray-700 md:text-black" />
           </button>
-          <h2
-            className="text-gray-800 font-medium"
-            style={{
-              fontFamily: "Poppins",
-              fontSize: "24px",
-              lineHeight: "36px",
-              color: "#262626",
-            }}
-          >
-            View Offer
-          </h2>
+          <h2 className="text-lg text-gray-800 font-medium">View Offer</h2>
         </div>
+      </div>
 
-        {/* Body */}
-        <div
-          className="bg-white rounded-lg flex flex-col"
-          style={{ height: "auto" }}
-        >
-          <div
-            className="overflow-y-auto p-6 flex-1 hide-scrollbar"
-            style={{ maxHeight: "500px" }}
-          >
-            {/* Info Rows */}
-            <InfoRow label="Offer For:" value={offer.offerFor || "N/A"} />
-            <InfoRow label="Customer Type:" value={offer.customerType || "N/A"} />
-            <InfoRow label="Offer On Product:" value={productNames} />
-            <InfoRow label="Discount:" value={discountDisplay} />
-            <InfoRow
-              label="Offer Start Date:"
-              value={parseDate(offer.startDate || offer.offerStartDate)}
-            />
-            <InfoRow
-              label="Offer Expire Date:"
-              value={parseDate(offer.expireDate || offer.offerExpireDate)}
-            />
-            {offer.offerText && (
-              <InfoRow label="Offer Text:" value={offer.offerText} />
-            )}
+      {/* Main Container */}
+      <div className="bg-white rounded-lg mt-4 shadow-md flex flex-col h-[80vh]">
+        {/* Scrollable content */}
+        <div className="p-6 overflow-y-auto flex-1 no-scrollbar" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+          <style>{`
+            .no-scrollbar::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
 
-            {/* Banner Section */}
+          <div className="flex flex-col items-start">
             {offer.bannerImage && (
-              <div className="flex gap-2 mb-6" style={{ height: "179.67px" }}>
-                <div
-                  className="font-medium flex items-center"
-                  style={{
-                    width: "300px",
-                    height: "30px",
-                    fontFamily: "Poppins",
-                    fontSize: "20px",
-                    lineHeight: "30px",
-                    color: "#262626",
-                  }}
-                >
-                  Banner
-                </div>
-                <div
-                  className="rounded-lg p-2 relative"
-                  style={{
-                    width: "326px",
-                    height: "179.67px",
-                    background: "#FFEAE6",
-                  }}
-                >
-                  <img
-                    src={offer.bannerImage}
-                    alt="Offer Banner"
-                    className="rounded-lg w-full h-full object-cover"
-                    style={{
-                      width: "286px",
-                      height: "159.67px",
-                    }}
-                  />
-                  <div
-                    className="absolute top-2 left-2 px-3 py-1 rounded text-white text-xs font-normal"
-                    style={{
-                      background: "#47B247",
-                      fontSize: "10.08px",
-                      fontFamily: "Poppins",
-                    }}
-                  >
-                    New Offer
-                  </div>
-                </div>
-              </div>
+              <img
+                src={offer.bannerImage}
+                alt="Offer Banner"
+                className="w-80 h-44 object-cover rounded shadow mb-6"
+              />
             )}
 
-            {/* Terms & Conditions */}
-            <div className="text-right mb-6">
-              <Link
-                className="font-medium hover:underline"
-                style={{
-                  fontFamily: "Poppins",
-                  fontSize: "20px",
-                  lineHeight: "30px",
-                  color: "#EC2D01",
-                }}
-                to={`/offer/see-terms/${offerId}`}
-              >
-                See Terms & Conditions
-              </Link>
+            <div className="w-full max-w-4xl space-y-4">
+              <InfoRow label="Offer For:" value={offer.offerFor} />
+              <InfoRow label="Customer Type:" value={offer.customerType} />
+              <InfoRow label="Offer On Product:" value={productNames} />
+              <InfoRow label="Discount:" value={discountDisplay} />
+              <InfoRow label="Offer Start Date:" value={parseDate(offer.startDate || offer.offerStartDate)} />
+              <InfoRow label="Offer Expire Date:" value={parseDate(offer.expireDate || offer.offerExpireDate)} />
+              {offer.offerText && <InfoRow label="Offer Text:" value={offer.offerText} />}
+
+              <div className="text-right">
+                <Link
+                  to={`/offer/view-terms/${offerId}`}
+                  className="text-red-600 font-medium hover:underline text-lg"
+                >
+                  See Terms & Conditions
+                </Link>
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* Edit Button - Fixed at bottom */}
-          <div className="flex justify-center p-6 bg-white border-t sticky bottom-0">
-            <button
-              onClick={() => navigate(`/offer/edit-offer/${offerId}`)}
-              className="rounded-xl font-semibold"
-              style={{
-                background: "#FEBC1D",
-                color: "#EC2D01",
-                width: "200px",
-                height: "50px",
-                fontFamily: "Poppins",
-                fontSize: "20px",
-                lineHeight: "30px",
-                fontWeight: "600",
-              }}
-            >
-              Edit
-            </button>
-          </div>
+        {/* Action Buttons */}
+        <div className="p-4 flex justify-center gap-4 bg-white border-t">
+          <button
+            onClick={() => navigate(`/offer/edit-offer/${offerId}`)}
+            className="bg-[#FEBC1D] text-red-600 font-semibold px-6 py-2 rounded-md hover:bg-yellow-500"
+          >
+            Edit
+          </button>
         </div>
       </div>
     </div>
@@ -224,32 +133,8 @@ export default function ViewOffer() {
 }
 
 const InfoRow = ({ label, value }) => (
-  <div className="flex items-center gap-2 mb-6" style={{ height: "65px" }}>
-    <div
-      className="font-medium flex items-center"
-      style={{
-        width: "300px",
-        height: "30px",
-        fontFamily: "Poppins",
-        fontSize: "20px",
-        lineHeight: "30px",
-        color: "#262626",
-      }}
-    >
-      {label}
-    </div>
-    <div
-      className="flex items-center px-4"
-      style={{
-        width: "724px",
-        height: "65px",
-        fontFamily: "Poppins",
-        fontSize: "16px",
-        lineHeight: "24px",
-        color: "#262626",
-      }}
-    >
-      {value || "N/A"}
-    </div>
+  <div className="grid grid-cols-2 gap-4">
+    <span className="font-semibold text-gray-700">{label}</span>
+    <span className="text-gray-800">{value || "N/A"}</span>
   </div>
 );

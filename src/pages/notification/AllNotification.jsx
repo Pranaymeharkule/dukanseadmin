@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import { BsArrowLeftCircle } from "react-icons/bs";
 
 const Header = ({ onAddClick }) => {
   const navigate = useNavigate();
@@ -12,11 +13,10 @@ const Header = ({ onAddClick }) => {
           onClick={() => navigate(-1)}
           type="button"
           title="Go Back"
-          className="w-8 h-8 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
+          <BsArrowLeftCircle size={20} className="text-gray-700 md:text-black" />
         </button>
-        <h1 className="text-base sm:text-lg md:text-xl font-semibold text-gray-800">
+        <h1 className="text-lg text-gray-800 font-medium">
           Notification
         </h1>
       </div>
@@ -203,10 +203,9 @@ export default function AllNotification() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const hasAddedNotificationRef = useRef(false);
-
   const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
+  // ✅ Fetch only 10 per page and replace list
   const fetchNotifications = async (page = 1, tab = "ALL") => {
     setLoading(true);
     setError(null);
@@ -240,6 +239,7 @@ export default function AllNotification() {
     }
   };
 
+  // ✅ Reset page when filter changes
   const handleFilterChange = (newFilter) => {
     if (newFilter === activeFilter) return;
     setActiveFilter(newFilter);
@@ -251,23 +251,19 @@ export default function AllNotification() {
     setCurrentPage(newPage);
   };
 
+  // ✅ Fetch new page when page/filter changes
   useEffect(() => {
     fetchNotifications(currentPage, activeFilter);
   }, [currentPage, activeFilter]);
 
-  // ✅ Fix: Add new notification only once
+  // ✅ Handle adding new notification from another page
   useEffect(() => {
     const newNotification = location.state?.newNotification;
-    if (newNotification && !hasAddedNotificationRef.current) {
-      hasAddedNotificationRef.current = true;
+    if (newNotification) {
       setCurrentPage(1);
-      setNotifications((prev) => [newNotification, ...prev.slice(0, 9)]);
+      setNotifications((prev) => [newNotification, ...prev.slice(0, 9)]); // keep max 10 on page
       navigate(location.pathname, { replace: true, state: {} });
       window.scrollTo({ top: 0, behavior: "smooth" });
-
-      setTimeout(() => {
-        hasAddedNotificationRef.current = false;
-      }, 500);
     }
   }, [location.state, navigate, location.pathname]);
 

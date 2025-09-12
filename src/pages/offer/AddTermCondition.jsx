@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
+import { BsArrowLeftCircle } from "react-icons/bs";
 import { useNavigate, useParams } from "react-router-dom";
 import { FiEdit } from "react-icons/fi";
 import ReactQuill from "react-quill";
@@ -23,7 +23,7 @@ const SuccessCheckIcon = () => (
   </svg>
 );
 
-const AddTermsCondition = () => {
+const AddOfferTerms = () => {
   const [termsData, setTermsData] = useState(null);
   const [editableContent, setEditableContent] = useState("");
   const [loading, setLoading] = useState(true);
@@ -102,8 +102,8 @@ const AddTermsCondition = () => {
     <div className="bg-gray-100 min-h-screen flex flex-col font-sans p-4 relative">
       {/* ✅ Success Overlay */}
       {success && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-8 flex flex-col items-center animate-fadeIn">
+        <div className="fixed inset-0 flex items-center justify-center bg-opacity-40 z-50">
+          <div className="bg-white rounded-xl  p-8 flex flex-col items-center animate-fadeIn">
             <SuccessCheckIcon className="mb-4" />
             <p className="text-gray-800 font-semibold text-lg text-center">
               Terms updated successfully
@@ -116,27 +116,21 @@ const AddTermsCondition = () => {
       <div className="flex-1 flex flex-col w-full space-y-4">
         {/* Header */}
         <div className="bg-white rounded-xl overflow-hidden">
-          <header className="flex items-center justify-between p-3 gap-3 bg-white">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate(-1)}
-                type="button"
-                className="w-8 h-8 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
-              >
-                <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
+          <header className="flex items-center justify-between p-1 gap-3 bg-white">
+            <div className="flex items-center bg-white px-4 py-3 rounded-md ">
+              <button onClick={() => navigate(-1)} title="Go Back">
+                <BsArrowLeftCircle size={20} className="text-gray-700 md:text-black" />
               </button>
-              <h1 className="text-lg text-gray-800 font-poppins font-medium">
-                Add Offer Terms & Conditions
-              </h1>
+              <h2 className="ml-2 text-lg text-gray-800 font-medium">Add Terms & Conditions</h2>
             </div>
 
             {/* Edit Controls */}
             {!loading && !error && termsData && (
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex justify-between items-center">
                 {!isEditing ? (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="bg-brandYellow text-white px-6 py-2 rounded-md flex items-center gap-2 font-poppins font-medium"
+                    className="bg-brandYellow text-white px-4 py-2 rounded-md flex items-center gap-2 font-poppins font-medium"
                   >
                     <FiEdit className="text-lg" />Edit
                   </button>
@@ -217,9 +211,9 @@ const AddTermsCondition = () => {
             <footer className="p-6 bg-gray-50 border-t border-gray-200 flex items-center justify-center">
               <button
                 onClick={() => navigate(`/offer/add`)}
-                className="px-6 py-3 bg-brandYellow text-brandRed font-semibold font-poppins rounded-lg hover:bg-yellow-500"
+                className="bg-[#FEBC1D] text-red-600 font-semibold px-6 py-2 rounded-md hover:bg-yellow-500"
               >
-                Add
+                Save
               </button>
             </footer>
           )}
@@ -229,4 +223,4 @@ const AddTermsCondition = () => {
   );
 };
 
-export default AddTermsCondition;
+export default AddOfferTerms;

@@ -43,16 +43,11 @@ const ViewTermCondition = () => {
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col font-sans p-4">
       {/* Header */}
-      <div className="bg-white rounded-xl p-3 md:p-4 border border-gray-200 mb-6 flex items-center">
-        <button
-          onClick={() => navigate(-1)}
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 text-3xl"
-        >
-          <BsArrowLeftCircle />
+      <div className="flex items-center mb-4 bg-white px-4 py-3 rounded-md shadow">
+        <button onClick={() => navigate(-1)} title="Go Back">
+          <BsArrowLeftCircle size={20} className="text-gray-700 md:text-black" />
         </button>
-        <h1 className="text-xl font-poppins font-medium text-gray-800 ml-4">
-          View Offer Terms & Conditions
-        </h1>
+        <h2 className="ml-2 text-lg text-gray-800 font-medium">View Offer</h2>
       </div>
 
       {/* Content */}
@@ -82,9 +77,6 @@ const ViewTermCondition = () => {
                 className="prose prose-gray max-w-none space-y-4"
                 dangerouslySetInnerHTML={{ __html: terms.description }}
               />
-              <p className="text-xs text-gray-400 mt-4">
-                Last updated: {new Date(terms.updatedAt).toLocaleDateString()}
-              </p>
             </div>
           )}
         </div>

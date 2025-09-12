@@ -223,7 +223,7 @@ export default function OffersTable() {
     <div className="bg-gray-100 p-3 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between bg-white px-4 m-2 py-3 rounded-md shadow">
-        <h2 className="font-poppins text-lg text-gray-800 font-medium">Offers List</h2>
+        <h2 className="text-lg text-gray-800 font-medium">Offers List</h2>
         <button
           className="flex items-center gap-2 bg-brandYellow text-red-500 font-semibold px-4 py-2 rounded-md shadow hover:bg-brandYellow transition"
           onClick={() => navigate("/offer/add")}
@@ -276,19 +276,19 @@ export default function OffersTable() {
         <table className="w-full min-w-[600px] sm:min-w-[700px]">
           <thead className="bg-brandYellow text-black text-sm">
             <tr>
-              <th className="font-poppins py-3 px-4 text-base text-left">
+              <th className="py-3 pl-2 pr-6 text-base text-left whitespace-nowrap">
                 Sr. No.
               </th>
-              <th className="font-poppins py-3 px-4 text-base text-left">
+              <th className="py-3 pl-2 pr-6 text-base text-center whitespace-nowrap">
                 Offer
               </th>
-              <th className="font-poppins py-3 px-4 text-base text-center">
+              <th className="py-3 pl-2 pr-6 text-base text-left whitespace-nowrap">
                 Discount Rate
               </th>
-              <th className="font-poppins py-3 px-4 text-base text-center">
+              <th className="py-3 pl-2 pr-6 text-base text-center whitespace-nowrap">
                 Offer Text
               </th>
-              <th className="font-poppins py-3 px-4 text-base text-right">
+              <th className="py-3 pl-2 pr-6 text-base text-right whitespace-nowrap">
                 Action
               </th>
             </tr>
@@ -301,8 +301,8 @@ export default function OffersTable() {
                 return (
                   <tr key={id || idx} className="hover:bg-gray-50 transition-colors duration-150">
                     <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{serialNumber}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{formatOfferName(item.offer)}</td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-center text-gray-900">
+                    <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-900">{formatOfferName(item.offer)}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-left text-gray-900">
                       {item.discountRate
                         ? `${item.discountRate}% off`
                         : item.discountAmount
@@ -310,7 +310,7 @@ export default function OffersTable() {
                           : "N/A"}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-center text-gray-900">{item.offerText || "N/A"}</td>
-                    <td className="py-3 px-4 flex justify-end items-center gap-4">
+                    <td className="py-3 px-4 flex justify-end items-end gap-4">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"

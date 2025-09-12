@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { BsArrowLeftCircle } from "react-icons/bs";
 
 const OrderDetails = () => {
   const { orderId } = useParams();
@@ -83,22 +84,8 @@ const OrderDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-8 py-4 flex items-center z-10 shadow-sm">
-          <div className="flex items-center">
-            <button
-              onClick={handleBackNavigation}
-              type="button"
-              title="Go Back"
-              className="w-8 h-8 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
-            </button>
-            <h1 className="text-xl font-semibold text-gray-800 px-4">
-              Order Details
-            </h1>
-          </div>
-        </div>
+      <div className="bg-gray-100 p-3 min-h-screen">
+        
         <div className="flex items-center justify-center h-64">
           <div className="text-gray-500">Loading...</div>
         </div>
@@ -218,28 +205,30 @@ const OrderDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 p-3">
       {/* Sticky Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 flex items-center z-10 shadow-sm">
-        <div className="flex items-center">
-          <button
-            onClick={handleBackNavigation}
-            type="button"
-            title="Go Back"
-            className="w-8 h-8 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
-          </button>
-          <h1 className="text-xl font-semibold text-gray-800 px-4">
-            Order Details
-          </h1>
+      <div className="flex items-center mb-4 bg-white px-4 py-3 rounded-md shadow">
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate(-1)}>
+              <BsArrowLeftCircle
+                size={20}
+                className="text-gray-700 md:text-black"
+              />
+            </button>
+            <h2 className="text-lg text-gray-800 font-medium">
+             Order Details 
+            </h2>
+          </div>
         </div>
-      </div>
 
       {/* Content */}
-      <div className="px-4 py-6 space-y-6">
+      <div className="bg-white rounded-lg mt-4 shadow-md flex flex-col h-[80vh]">
+      <div
+    className="p-6 overflow-y-auto flex-1 no-scrollbar"
+    style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+  >
         {/* Order ID Section */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div className="bg-white rounded-lg  p-3 ">
           <div className="text-sm font-medium text-gray-700 mb-2">
             Order Id:
           </div>
@@ -498,6 +487,7 @@ const OrderDetails = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

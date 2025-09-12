@@ -47,7 +47,7 @@ const FraudOverlay = ({ onClose, onConfirm, loading }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-[400px]">
+      <div className="bg-white rounded-lg shadow p-6 w-[300px]">
         <h2 className="text-lg font-semibold text-center mb-4">Flag As Fraud</h2>
 
         {/* Risk Dropdown */}
@@ -266,22 +266,28 @@ const CustomerProfile = () => {
   const isFraudStatus = customer?.profile?.status === "fraud";
 
   return (
-    <div className="min-h-screen bg-gray-100 space-y-4 p-6">
-      {/* Header */}
-      <div className="sticky bg-white top-0 z-50">
-        <div className="max-w-7xl bg-white px-4 py-4 rounded-lg sticky top-4 z-10 flex items-center gap-3 shadow-sm">
-          <BsArrowLeftCircle
-            className="text-2xl cursor-pointer text-gray-700 hover:text-gray-900"
-            onClick={() => navigate(-1)}
-          />
-          <h2 className="text-lg text-gray-800 font-poppins font-medium">
-            View Product Detail
-          </h2>
+    <div className="bg-gray-100 min-h-screen p-4 md:p-6">
+      {/* Header - Fixed */}
+      <div className="flex items-center mb-4 bg-white px-4 py-3 rounded-md shadow">
+        <div className="flex items-center gap-2">
+          <button onClick={() => navigate(-1)}>
+            <BsArrowLeftCircle size={20} className="text-gray-700 md:text-black" />
+          </button>
+          <h2 className="text-lg text-gray-800 font-medium">View Customer Info</h2>
         </div>
       </div>
 
-      {/* Customer Profile Section */}
-      <div className="bg-white rounded-lg border">
+      {/* Main Container - Fixed height with scrollable content */}
+      <div className="bg-white rounded-lg mt-4 shadow-md flex flex-col h-[80vh]">
+        {/* Scrollable content */}
+        <div
+          className="p-6 overflow-y-auto flex-1 scrollbar-hidden"
+        >
+
+          <div className="flex flex-col items-start scrollbar-hidden space-y-8">
+            {/* Profile Section */}
+            <div className="w-full">
+              {/* Customer Profile Section */}
         <div className="p-6 w-full">
           {/* Profile Image and Fraud Button Row */}
           <div className="flex justify-between items-center mb-6">
@@ -309,345 +315,205 @@ const CustomerProfile = () => {
                   }
                 }}
                 disabled={loading}
-                className={`px-8 py-3 rounded-lg border font-bold text-lg uppercase tracking-wide transition-colors shadow-md ${customer?.profile?.status === "fraud"
-                    ? "bg-green-100 text-green-700 border-green-300 hover:bg-green-200"
-                    : "text-red-600 border-red-600 hover:bg-red-50"
+                className={`px-6 py-3 rounded-lg border font-bold text-lg uppercase tracking-wide transition-colors shadow-md ${customer?.profile?.status === "fraud"
+                  ? "bg-green-100 text-green-700 border-green-300 hover:bg-green-200"
+                  : "text-red-600 border-red-600 hover:bg-red-50"
                   }`}
               >
                 {loading
                   ? "Loading..."
                   : customer?.profile?.status === "fraud"
-                    ? "Mark as Legitimate"
+                  ? "Mark as Legitimate"
                     : "Flag As Fraud"}
               </button>
             </div>
           </div>
 
-          {/* Customer Details */}
-          <div className="w-full max-w-md space-y-3 text-left">
-            <div className="flex gap-x-8 items-center">
-              <span className="w-40 font-semibold text-gray-800">
-                Full Name:
-              </span>
-              <span className="flex-1 text-gray-700">
-                {customer?.profile?.fullName || "-"}
-              </span>
+              {/* Customer Details */}
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Customer Details
+                </h2>
+                <div className="w-full max-w-md space-y-4 text-left">
+                  {[
+                    ["Full Name:", customer?.profile?.fullName],
+                    ["Gender:", customer?.profile?.gender],
+                    ["Date Of Birth:", customer?.profile?.dob],
+                    ["Phone Number:", customer?.profile?.phoneNumber],
+                    ["Email:", customer?.profile?.email],
+                    ["Address:", customer?.profile?.address],
+                  ].map(([label, value], idx) => (
+                    <div className="grid grid-cols-2 gap-4 items-start" key={idx}>
+                      <span className="font-semibold text-gray-700">{label}</span>
+                      <span className="text-gray-800">{value || "-"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            <div className="flex gap-x-8 items-center">
-              <span className="w-40 font-semibold text-gray-800">
-                Gender:
-              </span>
-              <span className="flex-1 text-gray-700">
-                {customer?.profile?.gender || "-"}
-              </span>
-            </div>
-
-            <div className="flex gap-x-8 items-center">
-              <span className="w-40 font-semibold text-gray-800">
-                Date Of Birth:
-              </span>
-              <span className="flex-1 text-gray-700">
-                {customer?.profile?.dob || "-"}
-              </span>
-            </div>
-
-            <div className="flex gap-x-8 items-center">
-              <span className="w-40 font-semibold text-gray-800">
-                Phone Number:
-              </span>
-              <span className="flex-1 text-gray-700">
-                {customer?.profile?.phoneNumber || "-"}
-              </span>
-            </div>
-
-            <div className="flex gap-x-8 items-center">
-              <span className="w-40 font-semibold text-gray-800">
-                Email:
-              </span>
-              <span className="flex-1 text-gray-700">
-                {customer?.profile?.email || "-"}
-              </span>
-            </div>
-
-            <div className="flex gap-x-8 items-start">
-              <span className="w-40 font-semibold text-gray-800">
-                Address:
-              </span>
-              <span className="flex-1 text-gray-700 break-words">
-                {customer?.profile?.address || "-"}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Orders Section */}
-      <div className="bg-white p-6">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="font-semibold text-gray-900">
-            Previous Order Details:
-          </h2>
-          <button
-            onClick={() => setShowAllOrders(!showAllOrders)}
-            className="text-blue-600 hover:underline text-sm font-medium"
-          >
-            See all
-          </button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full bg-white rounded-lg overflow-hidden">
-            <thead className="bg-white">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Sl.No
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Date
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Product Name
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Quantity
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Total Price
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Payment Status
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  View Order
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {(showAllOrders ? orders : orders.slice(0, 3)).length > 0 ? (
-                (showAllOrders ? orders : orders.slice(0, 3)).map(
-                  (order, index) => (
-                    <tr
-                      key={order.id}
-                      className={
-                        index % 2 === 0 ? "bg-[#FFFAFB]" : "bg-white"
-                      }
-                    >
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {index + 1}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {order.date}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {order.product}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {order.quantity}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {order.price}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {order.status}
-                      </td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => handleViewOrder(order.id)}
-                          className="text-gray-400 hover:text-gray-600"
+            {/* Orders Section */}
+            <div className="w-full">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="font-semibold text-gray-900">Previous Order Details:</h2>
+                <button
+                  onClick={() => setShowAllOrders(!showAllOrders)}
+                  className="text-blue-600 hover:underline text-sm font-medium"
+                >
+                  See all
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full bg-white rounded-lg overflow-hidden">
+                  <thead>
+                    <tr>
+                      {["Sl.No", "Date", "Product Name", "Quantity", "Total Price", "Payment Status", "View Order"].map((header) => (
+                        <th
+                          key={header}
+                          className="px-4 py-3 text-left text-sm font-bold text-gray-700"
                         >
-                          <VscEye size={18} />
-                        </button>
-                      </td>
+                          {header}
+                        </th>
+                      ))}
                     </tr>
-                  )
-                )
-              ) : (
-                <tr>
-                  <td
-                    colSpan="7"
-                    className="px-4 py-3 text-center text-gray-500"
-                  >
-                    No orders found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                  </thead>
+                  <tbody>
+                    {(showAllOrders ? orders : orders.slice(0, 3)).length > 0 ? (
+                      (showAllOrders ? orders : orders.slice(0, 3)).map((order, index) => (
+                        <tr key={order.id} className={index % 2 === 0 ? "bg-[#FFFAFB]" : "bg-white"}>
+                          <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{order.date}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{order.product}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{order.quantity}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{order.price}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{order.status}</td>
+                          <td className="px-4 py-3">
+                            <button
+                              onClick={() => handleViewOrder(order.id)}
+                              className="text-gray-400 hover:text-gray-600"
+                            >
+                              <VscEye size={18} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="7" className="px-4 py-3 text-center text-gray-500">
+                          No orders found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-      {/* Referral History Section */}
-      <div className="bg-white p-6">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="font-semibold text-gray-900">Referral History:</h2>
-          <button
-            onClick={() => setShowAllReferrals(!showAllReferrals)}
-            className="text-blue-600 hover:underline text-sm font-medium"
-          >
-            See all
-          </button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full bg-white rounded-lg overflow-hidden">
-            <thead className="bg-white">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Sl.No
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Date
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Person Name
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Referral code
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Referred via
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {(showAllReferrals ? referrals : referrals.slice(0, 3))
-                .length > 0 ? (
-                (showAllReferrals ? referrals : referrals.slice(0, 3)).map(
-                  (ref, index) => (
-                    <tr
-                      key={ref.id}
-                      className={
-                        index % 2 === 0 ? "bg-[#FFFAFB]" : "bg-white"
-                      }
-                    >
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {index + 1}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {ref.date}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {ref.name}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {ref.code}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {ref.via}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900">
-                        {ref.status}
-                      </td>
+            {/* Referral History Section */}
+            <div className="w-full">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="font-semibold text-gray-900">Referral History:</h2>
+                <button
+                  onClick={() => setShowAllReferrals(!showAllReferrals)}
+                  className="text-blue-600 hover:underline text-sm font-medium"
+                >
+                  See all
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full bg-white rounded-lg overflow-hidden">
+                  <thead>
+                    <tr>
+                      {["Sl.No", "Date", "Person Name", "Referral Code", "Referred via", "Status"].map((header) => (
+                        <th
+                          key={header}
+                          className="px-4 py-3 text-left text-sm font-bold text-gray-700"
+                        >
+                          {header}
+                        </th>
+                      ))}
                     </tr>
-                  )
-                )
-              ) : (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="px-4 py-3 text-center text-gray-500"
-                  >
-                    No referrals found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                  </thead>
+                  <tbody>
+                    {(showAllReferrals ? referrals : referrals.slice(0, 3)).length > 0 ? (
+                      (showAllReferrals ? referrals : referrals.slice(0, 3)).map((ref, index) => (
+                        <tr key={ref.id} className={index % 2 === 0 ? "bg-[#FFFAFB]" : "bg-white"}>
+                          <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{ref.date}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{ref.name}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{ref.code}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{ref.via}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{ref.status}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="px-4 py-3 text-center text-gray-500">
+                          No referrals found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-      {/* Gullak Ledger Section */}
-      <div className="bg-white p-6">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="font-semibold text-gray-900">Gullak ledger:</h2>
-          <button
-            onClick={() => setShowAllGullak(!showAllGullak)}
-            className="text-blue-600 hover:underline text-sm font-medium"
-          >
-            See all
-          </button>
+            {/* Gullak Ledger Section */}
+            <div className="w-full">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="font-semibold text-gray-900">Gullak Ledger:</h2>
+                <button
+                  onClick={() => setShowAllGullak(!showAllGullak)}
+                  className="text-blue-600 hover:underline text-sm font-medium"
+                >
+                  See all
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full bg-white rounded-lg overflow-hidden">
+                  <thead>
+                    <tr>
+                      {["Sl.No", "Date", "Available Coins", "Coins Earned", "Coins Redeemed", "Coins Expired"].map((header) => (
+                        <th
+                          key={header}
+                          className="px-4 py-3 text-left text-sm font-bold text-gray-700"
+                        >
+                          {header}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(showAllGullak ? gullakLedger : gullakLedger.slice(0, 3)).length > 0 ? (
+                      (showAllGullak ? gullakLedger : gullakLedger.slice(0, 3)).map((entry, index) => (
+                        <tr key={entry.id} className={index % 2 === 0 ? "bg-[#FFFAFB]" : "bg-white"}>
+                          <td className="px-4 py-3 text-sm text-gray-900">{index + 1}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{entry.date}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{entry.available}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{entry.earned}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{entry.redeemed}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{entry.expired}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="px-4 py-3 text-center text-gray-500">
+                          No gullak entries found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full bg-white rounded-lg overflow-hidden">
-            <thead className="bg-white">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Sl.No
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Date
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Available Coins
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Coins Earned
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Coins Redeemed
-                </th>
-                <th className="px-4 py-3 text-left text-sm font-bold text-gray-700">
-                  Coins Expired
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {(showAllGullak ? gullakLedger : gullakLedger.slice(0, 3))
-                .length > 0 ? (
-                (showAllGullak
-                  ? gullakLedger
-                  : gullakLedger.slice(0, 3)
-                ).map((entry, index) => (
-                  <tr
-                    key={entry.id}
-                    className={
-                      index % 2 === 0 ? "bg-[#FFFAFB]" : "bg-white"
-                    }
-                  >
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {index + 1}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {entry.date}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {entry.available}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {entry.earned}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {entry.redeemed}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {entry.expired}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="px-4 py-3 text-center text-gray-500"
-                  >
-                    No gullak entries found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
-      {/* Sticky Edit Button */}
-      <div className={`sticky bottom-0 z-50 bg-gray-50 py-4 border-t ${showFraudOverlay ? 'relative z-30' : ''}`}>
-        <div className="flex justify-center gap-4">
+        {/* Fixed Edit Button at bottom */}
+        <div className="p-4 flex justify-center bg-white border-t">
           <button
             onClick={() => navigate(`/customer/edit/${customerId}`)}
-            className="w-[200px] h-[50px] bg-brandYellow text-[#EC2D01] rounded-[10px] flex items-center justify-center p-[10px] gap-[8px] font-semibold text-[20px] leading-[50px] tracking-[0] text-center shadow-md"
-            style={{ fontFamily: "Poppins, sans-serif" }}
+            className="bg-[#FEBC1D] text-red-600 font-semibold px-6 py-2 rounded-md hover:bg-yellow-500"
           >
             Edit
           </button>
@@ -663,7 +529,8 @@ const CustomerProfile = () => {
         />
       )}
     </div>
+    </div>
   );
 };
 
-export default CustomerProfile;
+export default CustomerProfile; 

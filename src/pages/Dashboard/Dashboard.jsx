@@ -19,6 +19,11 @@ import { FaMoneyBills } from "react-icons/fa6";
 import axios from "axios";
 import { MapContainer, TileLayer, Circle, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { GoArrowUp } from "react-icons/go";
+import { IoMdArrowDown } from "react-icons/io";
+import { IoIosTrendingDown } from "react-icons/io";
+import { IoMdTrendingUp } from "react-icons/io";
+
 
 const API_BASE_URL = "https://dukanse-be-f5w4.onrender.com/api/adminDashboard";
 
@@ -394,8 +399,9 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center space-x-1">
             <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
-              <span className="text-sm">↑</span>
-              <span>{sellerStats ? `${sellerStats.growthPercent}%` : ""}</span>
+<span className="text-base">
+  <GoArrowUp />
+</span>              <span>{sellerStats ? `${sellerStats.growthPercent}%` : ""}</span>
             </div>
             <span className="text-xs text-red-600">Since last month</span>
           </div>
@@ -412,7 +418,9 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center space-x-1">
             <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
-              <span className="text-sm">↑</span>
+<span className="text-base">
+  <GoArrowUp />
+</span>
               <span>
                 {customerStats && customerStats.growthPercent
                   ? `${customerStats.growthPercent}%`
@@ -434,9 +442,10 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center space-x-1">
             <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
-              <span className="text-sm">
-                {salesStats?.growthPercent >= 0 ? "↑" : "↓"}
-              </span>
+             <span className="text-base">
+  {salesStats?.growthPercent >= 0 ? <GoArrowUp /> : <IoMdArrowDown />}
+</span>
+
               <span>{salesStats?.growthPercent ?? "-90.99%"}</span>
             </div>
             <span className="text-xs text-red-600">Since last month</span>
@@ -454,9 +463,10 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center space-x-1">
             <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
-              <span className="text-sm">
-                {revenueStats?.growthPercent >= 0 ? "↑" : "↓"}
-              </span>
+             <span className="text-base">
+  {revenueStats?.growthPercent >= 0 ? <GoArrowUp /> : <IoMdArrowDown />}
+</span>
+
               <span>{revenueStats?.growthPercent ?? "0%"}</span>
             </div>
             <span className="text-xs text-red-600">Since last month</span>
@@ -476,9 +486,10 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center space-x-1">
             <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
-              <span className="text-sm">
-                {storeStats?.["growth Percent"] >= 0 ? "↯" : "↯"}
-              </span>
+              <span className="text-base">
+  {storeStats?.["growth Percent"] >= 0 ? <IoMdTrendingUp /> : <IoIosTrendingDown />}
+</span>
+
               <span>{storeStats?.["growth Percent"] ?? "0"}%</span>
             </div>
             <span className="text-xs text-red-600">Since last month</span>
@@ -495,9 +506,10 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center space-x-1">
             <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
-              <span className="text-sm">
-                {activeStores?.growthPercent >= 0 ? "↯" : "↯"}
-              </span>
+              <span className="text-base">
+  {activeStores?.growthPercent >= 0 ? <IoMdTrendingUp /> : <IoIosTrendingDown />}
+</span>
+
               <span>{activeStores?.growthPercent ?? "0%"}</span>
             </div>
             <span className="text-xs text-red-600">Since last month</span>
@@ -514,9 +526,10 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center space-x-1">
             <div className="inline-flex items-center bg-red-600 text-white text-xs px-3 py-1 rounded-full space-x-1">
-              <span className="text-sm">
-                {todaysOrders?.growthPercent >= 0 ? "↯" : "↯"}
-              </span>
+             <span className="text-base">
+  {todaysOrders?.growthPercent >= 0 ? <IoMdTrendingUp /> : <IoIosTrendingDown />}
+</span>
+
               <span>{todaysOrders?.growthPercent ?? "0%"}</span>
             </div>
             <span className="text-xs text-red-600">Since last month</span>
@@ -563,7 +576,7 @@ export default function Dashboard() {
                   dataKey="income"
                   fill="#EC2D01"
                   radius={[8, 8, 0, 0]}
-                  barSize={10}
+                  barSize={40}
                 />
               </BarChart>
             </ResponsiveContainer>
