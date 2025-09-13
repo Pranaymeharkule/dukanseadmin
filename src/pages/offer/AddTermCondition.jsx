@@ -88,7 +88,7 @@ const AddOfferTerms = () => {
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
-        navigate(`/offer/edit-terms/${offerId}`);
+        navigate(`/offer/add-terms`);
       }, 2000);
     } catch (err) {
       setError(err.message);
