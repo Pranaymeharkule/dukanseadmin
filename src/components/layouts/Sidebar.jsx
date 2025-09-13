@@ -21,6 +21,7 @@ import { ReactComponent as GullakIcon } from "../../assets/gullak.svg";
 import { TbWallet } from "react-icons/tb";
 import { MdPayment } from "react-icons/md";
 import { FaGift } from "react-icons/fa";
+import { FaBox } from "react-icons/fa";
 
 
 
@@ -33,8 +34,9 @@ const menuItems = [
   { label: "Products", icon: <ProductIcon />, path: "/product", svg: true },
   { label: "Orders", icon: <HiOutlineShoppingCart />, path: "/order" },
   { label: "Referrals", icon: <LuUserPlus />, path: "/refer" },
+  { label: "Products", icon: <FaBox />, path: "/product" },
+
   { label: "Gullak", icon: <GullakIcon />, path: "/Gullak", svg: true },
-  { label: "Payment", icon: <MdPayment />, path: "/payment", svg: true },
     { label: "Redeem Request", icon: <TbWallet />, path: "/redeem", svg: true },
 { label: "Offer", icon: <FaGift />, path: "/offer" },
   {
