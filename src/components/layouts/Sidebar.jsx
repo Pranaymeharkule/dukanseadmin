@@ -31,7 +31,6 @@ const menuItems = [
   { label: "Dashboard", icon: <MdDashboard />, path: "/dashboard" },
   { label: "Customer", icon: <CustomerIcon />, path: "/customer", svg: true },
   { label: "Shop", icon: <ShopIcon />, path: "/shop", svg: true },
-  { label: "Products", icon: <ProductIcon />, path: "/product", svg: true },
   { label: "Orders", icon: <HiOutlineShoppingCart />, path: "/order" },
   { label: "Referrals", icon: <LuUserPlus />, path: "/refer" },
   { label: "Products", icon: <FaBox />, path: "/product" },
