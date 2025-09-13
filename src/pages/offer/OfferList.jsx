@@ -224,13 +224,12 @@ export default function OffersTable() {
       <div className="flex items-center justify-between bg-white px-4 m-2 py-3 rounded-md shadow">
         <h2 className="text-lg text-gray-800 font-medium">Offers List</h2>
         <button
-          className="flex items-center gap-2 bg-brandYellow text-red-500 font-semibold px-4 py-2 rounded-md shadow hover:bg-brandYellow transition"
+          className="flex items-center gap-2 bg-brandYellow text-brandRed font-semibold px-12 py-2 rounded-md shadow hover:bg-brandYellow transition"
           onClick={() => navigate("/offer/add")}
         >
-          ADD Offer
+          Add Offer
         </button>
       </div>
-
       {/* Error message */}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded m-2 ">
@@ -273,25 +272,26 @@ export default function OffersTable() {
         )}
 
         <table className="w-full min-w-[600px] sm:min-w-[700px]">
-          <thead className="bg-brandYellow text-black text-sm">
+          <thead className="bg-brandYellow text-black text-sm border border-[#999999]">
             <tr>
-              <th className="py-3 pl-2 pr-6 text-base text-left whitespace-nowrap">
+              <th className="py-3 px-4 text-base text-left whitespace-nowrap border-b border-[#999999]">
                 Sr. No.
               </th>
-              <th className="py-3 pl-2 pr-6 text-base text-center whitespace-nowrap">
+              <th className="py-3 px-4 text-base text-center whitespace-nowrap border-b border-[#999999]">
                 Offer
               </th>
-              <th className="py-3 pl-2 pr-6 text-base text-left whitespace-nowrap">
+              <th className="py-3 px-4 text-base text-left whitespace-nowrap border-b border-[#999999]">
                 Discount Rate
               </th>
-              <th className="py-3 pl-2 pr-6 text-base text-center whitespace-nowrap">
+              <th className="py-3 px-4 text-base text-center whitespace-nowrap border-b border-[#999999]">
                 Offer Text
               </th>
-              <th className="py-3 pl-2 pr-6 text-base text-right whitespace-nowrap">
+              <th className="py-3 px-4 text-base text-center whitespace-nowrap">
                 Action
               </th>
             </tr>
           </thead>
+
           <tbody className="divide-y divide-gray-200">
             {!loading && offers.length > 0 ? (
               offers.map((item, idx) => {
@@ -299,7 +299,7 @@ export default function OffersTable() {
                 const serialNumber = (page - 1) * 10 + idx + 1;
                 return (
                   <tr key={id || idx} className="hover:bg-gray-50 transition-colors duration-150">
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{serialNumber}</td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-center text-gray-900">{serialNumber}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-medium text-gray-900">{formatOfferName(item.offer)}</td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-left text-gray-900">
                       {item.discountRate
@@ -309,38 +309,42 @@ export default function OffersTable() {
                           : "N/A"}
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-center text-gray-900">{item.offerText || "N/A"}</td>
-                    <td className="py-3 px-4 flex justify-end items-end gap-4">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        className="text-gray-600 text-xl cursor-pointer hover:text-blue-600"
-                        onClick={() =>
-                          navigate(`/offer/view/${id}`)
-                        }
-                        title="View Product"
+                    <td className="py-3 px-4 flex justify-center items-center gap-4">
+                      <button
+                        className="text-red-500 text-xl cursor-pointer hover:text-red-700"
+                        onClick={() => navigate(`/offer/view/${id}`)}
+                        title="Delete Offer"
                       >
-                        <path
-                          d="M12.5 16C14.1569 16 15.5 14.6569 15.5 13C15.5 11.3431 14.1569 10 12.5 10C10.8431 10 9.5 11.3431 9.5 13C9.5 14.6569 10.8431 16 12.5 16Z"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        />
-                        <path
-                          d="M21.5 14C21.5 14 20.5 6 12.5 6C4.5 6 3.5 14 3.5 14"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        />
-                      </svg>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" onClick={() =>
-                        navigate(`/offer/edit/${id}`)
-                      } className="text-gray-600 text-xl cursor-pointer hover:text-blue-600" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M5 19H6.425L16.2 9.225L14.775 7.8L5 17.575V19ZM3 21V16.75L16.2 3.575C16.4 3.39167 16.621 3.25 16.863 3.15C17.105 3.05 17.359 3 17.625 3C17.891 3 18.1493 3.05 18.4 3.15C18.6507 3.25 18.8673 3.4 19.05 3.6L20.425 5C20.625 5.18333 20.771 5.4 20.863 5.65C20.955 5.9 21.0007 6.15 21 6.4C21 6.66667 20.9543 6.921 20.863 7.163C20.7717 7.405 20.6257 7.62567 20.425 7.825L7.25 21H3ZM15.475 8.525L14.775 7.8L16.2 9.225L15.475 8.525Z" fill="#333333" />
-                      </svg>
-
-
-
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          className="text-gray-600 text-xl cursor-pointer hover:text-blue-600"
+                          title="View Product"
+                        >
+                          <path
+                            d="M12.5 16C14.1569 16 15.5 14.6569 15.5 13C15.5 11.3431 14.1569 10 12.5 10C10.8431 10 9.5 11.3431 9.5 13C9.5 14.6569 10.8431 16 12.5 16Z"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          />
+                          <path
+                            d="M21.5 14C21.5 14 20.5 6 12.5 6C4.5 6 3.5 14 3.5 14"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          />
+                        </svg>
+                      </button>
+                      <button
+                        className="text-red-500 text-xl cursor-pointer hover:text-red-700"
+                        onClick={() => navigate(`/offer/edit/${id}`)}
+                        title="Delete Offer"
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-gray-600 text-xl cursor-pointer hover:text-blue-600" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M5 19H6.425L16.2 9.225L14.775 7.8L5 17.575V19ZM3 21V16.75L16.2 3.575C16.4 3.39167 16.621 3.25 16.863 3.15C17.105 3.05 17.359 3 17.625 3C17.891 3 18.1493 3.05 18.4 3.15C18.6507 3.25 18.8673 3.4 19.05 3.6L20.425 5C20.625 5.18333 20.771 5.4 20.863 5.65C20.955 5.9 21.0007 6.15 21 6.4C21 6.66667 20.9543 6.921 20.863 7.163C20.7717 7.405 20.6257 7.62567 20.425 7.825L7.25 21H3ZM15.475 8.525L14.775 7.8L16.2 9.225L15.475 8.525Z" fill="#333333" />
+                        </svg>
+                      </button>
                       <button
                         className="text-red-500 text-xl cursor-pointer hover:text-red-700"
                         onClick={() => handleDeleteClick(id)}
@@ -408,7 +412,7 @@ export default function OffersTable() {
               onClick={handlePreviousPage}
               disabled={page === 1 || paginationLoading}
             >
-             <FaChevronLeft className="text-lg" />
+              <FaChevronLeft className="text-lg" />
             </button>
 
             {/* Page Numbers */}

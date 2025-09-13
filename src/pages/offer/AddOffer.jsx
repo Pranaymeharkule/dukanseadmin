@@ -479,6 +479,9 @@ export default function AddOffer() {
 
         {/* Discount */}
         <div className="mb-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <label className="block font-medium text-gray-700 mb-1">
+            Discount Rate
+          </label>
           <input
             type="number"
             value={discountRate}
@@ -557,7 +560,7 @@ export default function AddOffer() {
         {/* Banner */}
         <div className="mb-4">
           <label className="block font-medium text-gray-700 mb-1">
-            Banner Image
+            Banner
           </label>
           <input
             type="file"
