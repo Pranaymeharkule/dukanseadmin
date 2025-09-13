@@ -15,7 +15,7 @@ const ProfileEdit = () => {
 
   // 👉 Your JWT Token
   const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM3N2Q5OTk2NGQ2ZmQ1OTJiNDVlMiIsImlhdCI6MTc1NzA2Njk2NiwiZXhwIjoxNzU3NjcxNzY2fQ.g2ie8SGnFDNvkayFkXh1-s9HE4ecGFPlMIL62V0QTxE";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM3N2Q5OTk2NGQ2ZmQ1OTJiNDVlMiIsImlhdCI6MTc1Nzc1NTQ5NywiZXhwIjoxNzU4MzYwMjk3fQ.Qn5LzbMFJD4TSvnnGWGcU-JQGZVsEw6XzUeSJaYTqEA";
 
   // 🔹 Fetch profile from API
   useEffect(() => {

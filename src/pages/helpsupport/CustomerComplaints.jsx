@@ -159,7 +159,7 @@ export default function CustomerComplaints() {
 
   const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
   const TOKEN =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM3N2Q5OTk2NGQ2ZmQ1OTJiNDVlMiIsImlhdCI6MTc1NzE0ODk2NiwiZXhwIjoxNzU3NzUzNzY2fQ.WNvKwkIgZKhG55pXWqoP4DDSqb7j_DrukoeFAPf80XI";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4ODM3N2Q5OTk2NGQ2ZmQ1OTJiNDVlMiIsImlhdCI6MTc1Nzc1NTQ5NywiZXhwIjoxNzU4MzYwMjk3fQ.Qn5LzbMFJD4TSvnnGWGcU-JQGZVsEw6XzUeSJaYTqEA";
 
   useEffect(() => {
     const fetchComplaints = async () => {
