@@ -13,7 +13,6 @@ import logo from "../../assets/logo2.png";
 
 // SVG icons from assets
 import { ReactComponent as CustomerIcon } from "../../assets/customer.svg";
-import { ReactComponent as OfferIcon } from "../../assets/Offer.svg";
 import { ReactComponent as PrivacyIcon } from "../../assets/privacy.svg";
 import { ReactComponent as ProductIcon } from "../../assets/Product.svg";
 import { ReactComponent as ShopIcon } from "../../assets/shop.svg";
@@ -21,6 +20,9 @@ import { ReactComponent as SupportIcon } from "../../assets/Support.svg";
 import { ReactComponent as GullakIcon } from "../../assets/gullak.svg";
 import { TbWallet } from "react-icons/tb";
 import { MdPayment } from "react-icons/md";
+import { FaGift } from "react-icons/fa";
+
+
 
 
 
@@ -34,7 +36,7 @@ const menuItems = [
   { label: "Gullak", icon: <GullakIcon />, path: "/Gullak", svg: true },
   { label: "Payment", icon: <MdPayment />, path: "/payment", svg: true },
     { label: "Redeem Request", icon: <TbWallet />, path: "/redeem", svg: true },
-  { label: "Offer", icon: <OfferIcon />, path: "/offer", svg: true },
+{ label: "Offer", icon: <FaGift />, path: "/offer" },
   {
     label: "Send Notification",
     icon: <FaRegBell />,
