@@ -12,11 +12,12 @@ import { MdWarning } from "react-icons/md";
 import logo from "../../assets/logo2.png";
 
 // SVG icons from assets
-import { ReactComponent as CustomerIcon } from "../../assets/customer.svg";
-import { ReactComponent as PrivacyIcon } from "../../assets/privacy.svg";
-import { ReactComponent as ShopIcon } from "../../assets/shop.svg";
-import { ReactComponent as SupportIcon } from "../../assets/Support.svg";
-import { ReactComponent as GullakIcon } from "../../assets/gullak.svg";
+import { FaUsers } from "react-icons/fa";        // Customer
+import { RiShieldKeyholeLine } from "react-icons/ri"; // Privacy
+import { FaStore } from "react-icons/fa";        // Shop
+import { MdSupportAgent } from "react-icons/md"; // Support
+import { GiMoneyStack } from "react-icons/gi";   // Gullak (piggybank/money)
+
 import { TbWallet } from "react-icons/tb";
 import { MdPayment } from "react-icons/md";
 import { FaGift } from "react-icons/fa";
@@ -28,13 +29,13 @@ import { FaBox } from "react-icons/fa";
 
 const menuItems = [
   { label: "Dashboard", icon: <MdDashboard />, path: "/dashboard" },
-  { label: "Customer", icon: <CustomerIcon />, path: "/customer", svg: true },
-  { label: "Shop", icon: <ShopIcon />, path: "/shop", svg: true },
+  { label: "Customer", icon: <FaUsers />, path: "/customer" },
+  { label: "Shop", icon: <FaStore />, path: "/shop" },
   { label: "Orders", icon: <HiOutlineShoppingCart />, path: "/order" },
   { label: "Referrals", icon: <LuUserPlus />, path: "/refer" },
   { label: "Products", icon: <FaBox />, path: "/product" },
 
-  { label: "Gullak", icon: <GullakIcon />, path: "/Gullak", svg: true },
+  { label: "Gullak", icon: <GiMoneyStack />, path: "/gullak" },
     { label: "Redeem Request", icon: <TbWallet />, path: "/redeem", svg: true },
 { label: "Offer", icon: <FaGift />, path: "/offer" },
   {
@@ -42,12 +43,8 @@ const menuItems = [
     icon: <FaRegBell />,
     path: "/send-notification",
   },
-  {
-    label: "Help & Support",
-    icon: <SupportIcon />,
-    path: "/helpSupport",
-    svg: true,
-  },
+  { label: "Help & Support", icon: <MdSupportAgent />, path: "/helpSupport" },
+
 
   {
 
@@ -55,12 +52,8 @@ const menuItems = [
     icon: <MdWarning  />,
     path: "/monitoring",
   },
-  {
-    label: "Privacy Policy",
-    icon: <PrivacyIcon />,
-    path: "/privacy-policy",
-    svg: true,
-  },
+    { label: "Privacy Policy", icon: <RiShieldKeyholeLine />, path: "/privacy-policy" },
+
   {
     label: "Terms & Conditions",
     icon: <IoMdSettings />,
