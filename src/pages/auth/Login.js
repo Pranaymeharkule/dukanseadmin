@@ -24,12 +24,15 @@ export default function Login() {
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
 
+  const [rememberMe, setRememberMe] = useState(false);
+
   const otpRefs = useRef([]);
 
   const [loginAdmin, { isLoading }] = useLoginAdminMutation();
   const [forgotPassword] = useForgotPasswordMutation();
   const [verifyOtp] = useVerifyOtpMutation();
 
+  // ✅ Login handler with Remember Me
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) {
@@ -41,6 +44,18 @@ export default function Login() {
       const res = await loginAdmin({ email, password }).unwrap();
       dispatch(loginSuccess({ admin: res.admin, token: res.token }));
       toast.success("Login Successful!");
+
+      // Save credentials if "Remember Me" checked
+      if (rememberMe) {
+        localStorage.setItem("rememberMe", "true");
+        localStorage.setItem("email", email);
+        localStorage.setItem("password", password);
+      } else {
+        localStorage.removeItem("rememberMe");
+        localStorage.removeItem("email");
+        localStorage.removeItem("password");
+      }
+
       navigate("/dashboard");
     } catch (err) {
       toast.error(err?.data?.message || "Login failed");
@@ -48,6 +63,7 @@ export default function Login() {
     }
   };
 
+  // Forgot password
   const handleForgetPassword = async () => {
     if (!email) {
       toast.error("Enter the email");
@@ -66,6 +82,7 @@ export default function Login() {
     }
   };
 
+  // OTP input change
   const handleOtpChange = (index, value) => {
     if (!/^[0-9]?$/.test(value)) return;
     const newOtp = [...otp];
@@ -75,6 +92,7 @@ export default function Login() {
     if (!value && index > 0) otpRefs.current[index - 1]?.focus();
   };
 
+  // OTP verify
   const handleOtpVerify = async () => {
     const enteredOtp = otp.join("");
     if (enteredOtp.length < 4) {
@@ -83,7 +101,6 @@ export default function Login() {
     }
 
     try {
-      console.log("Verifying OTP with:", { email, otp: enteredOtp });
       const res = await verifyOtp({ email, otp: enteredOtp }).unwrap();
       toast.success("OTP verified");
       navigate("/reset", { state: { email } });
@@ -93,7 +110,7 @@ export default function Login() {
     }
   };
 
-  // Countdown timer effect
+  // Countdown timer for OTP resend
   useEffect(() => {
     let interval;
     if (open && !canResend) {
@@ -111,6 +128,19 @@ export default function Login() {
     }
     return () => clearInterval(interval);
   }, [open, canResend]);
+
+  // Load remembered credentials
+  useEffect(() => {
+    const savedRemember = localStorage.getItem("rememberMe") === "true";
+    const savedEmail = localStorage.getItem("email");
+    const savedPassword = localStorage.getItem("password");
+
+    if (savedRemember && savedEmail && savedPassword) {
+      setRememberMe(true);
+      setEmail(savedEmail);
+      setPassword(savedPassword);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-brandYellow flex items-center justify-center px-4 relative">
@@ -135,9 +165,12 @@ export default function Login() {
             Please Log In To Your Account
           </p>
         </div>
+
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="text-sm text-gray-700">Enter Your Email Address</label>
+            <label className="text-sm text-gray-700">
+              Enter Your Email Address
+            </label>
             <input
               type="email"
               placeholder="you@example.com"
@@ -171,7 +204,13 @@ export default function Login() {
               htmlFor="rememberMe"
               className="relative inline-flex items-center cursor-pointer w-10 h-6"
             >
-              <input type="checkbox" id="rememberMe" className="sr-only peer" />
+              <input
+                type="checkbox"
+                id="rememberMe"
+                className="sr-only peer"
+                checked={rememberMe}
+                onChange={() => setRememberMe(!rememberMe)}
+              />
               <div className="w-10 h-6 bg-gray-100 rounded-full peer-checked:bg-[#FEBC1D] transition-colors duration-300 ease-in-out z-10"></div>
               <div className="absolute top-1 left-1 w-4 h-4 bg-red-500 rounded-full transition-transform duration-300 ease-in-out peer-checked:translate-x-4 z-20"></div>
             </label>

@@ -478,36 +478,38 @@ export default function AddOffer() {
         </div>
 
         {/* Discount */}
-        <div className="mb-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div>
           <label className="block font-medium text-gray-700 mb-1">
             Discount Rate
           </label>
-          <input
-            type="number"
-            value={discountRate}
-            onChange={(e) => {
-              setDiscountRate(e.target.value);
-              setDiscountAmount("");
-            }}
-            placeholder="Enter Discount (%)"
-            className="w-full border border-gray-300 p-2 rounded"
-            min="0"
-            max="100"
-            disabled={loading}
-          />
-          <span className="text-center text-gray-500 font-semibold">OR</span>
-          <input
-            type="number"
-            value={discountAmount}
-            onChange={(e) => {
-              setDiscountAmount(e.target.value);
-              setDiscountRate("");
-            }}
-            placeholder="Enter Discount (₹)"
-            className="w-full border border-gray-300 p-2 rounded"
-            min="0"
-            disabled={loading}
-          />
+          <div className="mb-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+            <input
+              type="number"
+              value={discountRate}
+              onChange={(e) => {
+                setDiscountRate(e.target.value);
+                setDiscountAmount("");
+              }}
+              placeholder="Enter Discount (%)"
+              className="w-full border border-gray-300 p-2 rounded"
+              min="0"
+              max="100"
+              disabled={loading}
+            />
+            <span className="text-center text-gray-500 font-semibold">OR</span>
+            <input
+              type="number"
+              value={discountAmount}
+              onChange={(e) => {
+                setDiscountAmount(e.target.value);
+                setDiscountRate("");
+              }}
+              placeholder="Enter Discount (₹)"
+              className="w-full border border-gray-300 p-2 rounded"
+              min="0"
+              disabled={loading}
+            />
+          </div>
         </div>
 
         {/* Dates */}
