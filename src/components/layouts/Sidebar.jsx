@@ -14,7 +14,6 @@ import logo from "../../assets/logo2.png";
 // SVG icons from assets
 import { ReactComponent as CustomerIcon } from "../../assets/customer.svg";
 import { ReactComponent as PrivacyIcon } from "../../assets/privacy.svg";
-import { ReactComponent as ProductIcon } from "../../assets/Product.svg";
 import { ReactComponent as ShopIcon } from "../../assets/shop.svg";
 import { ReactComponent as SupportIcon } from "../../assets/Support.svg";
 import { ReactComponent as GullakIcon } from "../../assets/gullak.svg";
