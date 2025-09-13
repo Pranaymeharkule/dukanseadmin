@@ -1,7 +1,7 @@
 import logo from "../../assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useDispatch } from "react-redux";
 import {
@@ -20,6 +20,9 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [open, setOpen] = useState(false);
+
+  const [timer, setTimer] = useState(60);
+  const [canResend, setCanResend] = useState(false);
 
   const otpRefs = useRef([]);
 
@@ -55,6 +58,8 @@ export default function Login() {
       await forgotPassword(email).unwrap();
       toast.success("OTP sent to your email");
       setOpen(true);
+      setTimer(60);
+      setCanResend(false);
     } catch (err) {
       toast.error(err?.data?.message || "Failed to send OTP");
       console.error("Forgot Password Error:", err);
@@ -69,6 +74,7 @@ export default function Login() {
     if (value && index < otp.length - 1) otpRefs.current[index + 1]?.focus();
     if (!value && index > 0) otpRefs.current[index - 1]?.focus();
   };
+
   const handleOtpVerify = async () => {
     const enteredOtp = otp.join("");
     if (enteredOtp.length < 4) {
@@ -87,6 +93,24 @@ export default function Login() {
     }
   };
 
+  // Countdown timer effect
+  useEffect(() => {
+    let interval;
+    if (open && !canResend) {
+      interval = setInterval(() => {
+        setTimer((prev) => {
+          if (prev > 1) {
+            return prev - 1;
+          } else {
+            clearInterval(interval);
+            setCanResend(true);
+            return 0;
+          }
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [open, canResend]);
 
   return (
     <div className="min-h-screen bg-brandYellow flex items-center justify-center px-4 relative">
@@ -198,9 +222,16 @@ export default function Login() {
             </div>
             <p className="text-center text-sm text-gray-600 mb-5">
               Didn’t receive the code?{" "}
-              <span className="text-red-500 font-semibold cursor-pointer hover:underline">
-                Resend
-              </span>
+              {!canResend ? (
+                <span className="text-red-500 font-semibold">{timer}s</span>
+              ) : (
+                <span
+                  className="text-red-500 font-semibold cursor-pointer hover:underline"
+                  onClick={handleForgetPassword}
+                >
+                  Resend
+                </span>
+              )}
             </p>
             <div className="flex justify-between gap-4">
               <button
