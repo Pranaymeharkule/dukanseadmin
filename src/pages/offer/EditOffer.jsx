@@ -380,18 +380,19 @@ export default function EditOffer() {
 
         {/* Select User Type */}
         <div className="mb-4">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
+          <label className="fblock font-medium text-gray-700 mb-1">
             Select User Type <span className="text-red-500">*</span>
           </label>
           <select
             value={offerFor}
             onChange={(e) => setOfferFor(e.target.value)}
-            className="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className={`w-full border border-gray-300 p-2 rounded ${!offerFor ? "text-gray-300" : "text-gray-700"
+              }`}
             required
           >
             <option value="">-- Select --</option>
             {offerForOptions.map((item, index) => (
-              <option key={index} value={item}>
+              <option key={index} value={item} className="text-gray-700">
                 {item}
               </option>
             ))}
@@ -400,18 +401,19 @@ export default function EditOffer() {
 
         {/* Select Customer */}
         <div className="mb-4">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
+          <label className="block font-medium text-gray-700 mb-1">
             Select Customer <span className="text-red-500">*</span>
           </label>
           <select
             value={customerType}
             onChange={(e) => setCustomerType(e.target.value)}
-            className="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className={`w-full border border-gray-300 p-2 rounded ${!customerType ? "text-gray-300" : "text-gray-700"
+              }`}
             required
           >
             <option value="">-- Select --</option>
             {customerTypeOptions.map((item, index) => (
-              <option key={index} value={item}>
+              <option key={index} value={item} className="text-gray-700">
                 {item}
               </option>
             ))}
@@ -420,7 +422,7 @@ export default function EditOffer() {
 
         {/* Select Products */}
         <div className="mb-4">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
+          <label className="block font-medium text-gray-700 mb-1">
             Select Product <span className="text-red-500">*</span>
           </label>
           {products.map((product, index) => (
@@ -428,12 +430,13 @@ export default function EditOffer() {
               <select
                 value={product.productId}
                 onChange={(e) => handleProductChange(index, e.target.value)}
-                className="w-full border border-gray-300 p-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full border border-gray-300 p-2 rounded ${!product.productId ? "text-gray-300" : "text-gray-700"
+                  }`}
                 required
               >
                 <option value="">-- Select --</option>
                 {processedProductOptions.map((p) => (
-                  <option key={p._id} value={p._id}>
+                  <option key={p._id} value={p._id} className="text-gray-700">
                     {p.productName}
                   </option>
                 ))}
@@ -464,7 +467,7 @@ export default function EditOffer() {
 
         {/* Discount */}
         <div className="mb-4">
-          <label className="font-poppins block mb-2 text-sm font-medium text-gray-600">
+          <label className="block font-medium text-gray-700 mb-1">
             Discount <span className="text-red-500">*</span>
           </label>
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
@@ -498,34 +501,36 @@ export default function EditOffer() {
         {/* Dates */}
         <div className="mb-4">
           <div>
-            <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
+            <label className="block font-medium text-gray-700 mb-1">
               Offer Start Date
             </label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full border border-gray-300 p-2 rounded"
+              className={`w-full border border-gray-300 p-2 rounded ${!startDate ? "text-gray-300" : "text-gray-700"
+                }`}
               required
             />
           </div>
         </div>
         <div>
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
+          <label className="block font-medium text-gray-700 mb-1">
             Offer Expire Date
           </label>
           <input
             type="date"
             value={expireDate}
             onChange={(e) => setExpireDate(e.target.value)}
-            className="w-full border border-gray-300 p-2 rounded"
+            className={`w-full border border-gray-300 p-2 rounded ${!expireDate ? "text-gray-300" : "text-gray-700"
+              }`}
             required
           />
         </div>
 
         {/* Offer Text */}
         <div className="mb-4">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
+          <label className="block font-medium text-gray-700 mb-1">
             Offer Text
           </label>
           <textarea
@@ -539,7 +544,7 @@ export default function EditOffer() {
 
         {/* Banner */}
         <div className="mb-6">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
+          <label className="block font-medium text-gray-700 mb-1">
             Banner Image
           </label>
           {existingBanner && !bannerImage && (

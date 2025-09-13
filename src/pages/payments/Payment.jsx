@@ -4,7 +4,27 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpDown } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-
+import { RxCalendar } from "react-icons/rx";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import {
+  FaChevronLeft, FaChevronRight,
+} from "react-icons/fa"
+const CustomInput = React.forwardRef(
+  ({ value, onClick, placeholder }, ref) => (
+    <button
+      type="button"
+      onClick={onClick}
+      ref={ref}
+      className="flex items-center justify-between border border-gray-300 rounded-md px-3 py-2 text-sm w-44 bg-white hover:border-gray-400"
+    >
+      <span className={value ? "text-gray-800" : "text-gray-400"}>
+        {value || placeholder}
+      </span>
+      <RxCalendar alt="calendar" className="w-4 h-4 ml-2"/>
+    </button>
+  )
+);
 const Payment = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +40,10 @@ const Payment = () => {
   const navigate = useNavigate();
   const pageSize = 10;
   const search = orderId || "";
+  const [paginationData, setPaginationData] = useState({
+    totalPages: 1,
+    next: false,
+  });
 
   const API_BASE_URL = process.env.REACT_APP_BACKEND_API_BASEURL;
 
@@ -40,7 +64,29 @@ const Payment = () => {
     (page - 1) * pageSize,
     page * pageSize
   );
-
+  const ViewIcon = () => {
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        className="inline-block"
+      >
+        <path
+          d="M12.5 16C14.1569 16 15.5 14.6569 15.5 13C15.5 11.3431 14.1569 10 12.5 10C10.8431 10 9.5 11.3431 9.5 13C9.5 14.6569 10.8431 16 12.5 16Z"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
+        <path
+          d="M21.5 14C21.5 14 20.5 6 12.5 6C4.5 6 3.5 14 3.5 14"
+          stroke="currentColor"
+          strokeWidth="2"
+        />
+      </svg>
+    );
+  }
   const fetchPayments = async () => {
     try {
       setLoading(true);
@@ -65,8 +111,6 @@ const Payment = () => {
         params.search = searchTerm.trim();
       }
 
-      // ✅ Safe date conversion
-      // ✅ Safe date conversion before sending
 
       if (search) {
         params.search = search;
@@ -83,6 +127,14 @@ const Payment = () => {
       if (res.data.success) {
         const paymentData = res.data.payments || [];
         setPayments(paymentData);
+        const totalPages = res.data.totalPages || 1;
+        const hasNext = res.data.next || paymentData.length === limit;
+
+        setPaginationData({ totalPages, next: hasNext });
+
+        if (paymentData.length === 0) {
+          setError("No payments found.");
+        }
         setTotalPages(res.data.totalPages || 1);
         setError("");
 
@@ -153,8 +205,8 @@ const Payment = () => {
   return (
     <div className="p-4 bg-gray-100 rounded-md overflow-hidden">
       {/* Header */}
-      <div className="bg-white shadow p-4 rounded-md">
-        <h2 className="text-xl font-semibold">Payments List</h2>
+      <div className="bg-white px-4 py-3 rounded-md shadow">
+        <h2 className="text-lg text-gray-800 font-medium">Payments List</h2>
       </div>
 
       {/* Gap */}
@@ -170,26 +222,35 @@ const Payment = () => {
           placeholder="Enter"
           className="border border-gray-300 rounded-md px-3 py-2 text-sm"
         />
-        <input
-          type="date"
-          value={fromDate}
-          onChange={(e) => {
-            setFromDate(e.target.value);
-            setError(""); // Clear error when date changes
-          }}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-          max={toDate || undefined}
-        />
-        <input
-          type="date"
-          value={toDate}
-          onChange={(e) => {
-            setToDate(e.target.value);
-            setError(""); // Clear error when date changes
-          }}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm"
-          min={fromDate || undefined}
-        />
+
+        {/* From Date */}
+        <div className="flex items-center gap-3">
+          <DatePicker
+            selected={fromDate ? new Date(fromDate) : null}
+            onChange={(date) =>
+              setFromDate(date ? date.toISOString().split("T")[0] : "")
+            }
+            customInput={<CustomInput />}
+            placeholderText="From Date"
+            calendarClassName="custom-calendar"
+            maxDate={toDate ? new Date(toDate) : null}
+          />
+        </div>
+
+        {/* To Date */}
+        <div className="flex items-center gap-3">
+          <DatePicker
+            selected={toDate ? new Date(toDate) : null}
+            onChange={(date) =>
+              setToDate(date ? date.toISOString().split("T")[0] : "")
+            }
+            customInput={<CustomInput />}
+            placeholderText="To Date"
+            calendarClassName="custom-calendar"
+            minDate={fromDate ? new Date(fromDate) : null}
+          />
+        </div>
+
         <button
           onClick={() => {
             if (!isDateRangeValid()) {
@@ -204,6 +265,7 @@ const Payment = () => {
         >
           Search
         </button>
+
         {(searchTerm || fromDate || toDate) && (
           <button
             onClick={clearFilters}
@@ -213,6 +275,7 @@ const Payment = () => {
           </button>
         )}
       </div>
+
 
       {/* Gap */}
       <div className="h-4"></div>
@@ -268,12 +331,12 @@ const Payment = () => {
           <div className="overflow-x-auto">
             <table className="w-full table-auto">
               <thead className="bg-brandYellow text-black text-sm text-center">
-                <tr>
-                  <th className="p-3">Order Id</th>
-                  <th className="p-3">Location</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Date & Time</th>
-                  <th className="p-3">Action</th>
+                <tr className="text-black text-sm">
+                  <th className="py-3 px-4 text-base text-left">Order Id</th>
+                  <th className="py-3 px-4 text-base text-center">Location</th>
+                  <th className="py-3 px-4 text-base text-center">Status</th>
+                  <th className="py-3 px-4 text-base text-center">Date & Time</th>
+                  <th className="py-3 px-4 text-base text-left">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -285,16 +348,15 @@ const Payment = () => {
                       navigate(`/payment/viewpayment/${p.orderId}`)
                     }
                   >
-                    <td className="p-3">{p.orderNumber}</td>
+                    <td className="p-3 text-left">{p.orderNumber}</td>
                     <td className="p-3">{p.address || p.location || "N/A"}</td>
                     <td
-                      className={`p-3 font-semibold ${
-                        p.paymentStatus === "Success"
-                          ? "text-green-600"
-                          : p.paymentStatus === "Failed"
+                      className={`p-3 font-semibold ${p.paymentStatus === "Success"
+                        ? "text-green-600"
+                        : p.paymentStatus === "Failed"
                           ? "text-red-500"
                           : "text-yellow-500"
-                      }`}
+                        }`}
                     >
                       {p.paymentStatus}
                     </td>
@@ -313,25 +375,7 @@ const Payment = () => {
                           navigate(`/payment/viewpayment/${p.orderId}`);
                         }}
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          className="inline-block"
-                        >
-                          <path
-                            d="M12.5 16C14.1569 16 15.5 14.6569 15.5 13C15.5 11.3431 14.1569 10 12.5 10C10.8431 10 9.5 11.3431 9.5 13C9.5 14.6569 10.8431 16 12.5 16Z"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          />
-                          <path
-                            d="M21.5 14C21.5 14 20.5 6 12.5 6C4.5 6 3.5 14 3.5 14"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          />
-                        </svg>
+                        <ViewIcon />
                       </button>
                     </td>
                   </tr>
@@ -345,65 +389,64 @@ const Payment = () => {
       {/* Gap */}
       <div className="h-4"></div>
 
-      {/* Pagination - Only show if more than 10 records (more than 1 page) */}
-      {totalRecords > 10 && (
-        <div className="bg-white px-4 py-3 flex justify-center items-center gap-1 border rounded-md mt-4">
-          {/* Previous Button */}
-          <button
-            disabled={page === 1}
-            onClick={() => setPage((p) => p - 1)}
-            className="w-10 h-10 flex items-center justify-center text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed text-lg font-bold"
-            title="Previous Page"
-          >
-            ‹
-          </button>
+      {/* Pagination (same as Customer) */}
+      <div className="flex justify-center items-center gap-2 mt-6">
+        {/* Previous Button */}
+        <button
+          onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+          disabled={page === 1}
+          className={`p-2 text-red-500 transition rounded-full ${page === 1 ? "opacity-40 cursor-not-allowed" : "hover:text-red-700"
+            }`}
+        >
+          <FaChevronLeft className="text-lg" />
+        </button>
 
-          {/* Page Numbers */}
-          {(() => {
-            const pages = [];
-            const maxVisiblePages = 5;
-            let startPage = Math.max(1, page - 2);
-            let endPage = Math.min(
-              totalClientPages,
-              startPage + maxVisiblePages - 1
-            );
+        {/* Page Numbers */}
+        {Array.from(
+          { length: Math.max(3, paginationData?.totalPages || 1) },
+          (_, i) => i + 1
+        ).map((pageNum) => {
+          const totalPages = paginationData?.totalPages || 1;
+          const isPhantom = pageNum > totalPages;
+          const isActive = pageNum === page;
 
-            // Adjust start if we're near the end
-            if (endPage - startPage < maxVisiblePages - 1) {
-              startPage = Math.max(1, endPage - maxVisiblePages + 1);
-            }
+          return (
+            <button
+              key={pageNum}
+              onClick={() => {
+                if (!isPhantom && !isActive) setPage(pageNum);
+              }}
+              disabled={isPhantom || isActive}
+              className={`px-3 py-1 rounded-md text-base font-bold transition-all ${isActive
+                  ? "bg-yellow-400 text-red-600"
+                  : isPhantom
+                    ? "opacity-40 cursor-not-allowed"
+                    : "text-red-500 hover:text-red-700"
+                }`}
+            >
+              {pageNum}
+            </button>
+          );
+        })}
 
-            for (let i = startPage; i <= endPage; i++) {
-              pages.push(
-                <button
-                  key={i}
-                  onClick={() => setPage(i)}
-                  className={`w-12 h-12 flex items-center justify-center text-base font-semibold rounded-xl transition-all duration-200 ${
-                    page === i
-                      ? "bg-yellow-400 text-black shadow-md"
-                      : "text-red-500 hover:text-red-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {i}
-                </button>
-              );
-            }
-
-            return pages;
-          })()}
-
-          {/* Next Button */}
-          <button
-            disabled={page === totalClientPages}
-            onClick={() => setPage((p) => p + 1)}
-            className="w-10 h-10 flex items-center justify-center text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed text-lg font-bold"
-            title="Next Page"
-          >
-            ›
-          </button>
-        </div>
-      )}
+        {/* Next Button */}
+        <button
+          onClick={() =>
+            setPage((prev) =>
+              Math.min(paginationData?.totalPages || 1, prev + 1)
+            )
+          }
+          disabled={page === (paginationData?.totalPages || 1)}
+          className={`p-2 text-red-500 transition rounded-full ${page === (paginationData?.totalPages || 1)
+              ? "opacity-40 cursor-not-allowed"
+              : "hover:text-red-700"
+            }`}
+        >
+          <FaChevronRight className="text-lg" />
+        </button>
+      </div>
     </div>
   );
 };
+
 export default Payment;

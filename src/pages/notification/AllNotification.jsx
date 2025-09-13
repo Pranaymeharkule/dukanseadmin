@@ -3,22 +3,25 @@ import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { BsArrowLeftCircle } from "react-icons/bs";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const Header = ({ onAddClick }) => {
   const navigate = useNavigate();
   return (
     <header className="flex items-center justify-between p-3 md:p-4 bg-white rounded-xl shadow-sm border border-gray-200 flex-wrap gap-2 mb-4">
-      <div className="flex items-center gap-2 md:gap-3">
+      {/* Header */}
+      <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/send-notification")}
           type="button"
           title="Go Back"
+          className="flex items-center justify-center w-8 h-8 sm:w-auto sm:h-auto"
         >
           <BsArrowLeftCircle size={20} className="text-gray-700 md:text-black" />
         </button>
-        <h1 className="text-lg text-gray-800 font-medium">
+        <h2 className="text-lg text-gray-800 font-poppins font-medium flex-1 min-w-0">
           Notification
-        </h1>
+        </h2>
       </div>
       <button
         onClick={onAddClick}
@@ -48,10 +51,9 @@ const FilterTabs = ({ activeFilter, setActiveFilter, loading }) => {
             onClick={() => setActiveFilter(f.value)}
             disabled={loading}
             className={`px-4 py-2 rounded-md font-semibold transition-all duration-200 whitespace-nowrap text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed
-              ${
-                activeFilter === f.value
-                  ? "bg-[#FEBC1D] text-[#EC2D01] shadow"
-                  : "bg-white text-[#EC2D01] border border-[#EC2D01] hover:bg-red-50"
+              ${activeFilter === f.value
+                ? "bg-[#FEBC1D] text-[#EC2D01] shadow"
+                : "bg-white text-[#EC2D01] border border-[#EC2D01] hover:bg-red-50"
               }`}
           >
             {f.label}
@@ -77,8 +79,8 @@ const NotificationItem = ({ notification }) => {
           alt={`${notification.userName || "Unknown"}'s avatar`}
           className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover flex-shrink-0 border"
           onError={(e) =>
-            (e.target.src =
-              "https://placehold.co/100x100/CCCCCC/FFFFFF?text=Error")
+          (e.target.src =
+            "https://placehold.co/100x100/CCCCCC/FFFFFF?text=Error")
           }
         />
         <p className="font-semibold text-gray-800 text-base sm:text-lg">
@@ -112,9 +114,9 @@ const NotificationItem = ({ notification }) => {
         <p className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">
           {notification.createdAt
             ? new Date(notification.createdAt).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
+              hour: "2-digit",
+              minute: "2-digit",
+            })
             : "Now"}
         </p>
       </div>
@@ -150,45 +152,60 @@ const Pagination = ({ currentPage, setCurrentPage, totalPages, loading }) => {
   };
 
   return (
-    <nav className="flex items-center justify-center gap-2 sm:gap-4 p-3 sm:p-4 bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto mt-4">
+    <div className="flex justify-center items-center gap-2 mt-6">
+      {/* Previous Button */}
       <button
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 1 || loading}
-        className="p-1.5 sm:p-2 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+        disabled={currentPage === 1}
+        className={`p-2 text-red-500 transition rounded-full ${currentPage === 1
+            ? "opacity-40 cursor-not-allowed"
+            : "hover:text-red-700"
+          }`}
       >
-        <ChevronLeft size={18} />
+        <FaChevronLeft className="text-lg" />
       </button>
-      {getPageNumbers().map((p) =>
-        p === "..." ? (
-          <span
-            key={`dots-${Math.random()}`}
-            className="px-1 sm:px-2 text-gray-500"
-          >
-            ...
-          </span>
-        ) : (
-          <button
-            key={p}
-            onClick={() => handlePageChange(p)}
-            disabled={loading}
-            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-md text-xs sm:text-sm font-bold disabled:cursor-not-allowed ${
-              currentPage === p
-                ? "bg-yellow-400 text-white shadow"
-                : "bg-gray-200 hover:bg-gray-300"
-            }`}
-          >
-            {p}
-          </button>
-        )
+
+      {/* Page Numbers (always at least 3) */}
+      {Array.from({ length: Math.max(3, totalPages) }, (_, i) => i + 1).map(
+        (pageNum) => {
+          const isPhantom = pageNum > totalPages; // beyond real pages
+          const isActive = pageNum === currentPage;
+
+          return (
+            <button
+              key={pageNum}
+              onClick={() => {
+                if (isPhantom || isActive) return;
+                setCurrentPage(pageNum);
+              }}
+              disabled={isPhantom || isActive}
+              className={`px-3 py-1 rounded-md text-base font-bold transition-all ${isActive
+                  ? "bg-brandYellow text-red-600"
+                  : isPhantom
+                    ? "opacity-40 cursor-not-allowed"
+                    : "text-red-500 hover:text-red-700"
+                }`}
+            >
+              {pageNum}
+            </button>
+          );
+        }
       )}
+
+      {/* Next Button */}
       <button
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages || loading}
-        className="p-1.5 sm:p-2 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        onClick={() =>
+          setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+        }
+        disabled={currentPage === totalPages}
+        className={`p-2 text-red-500 transition rounded-full ${currentPage === totalPages
+            ? "opacity-40 cursor-not-allowed"
+            : "hover:text-red-700"
+          }`}
       >
-        <ChevronRight size={18} />
+        <FaChevronRight className="text-lg" />
       </button>
-    </nav>
+    </div>
   );
 };
 

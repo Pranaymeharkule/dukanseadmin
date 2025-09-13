@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { BsArrowLeftCircle } from "react-icons/bs";
@@ -50,7 +49,6 @@ export default function AddOffer() {
       products,
       offerText,
       offerTerms,
-      // Note: bannerImage (File object) cannot be serialized, so it's excluded
     };
 
     try {
@@ -98,7 +96,9 @@ export default function AddOffer() {
         const [offerForRes, customerRes, productRes] = await Promise.all([
           axios.get(`${API_BASE_URL}/offer/getAllOfferFor?t=${Date.now()}`),
           axios.get(`${API_BASE_URL}/offer/getAllCustomerType?t=${Date.now()}`),
-          axios.get(`${API_BASE_URL}/product/getAllProducts?page=1&limit=1000&sortOrder=desc&t=${Date.now()}`),
+          axios.get(
+            `${API_BASE_URL}/product/getAllProducts?page=1&limit=1000&sortOrder=desc&t=${Date.now()}`
+          ),
         ]);
 
         const offerForList = Array.isArray(offerForRes.data?.offerForOptions)
@@ -149,9 +149,8 @@ export default function AddOffer() {
     fetchData();
   }, []);
 
-  // Handle form state restoration on component mount
+  // Handle form state restoration
   useEffect(() => {
-    // Priority 1: Check if returning from Add Terms page (via location.state)
     if (location.state && Object.keys(location.state).length > 0) {
       const data = location.state;
       setOfferFor(data.offerFor || "");
@@ -163,18 +162,14 @@ export default function AddOffer() {
       setProducts(data.products || [{ productId: "" }]);
       setOfferText(data.offerText || "");
       setOfferTerms(data.offerTerms || "From 9 to 3 only");
-      // Clear the saved state since we're using location.state
       clearFormState();
-    }
-    // Priority 2: Check sessionStorage for saved form state
-    else {
+    } else {
       loadFormState();
     }
   }, [location.state]);
 
-  // Auto-save form state whenever any field changes
+  // Auto-save
   useEffect(() => {
-    // Only save if we have some meaningful data
     if (
       offerFor ||
       customerType ||
@@ -244,7 +239,6 @@ export default function AddOffer() {
       return;
     }
 
-    // Get valid product IDs
     const validProductIds = products
       .map((p) => p.productId)
       .filter((id) => productOptions.some((po) => po._id === id));
@@ -255,13 +249,12 @@ export default function AddOffer() {
       return;
     }
 
-    // Convert product IDs to product names for the API
     const validProductNames = validProductIds
       .map((id) => {
         const product = productOptions.find((po) => po._id === id);
         return product ? product.productName : null;
       })
-      .filter(Boolean); // Remove any null values
+      .filter(Boolean);
 
     if (validProductNames.length === 0) {
       setError("⚠️ Unable to find product names for selected products.");
@@ -270,10 +263,7 @@ export default function AddOffer() {
     }
 
     try {
-      // Create FormData for the API request
       const formData = new FormData();
-
-      // Add basic fields
       formData.append("offerFor", offerFor.trim());
       formData.append("customerType", customerType.trim());
       formData.append("offerStartDate", formatDate(offerStartDate));
@@ -281,67 +271,41 @@ export default function AddOffer() {
       formData.append("offerText", offerText.trim());
       formData.append("offerTerms", offerTerms.trim());
 
-      // Add discount (either rate or amount)
       if (discountRate) {
         formData.append("discountRate", discountRate);
       } else if (discountAmount) {
         formData.append("discountAmount", discountAmount);
       }
 
-      // Add products as array with single quotes (custom format for API)
       const productsString = `['${validProductNames.join("', '")}']`;
       formData.append("products", productsString);
 
-      // Add banner image if exists
       if (bannerImage) {
         formData.append("bannerImage", bannerImage);
-      }
-
-      console.log("FormData entries:");
-      for (let [key, value] of formData.entries()) {
-        console.log(key, value);
       }
 
       const response = await axios.post(
         `${API_BASE_URL}/offer/createOffer`,
         formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data"
-          }
-        }
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      console.log("API Response:", response.data);
-
-      // Handle successful response
       if (response.data.success) {
         const offerId = response.data.offer?._id;
-
         setSuccess(response.data.message || "Offer added successfully!");
         setError("");
         clearFormState();
         resetForm();
 
-        // Navigate to the created offer's view page if ID is available
         if (offerId) {
-          setTimeout(() => {
-            navigate(`/offer/view/${offerId}`);
-          }, 1500);
+          setTimeout(() => navigate(`/offer/view/${offerId}`), 1500);
         } else {
-          setTimeout(() => {
-            navigate("/offer");
-          }, 1500);
+          setTimeout(() => navigate("/offer"), 1500);
         }
       } else {
         setError("❌ Failed to create offer. Please try again.");
       }
-
     } catch (err) {
-      console.error("Full error object:", err);
-      console.error("Error response:", err.response);
-      console.error("Error data:", err.response?.data);
-
       setError(
         err.response?.data?.message ||
         "❌ Failed to add offer. Please try again."
@@ -351,7 +315,6 @@ export default function AddOffer() {
     }
   };
 
-  // Helper function to reset form
   const resetForm = () => {
     setOfferFor("");
     setCustomerType("");
@@ -366,10 +329,7 @@ export default function AddOffer() {
   };
 
   const handleTermsNavigation = () => {
-    // Save current form state before navigation
     saveFormState();
-
-    // Navigate to Add Terms page with current state
     navigate("/offer/add-terms", {
       state: {
         offerFor,
@@ -386,21 +346,20 @@ export default function AddOffer() {
   };
 
   const handleBackNavigation = () => {
-    // Clear form state when going back
     clearFormState();
     navigate(-1);
   };
+
   return (
     <div className="bg-gray-100 min-h-screen p-4 flex flex-col">
       {/* Sticky Header */}
       <div className="stickyflex items-center mb-4 bg-white px-4 py-3 rounded-md shadow">
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleBackNavigation}
-            type="button"
-            title="Go Back"
-          >
-            <BsArrowLeftCircle size={20} className="text-gray-700 md:text-black" />
+          <button onClick={handleBackNavigation} type="button" title="Go Back">
+            <BsArrowLeftCircle
+              size={20}
+              className="text-gray-700 md:text-black"
+            />
           </button>
           <h2 className="text-lg text-gray-800 font-medium">Add Offer</h2>
         </div>
@@ -425,40 +384,47 @@ export default function AddOffer() {
 
         {/* User Type */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-00 font-poppins">
+          <label className="block font-medium text-gray-700 mb-1">
             Select User Type
           </label>
           <select
             value={offerFor}
             onChange={(e) => setOfferFor(e.target.value)}
-            className="w-full border border-gray-300 p-2 rounded"
+            className={`w-full border border-gray-300 p-2 rounded ${!offerFor ? "text-gray-300" : "text-gray-700"
+              }`}
             required
             disabled={loading}
           >
-            <option value="">-- Select --</option>
+            <option value="" disabled hidden>
+              -- Select --
+            </option>
             {offerForOptions.map((item, i) => (
-              <option key={i} value={item}>
+              <option key={i} value={item} className="text-gray-700">
                 {item}
               </option>
             ))}
           </select>
+
         </div>
 
         {/* Customer Type */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-600 font-poppins">
+          <label className="block font-medium text-gray-700 mb-1">
             Select Customer
           </label>
           <select
             value={customerType}
             onChange={(e) => setCustomerType(e.target.value)}
-            className="w-full border border-gray-300 p-2 rounded"
+            className={`w-full border border-gray-300 p-2 rounded ${!customerType ? "text-gray-300" : "text-gray-700"
+              }`}
             required
             disabled={loading}
           >
-            <option value="">-- Select --</option>
+            <option value="" className="text-red" disabled>
+              -- Select --
+            </option>
             {customerTypeOptions.map((item, i) => (
-              <option key={i} value={item}>
+              <option key={i} value={item} className="text-gray-700">
                 {item}
               </option>
             ))}
@@ -467,7 +433,7 @@ export default function AddOffer() {
 
         {/* Products */}
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium text-gray-600 font-poppins">
+          <label className="block font-medium text-gray-700 mb-1">
             Select Product
           </label>
           {products.map((product, index) => (
@@ -475,13 +441,16 @@ export default function AddOffer() {
               <select
                 value={product.productId}
                 onChange={(e) => handleProductChange(index, e.target.value)}
-                className="w-full border border-gray-300 p-2 rounded"
+                className={`w-full border border-gray-300 p-2 rounded ${!product.productId ? "text-gray-300" : "text-gray-700"
+                  }`}
                 required
                 disabled={loading}
               >
-                <option value="">-- Select --</option>
+                <option value="" className="text-red" disabled>
+                  -- Select --
+                </option>
                 {productOptions.map((p) => (
-                  <option key={p._id} value={p._id}>
+                  <option key={p._id} value={p._id} className="text-gray-700">
                     {p.productName}
                   </option>
                 ))}
@@ -541,28 +510,30 @@ export default function AddOffer() {
         {/* Dates */}
         <div className="mb-4">
           <div>
-            <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
+            <label className="block font-medium text-gray-700 mb-1">
               Offer Start Date
             </label>
             <input
               type="date"
               value={offerStartDate}
               onChange={(e) => setOfferStartDate(e.target.value)}
-              className="w-full border border-gray-300 p-2 rounded"
+              className={`w-full border border-gray-300 p-2 rounded ${!offerStartDate ? "text-gray-300" : "text-gray-700"
+                }`}
               required
               disabled={loading}
             />
           </div>
         </div>
         <div>
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
+          <label className="block font-medium text-gray-700 mb-1">
             Offer Expire Date
           </label>
           <input
             type="date"
             value={offerExpireDate}
             onChange={(e) => setOfferExpireDate(e.target.value)}
-            className="w-full border border-gray-300 p-2 rounded"
+            className={`w-full border border-gray-300 p-2 rounded ${!offerExpireDate ? "text-gray-300" : "text-gray-700"
+              }`}
             required
             disabled={loading}
           />
@@ -570,7 +541,7 @@ export default function AddOffer() {
 
         {/* Offer Text */}
         <div className="mb-4 p-2">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
+          <label className="block font-medium text-gray-700 mb-1">
             Offer Text
           </label>
           <textarea
@@ -585,7 +556,7 @@ export default function AddOffer() {
 
         {/* Banner */}
         <div className="mb-4">
-          <label className="font-poppins block mb-1 text-sm font-medium text-gray-600">
+          <label className="block font-medium text-gray-700 mb-1">
             Banner Image
           </label>
           <input
@@ -620,7 +591,7 @@ export default function AddOffer() {
         <button
           type="submit"
           form="offer-form"
-          className={`font-poppins px-6 py-2   rounded-lg text-lg font-bold shadow-md transition-colors ${loading
+          className={`font-poppins px-6 py-2 rounded-lg text-lg font-bold shadow-md transition-colors ${loading
             ? "bg-gray-400 text-gray-600 cursor-not-allowed"
             : "bg-brandYellow text-red-600 hover:bg-yellow-600"
             }`}

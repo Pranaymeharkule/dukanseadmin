@@ -2,9 +2,13 @@ import React, { useState, useEffect } from "react";
 import { BsArrowLeftCircle } from "react-icons/bs";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import { RxCalendar } from "react-icons/rx";
+
 import { GrUpload } from "react-icons/gr";
 import SuccessOverlay from "../../components/overlay/SuccessOverlay";
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
 const EditCustomer = () => {
   const navigate = useNavigate();
   const { customerId } = useParams();
@@ -25,6 +29,25 @@ const EditCustomer = () => {
   const [imageFile, setImageFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const CustomInput = React.forwardRef(({ value, onClick, placeholder }, ref) => (
+    <div className="relative block w-full">
+      <input
+        type="text"
+        value={value ? format(new Date(value), "d MMM yyyy") : ""}
+        placeholder={placeholder}
+        readOnly
+        onClick={onClick}
+        ref={ref}
+        className="w-full h-[40px] p-4 border border-[#EEEEEE] rounded-md cursor-pointer text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+      />
+      <div
+        className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
+        onClick={onClick}
+      >
+<RxCalendar className="w-5 h-5" />      </div>
+    </div>
+  ));
+
 
   useEffect(() => {
     const fetchCustomer = async () => {
@@ -40,10 +63,10 @@ const EditCustomer = () => {
             profile.gender?.toLowerCase() === "male"
               ? "Male"
               : profile.gender?.toLowerCase() === "female"
-              ? "Female"
-              : profile.gender?.toLowerCase() === "other"
-              ? "Other"
-              : "";
+                ? "Female"
+                : profile.gender?.toLowerCase() === "other"
+                  ? "Other"
+                  : "";
 
           setFormData({
             name: profile.fullName || "",
@@ -158,7 +181,7 @@ const EditCustomer = () => {
         <div className="flex-1 px-4 md:px-6 py-6 overflow-y-auto min-w-[320px] md:min-w-[700px]">
           {/* Image Upload */}
           <div className="mb-4">
-            <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
+            <label className="block font-medium text-gray-700 mb-1">
               Image (Optional)
             </label>
             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-6">
@@ -194,7 +217,7 @@ const EditCustomer = () => {
           {/* Inputs */}
           <div className="space-y-3 text-sm text-gray-800">
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
+              <label className="block font-medium text-gray-700 mb-1">
                 Full Name
               </label>
               <input
@@ -207,16 +230,17 @@ const EditCustomer = () => {
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
+              <label className="block font-medium text-gray-700 mb-1">
                 Gender
               </label>
               <select
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-[#EEEEEE] rounded-md text-gray-700"
+                className={`w-full px-3 py-2 border border-[#EEEEEE] rounded-md ${!formData.gender ? "text-gray-400" : "text-gray-700"
+                  }`}
               >
-                <option value="" className="text-gray-400">
+                <option value="" disabled hidden>
                   Select gender
                 </option>
                 <option value="Male">Male</option>
@@ -226,20 +250,29 @@ const EditCustomer = () => {
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
+              <label className="block font-medium text-gray-700 mb-1">
                 Date Of Birth
               </label>
-              <input
-                type="date"
-                name="dob"
-                value={formData.dob}
-                onChange={handleChange}
-                className="w-full h-[40px] flex gap-2 p-4 border border-[#EEEEEE]"
-              />
+              <div className="w-full">
+                <DatePicker
+                  selected={formData.dob ? new Date(formData.dob) : null}
+                  onChange={(date) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      dob: date ? date.toISOString().split("T")[0] : "",
+                    }))
+                  }
+                  customInput={<CustomInput placeholder="Select Date of Birth" />}
+                  wrapperClassName="block w-full"          // <-- important
+                  calendarClassName="custom-calendar"
+                  maxDate={new Date()}
+                />
+              </div>
+
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
+              <label className="block font-medium text-gray-700 mb-1">
                 Phone Number
               </label>
               <input
@@ -252,7 +285,7 @@ const EditCustomer = () => {
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
+              <label className="block font-medium text-gray-700 mb-1">
                 Email
               </label>
               <input
@@ -266,7 +299,7 @@ const EditCustomer = () => {
 
             {/* Addresses */}
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700 font-poppins">
+              <label className="block font-medium text-gray-700 mb-1">
                 Address
               </label>
               {formData.addresses.map((addr, i) => (
@@ -291,7 +324,7 @@ const EditCustomer = () => {
 
         {/* Sticky Save Button */}
         <div className="sticky bottom-0 z-50 bg-white py-4 border-t">
-          <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center gap-4 px-4">
+          <div className="bg-white px-4 py-3 sticky bottom-0 z-10 border-t flex justify-center">
             <button
               onClick={handleSave}
               className="bg-[#FEBC1D] text-red-600 font-semibold px-6 py-2 rounded-md hover:bg-yellow-500"

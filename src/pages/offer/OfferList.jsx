@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaPlus } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaPlus } from "react-icons/fa";
 import { FiEye } from "react-icons/fi";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MdOutlineModeEditOutline, MdDelete } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
@@ -409,7 +408,7 @@ export default function OffersTable() {
               onClick={handlePreviousPage}
               disabled={page === 1 || paginationLoading}
             >
-              <ChevronLeft size={16} />
+             <FaChevronLeft className="text-lg" />
             </button>
 
             {/* Page Numbers */}
@@ -442,7 +441,7 @@ export default function OffersTable() {
               onClick={handleNextPage}
               disabled={page === totalPages || paginationLoading}
             >
-              <ChevronRight size={16} />
+              <FaChevronRight className="text-lg" />
             </button>
           </div>
         )}

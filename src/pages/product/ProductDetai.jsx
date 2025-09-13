@@ -21,120 +21,68 @@ const ProductDetails = () => {
   const product = data?.product;
 
   return (
-    <div className="bg-gray-100 gap-4 p-4 font-poppins">
+    <div className="bg-gray-100 min-h-screen p-4 md:p-6 font-poppins">
       {/* Header Card */}
-      <div className="bg-white px-4 py-4 rounded-lg sticky top-4 z-10 flex items-center gap-3 shadow-sm">
-        <BsArrowLeftCircle
-          className="text-2xl cursor-pointer text-gray-700 hover:text-gray-900"
-          onClick={() => navigate(-1)}
-        />
-        <h2 className="text-lg text-gray-800 font-poppins font-medium">
-          View Product Detail
-        </h2>
+      <div className="flex items-center mb-4 bg-white px-4 py-3 shadow rounded-md">
+        <button onClick={() => navigate(-1)}>
+          <BsArrowLeftCircle size={20} className="text-gray-700 md:text-black" />
+        </button>
+        <h2 className="ml-2 text-lg text-gray-800 font-medium">View Product Details</h2>
       </div>
 
       {/* Product Card */}
-      <div className="overflow-x-auto scrollbar-thin bg-white mt-4 space-y-6 px-4 rounded-lg shadow">
-        <div className="max-h-full min-w-full p-4">
-          {/* Images */}
-          <div className="flex space-x-6 mb-6">
-            <img
-              src={product?.productPhotoFront}
-              alt="Front View"
-              className="w-40 h-48 object-cover border rounded"
-            />
-            <img
-              src={product?.productPhotoBack}
-              alt="Back View"
-              className="w-40 h-48 object-cover border rounded"
-            />
-          </div>
+      <div className="bg-white shadow rounded-lg flex flex-col h-[80vh]">
+        <div
+          className="p-6 overflow-y-auto flex-1 no-scrollbar"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          <style>{`
+            .no-scrollbar::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
 
-          {/* Product Name & Price */}
-          <div className="mt-2">
-            <h3 className="text-base font-poppins sm:text-xl font-semibold text-gray-800 mb-2">
-              {product?.productName || "Product Name"}
-            </h3>
-
-            <div className="text-sm sm:text-base font-semibold text-gray-800 bg-brandYellow w-fit px-3 py-1 rounded">
-              Price: ₹ {product?.price}
-            </div>
-          </div>
-
-          {/* Product Details Section */}
-          <div className="mt-6">
-            <h3 className="text-base sm:text-lg font-poppins font-semibold text-gray-800 mb-4">
-              Product Details
-            </h3>
-
-            <div className="grid grid-cols-1 gap-3 sm:gap-4 text-sm sm:text-base text-gray-700">
-              <p className="flex">
-                <span className="w-48 text-base font-poppins font-semibold flex-shrink-0">
-                  Pack Of:
-                </span>
-                <span className="flex-1 font-poppins text-base font-normal text-gray-800">
-                  {product?.productDetails?.packOf}
-                </span>
-              </p>
-
-              <p className="flex">
-                <span className="w-48 font-poppins font-semibold flex-shrink-0">Brand:</span>
-                <span className="flex-1 font-poppins text-base font-normal text-gray-800">
-                  {product.brand}
-                </span>
-              </p>
-
-              <p className="flex">
-                <span className="w-48 font-poppins font-semibold flex-shrink-0">Type:</span>
-                <span className="flex-1 font-poppins text-base font-normal text-gray-800">
-                  {product.productType}
-                </span>
-              </p>
-
-              <p className="flex">
-                <span className="w-48 font-poppins font-semibold flex-shrink-0">
-                  Net Weight:
-                </span>
-                <span className="flex-1 font-poppins text-base font-normal text-gray-800">
-                  {product?.productDetails?.netWeight}
-                </span>
-              </p>
-
-              <p className="flex">
-                <span className="w-48 font-poppins font-semibold flex-shrink-0">
-                  Maximum Shelf Life:
-                </span>
-                <span className="flex-1 font-poppins text-base font-normal text-gray-800">
-                  {product?.productDetails?.shelfLife}
-                </span>
-              </p>
-
-              <p className="flex">
-                <span className="w-48 font-poppins font-semibold flex-shrink-0">
-                  Nutrient Content:
-                </span>
-                <span className="flex-1 font-poppins text-base font-normal text-gray-800">
-                  {product?.productDetails?.nutrientContent}
-                </span>
-              </p>
-
-              <p className="flex">
-                <span className="w-48 font-poppins font-semibold flex-shrink-0">
-                  Product Description:
-                </span>
-                <span className="flex-1 font-poppins text-base font-normal text-gray-800">
-                  {product?.productDetails?.productDescription}
-                </span>
-              </p>
+          <div className="flex flex-col items-start gap-6">
+            {/* Images */}
+            <div className="flex space-x-6">
+              <img
+                src={product?.productPhotoFront}
+                alt="Front View"
+                className="w-40 h-48 object-cover rounded shadow"
+              />
+              <img
+                src={product?.productPhotoBack}
+                alt="Back View"
+                className="w-40 h-48 object-cover rounded shadow"
+              />
             </div>
 
+            {/* Basic Info */}
+            <div className="w-full max-w-4xl space-y-4">
+              {[
+                ["Product Name:", product?.productName],
+                ["Price:", `₹ ${product?.price}`],
+                ["Brand:", product?.brand],
+                ["Type:", product?.productType],
+                ["Pack Of:", product?.productDetails?.packOf],
+                ["Net Weight:", product?.productDetails?.netWeight],
+                ["Maximum Shelf Life:", product?.productDetails?.shelfLife],
+                ["Nutrient Content:", product?.productDetails?.nutrientContent],
+                ["Product Description:", product?.productDetails?.productDescription],
+              ].map(([label, value], idx) => (
+                <div className="grid grid-cols-2 gap-4" key={idx}>
+                  <span className="font-semibold text-gray-700">{label}</span>
+                  <span className="text-gray-800">{value || "N/A"}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Edit Button */}
-        <div className="bg-white flex justify-center mt-6 p-4">
+        {/* Action Button */}
+        <div className="p-4 flex justify-center bg-white gap-4">
           <button
-            className="w-[200px] h-[50px] rounded-lg bg-[#FEBC1D] text-[#EC2D01] font-semibold text-lg sm:text-xl leading-[100%] text-center px-4 py-2 shadow-md hover:opacity-90"
+            className="w-[200px] h-[50px] rounded-lg bg-[#FEBC1D] text-[#EC2D01] font-semibold text-lg sm:text-xl shadow-md hover:opacity-90"
             onClick={() => navigate(`/product/detail/edit/${id}`)}
           >
             Edit

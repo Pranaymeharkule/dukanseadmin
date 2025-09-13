@@ -79,7 +79,7 @@ export default function ViewOffer() {
       </div>
 
       {/* Main Container */}
-      <div className="bg-white rounded-lg mt-4 shadow-md flex flex-col h-[80vh]">
+      <div className="bg-white rounded-lg mt-4 p-4 shadow-md flex flex-col h-[80vh]">
         {/* Scrollable content */}
         <div className="p-6 overflow-y-auto flex-1 no-scrollbar" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
           <style>{`
@@ -121,7 +121,7 @@ export default function ViewOffer() {
         {/* Action Buttons */}
         <div className="p-4 flex justify-center gap-4 bg-white border-t">
           <button
-            onClick={() => navigate(`/offer/edit-offer/${offerId}`)}
+            onClick={() => navigate(`/offer/edit/${offerId}`)}
             className="bg-[#FEBC1D] text-red-600 font-semibold px-6 py-2 rounded-md hover:bg-yellow-500"
           >
             Edit

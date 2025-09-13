@@ -121,12 +121,10 @@ export default function AddNotificationForm() {
           Send New Notification
         </h2>
       </div>
-
-
       {/* Form */}
       <div className="flex-1 min-h-full bg-white p-4 sm:p-6 rounded shadow space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
+          <label className="block font-medium text-gray-700 mb-1">
             Select User Type
           </label>
           <select
@@ -192,10 +190,7 @@ export default function AddNotificationForm() {
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className={`w-full sm:w-auto bg-[#FEBC1D] text-red-600 font-bold py-2 px-6 rounded-lg shadow-sm text-base transition-colors ${isSubmitting
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-yellow-500 active:bg-yellow-600"
-              }`}
+            className={`bg-[#FEBC1D] text-red-600 font-semibold px-6 py-2 rounded-md hover:bg-yellow-500 ${isSubmitting}`}
           >
             {isSubmitting ? "Sending..." : "Send Notification"}
           </button>

@@ -111,7 +111,7 @@ const RiskMonitoring = () => {
               </thead>
               <tbody>
                 {riskData.map((item, index) => (
-                  <tr key={index} className="hover:bg-gray-50 border-b border-gray-100">
+                  <tr key={index} className="border-b border-gray-100">
                     <td className="px-4 py-3 text-sm text-gray-700">
                       <div className="flex items-center gap-2">
                         {item.profileImage ? (

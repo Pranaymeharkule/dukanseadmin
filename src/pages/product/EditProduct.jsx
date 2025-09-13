@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { GrUpload } from "react-icons/gr";
 import SuccessOverlay from "../../components/overlay/SuccessOverlay";
+import { BsArrowLeftCircle } from "react-icons/bs";
 import {
   useUpdateProductByIdMutation,
   useGetProductByIdQuery,
@@ -111,23 +112,19 @@ export default function EditProduct() {
   return (
     <div className="bg-gray-100 min-h-screen p-4 flex flex-col">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-20 bg-gray-100 pb-4">
-        <div className="flex items-center gap-2 bg-white p-4 rounded shadow">
-          <button
-            onClick={handleBackNavigation}
-            type="button"
-            className="w-8 h-8 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
+      <div className="sticky bottom-0 left-0 right-0 bg-white border-t z-30 p-4 flex rounded-md shadow">
+        <div className="flex items-center gap-2">
+          <button onClick={() => navigate(-1)}>
+            <BsArrowLeftCircle size={20} className="text-gray-700 md:text-black" />
           </button>
-          <h2 className="text-lg font-medium text-gray-800">Edit Product</h2>
+          <h2 className="text-lg text-gray-800 font-medium">Edit Product Details</h2>
         </div>
       </div>
 
       {/* Form */}
       <form
         onSubmit={handleSave}
-        className="bg-white p-6 rounded shadow mt-2 pb-10"
+        className="bg-white p-6 rounded shadow mt-4 pb-10"
       >
         {/* Messages */}
         {error && (
@@ -139,7 +136,7 @@ export default function EditProduct() {
         {/* Upload Images */}
         <div className="flex gap-6 mb-6">
           {/* Front Image */}
-          <div className="w-52 h-[290px] bg-white rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 shadow">
+          <div className="w-52 h-[290px] bg-white shadow rounded-lg border border-gray-300 flex flex-col items-center justify-between p-3 shadow">
             {frontPreview ? (
               <img
                 src={frontPreview}
@@ -198,7 +195,7 @@ export default function EditProduct() {
         {/* Form Inputs */}
         <div className="space-y-4 text-sm text-gray-800">
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Name of Product
             </label>
             <input
@@ -211,7 +208,7 @@ export default function EditProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Brand
             </label>
             <input
@@ -224,7 +221,7 @@ export default function EditProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Type
             </label>
             <input
@@ -236,7 +233,7 @@ export default function EditProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Net Weight
             </label>
             <input
@@ -248,7 +245,7 @@ export default function EditProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Price (₹)
             </label>
             <input
@@ -261,7 +258,7 @@ export default function EditProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Pack Of
             </label>
             <input
@@ -273,7 +270,7 @@ export default function EditProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Maximum Shelf Life
             </label>
             <input
@@ -285,7 +282,7 @@ export default function EditProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Nutrient Content
             </label>
             <input
@@ -297,7 +294,7 @@ export default function EditProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Product Description
             </label>
             <textarea
@@ -317,7 +314,7 @@ export default function EditProduct() {
           type="submit"
           form="edit-product-form"
           onClick={handleSave}
-          className="font-poppins px-10 py-4 rounded-lg text-lg font-bold shadow-md transition-colors bg-brandYellow text-red-600 hover:bg-yellow-600"
+          className="bg-[#FEBC1D] text-red-600 font-semibold px-6 py-2 rounded-md hover:bg-yellow-500"
         >
           Save
         </button>

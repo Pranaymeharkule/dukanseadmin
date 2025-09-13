@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { BsArrowLeftCircle } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import { GrUpload } from "react-icons/gr";
 import { useAddProductMutation } from "../../redux/apis/productApi";
@@ -97,16 +97,12 @@ export default function AddProduct() {
   return (
     <div className="bg-gray-100 min-h-screen p-4 flex flex-col">
       {/* Sticky Header */}
-      <div className="sticky top-0 z-20 bg-gray-100 pb-4">
-        <div className="flex items-center gap-2 bg-white p-4 rounded shadow">
-          <button
-            onClick={handleBackNavigation}
-            type="button"
-            className="w-8 h-8 flex items-center justify-center border-[3px] border-gray-600 rounded-full hover:border-gray-800 transition"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-700" strokeWidth={3} />
+      <div className="flex items-center mb-4 bg-white px-4 py-3 rounded-md shadow">
+        <div className="flex items-center gap-2">
+          <button onClick={() => navigate(-1)}>
+            <BsArrowLeftCircle size={20} className="text-gray-700 md:text-black" />
           </button>
-          <h2 className="text-lg font-medium text-gray-800">Add Product</h2>
+          <h2 className="text-lg text-gray-800 font-medium">ADD Product</h2>
         </div>
       </div>
 
@@ -189,7 +185,7 @@ export default function AddProduct() {
         {/* Form Inputs */}
         <div className="space-y-4 text-sm text-gray-800">
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Name of Product
             </label>
             <input
@@ -202,7 +198,7 @@ export default function AddProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Brand
             </label>
             <input
@@ -215,7 +211,7 @@ export default function AddProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Type
             </label>
             <input
@@ -227,7 +223,7 @@ export default function AddProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Net Weight
             </label>
             <input
@@ -239,7 +235,7 @@ export default function AddProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Price (₹)
             </label>
             <input
@@ -252,7 +248,7 @@ export default function AddProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Pack Of
             </label>
             <input
@@ -264,7 +260,7 @@ export default function AddProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Maximum Shelf Life
             </label>
             <input
@@ -276,7 +272,7 @@ export default function AddProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Nutrient Content
             </label>
             <input
@@ -288,7 +284,7 @@ export default function AddProduct() {
             />
           </div>
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
+            <label className="block font-medium text-gray-700 mb-1">
               Product Description
             </label>
             <textarea
@@ -308,11 +304,10 @@ export default function AddProduct() {
           type="submit"
           form="add-product-form"
           onClick={handleSave}
-          className={`font-poppins px-10 py-4 rounded-lg text-lg font-bold shadow-md transition-colors ${
-            isLoading
-              ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-              : "bg-brandYellow text-red-600 hover:bg-yellow-600"
-          }`}
+          className={`font-poppins px-10 py-4 rounded-lg text-lg font-bold shadow-md transition-colors ${isLoading
+            ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+            : "bg-brandYellow text-red-600 hover:bg-yellow-600"
+            }`}
           disabled={isLoading}
         >
           {isLoading ? "Adding Product..." : "Add Product"}

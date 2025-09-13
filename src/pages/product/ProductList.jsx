@@ -7,8 +7,8 @@ import {
   FaSortDown,
   FaFilter,
   FaPlusCircle,
-  FaChevronUp,
-  FaChevronDown,
+  FaChevronLeft, 
+  FaChevronRight
 } from "react-icons/fa";
 import { TbArrowsSort } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +18,6 @@ import {
   useGetAllProductsQuery,
 } from "../../redux/apis/productApi";
 import { toast } from "react-toastify";
-import sorting_arrow from "../../assets/sorting-arrows.png";
 
 const ProductList = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -284,11 +283,11 @@ const ProductList = () => {
             <table className="w-full table-auto">
               <thead className="bg-brandYellow text-white text-center">
                 <tr className="text-black text-sm">
-                  <th className="py-3 px-4 text-base font-poppins text-left">Product</th>
-                  <th className="py-3 px-4 text-base font-poppins text-center">Name</th>
-                  <th className="py-3 px-4 text-base font-poppins text-center">MRP</th>
-                  <th className="py-3 px-4 text-base font-poppins text-center">Quantity</th>
-                  <th className="py-3 px-4 text-base font-poppins text-right">Action</th>
+                  <th className="py-3 px-4 text-base text-left">Product</th>
+                  <th className="py-3 px-4 text-base text-center">Name</th>
+                  <th className="py-3 px-4 text-base text-center">MRP</th>
+                  <th className="py-3 px-4 text-base text-center">Quantity</th>
+                  <th className="py-3 px-4 text-base text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="text-sm text-gray-700 min-h-[400px] ">
@@ -379,7 +378,7 @@ const ProductList = () => {
                   className={`text-red-500 hover:text-red-700 transition-all p-1 ${currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                 >
-                  &#8592;
+                  <FaChevronLeft className="text-lg" />
                 </button>
 
                 {/* Page Numbers */}
@@ -408,7 +407,7 @@ const ProductList = () => {
                     : ""
                     }`}
                 >
-                  &#8594;
+                  <FaChevronRight className="text-lg" />
                 </button>
               </div>
             </div>
